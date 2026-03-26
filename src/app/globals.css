@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cor-fundo: #FDF8F0;
+    --cor-texto: #3D2B1F;
+    --cor-acento: #C4713C;
+    --cor-borda: #E8D5B7;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: Georgia, Cambria, 'Times New Roman', serif;
+  }
+}
+
+@layer components {
+  .botao-primario {
+    @apply bg-terracota-400 hover:bg-terracota-500 text-white font-medium px-6 py-3 rounded-lg
+           transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md;
+  }
+
+  .botao-secundario {
+    @apply border border-marrom-300 hover:border-marrom-400 text-marrom-500 hover:text-marrom-600
+           font-medium px-6 py-3 rounded-lg transition-all duration-200 active:scale-95;
+  }
+
+  .cartao-opcao {
+    @apply border-2 border-creme-300 rounded-xl p-3 cursor-pointer
+           transition-all duration-200 hover:border-terracota-300 hover:shadow-sm;
+  }
+
+  .cartao-opcao-selecionado {
+    @apply border-terracota-400 bg-terracota-100 shadow-sm;
+  }
+
+  .seletor-cor {
+    @apply w-8 h-8 rounded-full cursor-pointer border-2 border-transparent
+           transition-all duration-150 hover:scale-110 hover:border-marrom-300;
+  }
+
+  .seletor-cor-selecionado {
+    @apply border-marrom-500 scale-110 ring-2 ring-marrom-300 ring-offset-1;
+  }
+}
+
+@layer utilities {
+  .scrollbar-fino::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-fino::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-fino::-webkit-scrollbar-thumb {
+    background-color: #D4B896;
+    border-radius: 999px;
+  }
+}
