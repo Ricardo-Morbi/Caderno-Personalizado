@@ -4,25 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useCadernoStore } from '@/store/useCadernoStore'
 
 // Dimensões base para cada tamanho (proporção visual)
-const DIMENSOES_POR_TAMANHO = {
-  A6: { largura: 148, altura: 210 },
-  A5: { largura: 148, altura: 210 },
-  A4: { largura: 148, altura: 210 },
-  personalizado: { largura: 148, altura: 210 },
+const PROPORCAO_POR_FORMATO: Record<string, { fatorLargura: number; fatorAltura: number }> = {
+  retrato:  { fatorLargura: 1,   fatorAltura: 1.4 },
+  paisagem: { fatorLargura: 1.4, fatorAltura: 1   },
+  quadrado: { fatorLargura: 1,   fatorAltura: 1   },
 }
 
-// Proporções reais aplicadas ao preview
-const PROPORCAO_POR_FORMATO = {
-  retrato: { fatorLargura: 1, fatorAltura: 1.4 },
-  paisagem: { fatorLargura: 1.4, fatorAltura: 1 },
-  quadrado: { fatorLargura: 1, fatorAltura: 1 },
-}
-
-const ESPESSURA_POR_TIPO = {
-  fino: 14,
-  medio: 22,
-  grosso: 32,
-  'extra-grosso': 44,
+const ESPESSURA_POR_TIPO: Record<string, number> = {
+  fino:          14,
+  medio:         22,
+  grosso:        32,
+  'extra-grosso':44,
 }
 
 // Padrão SVG para diferentes materiais da capa
@@ -60,13 +52,9 @@ function padraoPagina(padrao: string) {
       return Array.from({ length: 8 }, (_, i) => (
         <line
           key={i}
-          x1="8"
-          y1={24 + i * 14}
-          x2="92"
-          y2={24 + i * 14}
-          stroke="#C4A08A"
-          strokeWidth="0.5"
-          opacity="0.6"
+          x1="8" y1={24 + i * 14}
+          x2="92" y2={24 + i * 14}
+          stroke="#C4A08A" strokeWidth="0.5" opacity="0.6"
         />
       ))
     case 'pontilhado':
@@ -74,11 +62,8 @@ function padraoPagina(padrao: string) {
         Array.from({ length: 8 }, (_, col) => (
           <circle
             key={`${row}-${col}`}
-            cx={12 + col * 11}
-            cy={24 + row * 14}
-            r="0.8"
-            fill="#C4A08A"
-            opacity="0.5"
+            cx={12 + col * 11} cy={24 + row * 14}
+            r="0.8" fill="#C4A08A" opacity="0.5"
           />
         ))
       ).flat()
@@ -93,70 +78,311 @@ function padraoPagina(padrao: string) {
   }
 }
 
+// Calcular luminância do hex para escolher cor de contraste do texto gravado
+function luminancia(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
+
+// Renderiza o texto gravado na capa com a estética do tipo escolhido
+function GravacaoCapa({
+  texto, tipo, cx, cy, largura, altura, corCapa,
+}: {
+  texto: string
+  tipo: string
+  cx: number
+  cy: number
+  largura: number
+  altura: number
+  corCapa: string
+}) {
+  if (!texto || tipo === 'nenhuma') return null
+
+  const lum = corCapa.startsWith('#') ? luminancia(corCapa) : 0.5
+  const ehEscuro = lum < 0.45
+
+  // Quebra o texto em linhas (máx 18 chars por linha)
+  const palavras = texto.split(' ')
+  const linhas: string[] = []
+  let linhaAtual = ''
+  for (const p of palavras) {
+    if ((linhaAtual + ' ' + p).trim().length > 18) {
+      linhas.push(linhaAtual.trim())
+      linhaAtual = p
+    } else {
+      linhaAtual = (linhaAtual + ' ' + p).trim()
+    }
+  }
+  if (linhaAtual) linhas.push(linhaAtual.trim())
+
+  const fontSize = Math.min(largura / 10, 10)
+  const lineHeight = fontSize * 1.6
+  const totalHeight = linhas.length * lineHeight
+  const yInicio = cy - totalHeight / 2 + lineHeight / 2
+
+  if (tipo === 'baixo-relevo') {
+    // Texto afundado: mesma cor da capa mas mais escuro/claro, sem contorno
+    const corTexto = ehEscuro ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.22)'
+    const corSombra = ehEscuro ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.6)'
+    return (
+      <g>
+        <defs>
+          <filter id="baixo-relevo-filter">
+            <feDropShadow dx="0.4" dy="0.6" stdDeviation="0.3" floodColor={corSombra} floodOpacity="1" />
+          </filter>
+        </defs>
+        {linhas.map((linha, i) => (
+          <text
+            key={i}
+            x={cx}
+            y={yInicio + i * lineHeight}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            fontFamily="Georgia, serif"
+            letterSpacing="0.08em"
+            fill={corTexto}
+            filter="url(#baixo-relevo-filter)"
+          >
+            {linha}
+          </text>
+        ))}
+      </g>
+    )
+  }
+
+  if (tipo === 'alto-relevo') {
+    // Texto elevado: cor clara/escura com sombra pronunciada
+    const corTexto = ehEscuro ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)'
+    const corSombra = ehEscuro ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.9)'
+    return (
+      <g>
+        <defs>
+          <filter id="alto-relevo-filter">
+            <feDropShadow dx="1" dy="1.5" stdDeviation="0.5" floodColor={corSombra} floodOpacity="1" />
+            <feDropShadow dx="-0.5" dy="-0.5" stdDeviation="0.3" floodColor={ehEscuro ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'} floodOpacity="1" result="shadow2" />
+          </filter>
+        </defs>
+        {/* Sombra de profundidade */}
+        {linhas.map((linha, i) => (
+          <text
+            key={`shadow-${i}`}
+            x={cx + 0.8}
+            y={yInicio + i * lineHeight + 1.2}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            fontFamily="Georgia, serif"
+            letterSpacing="0.08em"
+            fill={ehEscuro ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)'}
+          >
+            {linha}
+          </text>
+        ))}
+        {linhas.map((linha, i) => (
+          <text
+            key={i}
+            x={cx}
+            y={yInicio + i * lineHeight}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            fontFamily="Georgia, serif"
+            letterSpacing="0.08em"
+            fill={corTexto}
+            filter="url(#alto-relevo-filter)"
+          >
+            {linha}
+          </text>
+        ))}
+      </g>
+    )
+  }
+
+  if (tipo === 'bordado') {
+    // Texto bordado: stroke pontilhado simulando ponto de costura, cor contrastante
+    const corFio = ehEscuro ? '#F5E6C8' : '#5C3D2E'
+    const corSombra = ehEscuro ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)'
+    return (
+      <g>
+        {/* Contorno de base (shadow) para profundidade */}
+        {linhas.map((linha, i) => (
+          <text
+            key={`shadow-${i}`}
+            x={cx + 0.5}
+            y={yInicio + i * lineHeight + 0.8}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            fontFamily="Georgia, serif"
+            letterSpacing="0.08em"
+            fill="none"
+            stroke={corSombra}
+            strokeWidth={1.8}
+          >
+            {linha}
+          </text>
+        ))}
+        {/* Fio de bordado — stroke pontilhado */}
+        {linhas.map((linha, i) => (
+          <text
+            key={i}
+            x={cx}
+            y={yInicio + i * lineHeight}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            fontFamily="Georgia, serif"
+            letterSpacing="0.08em"
+            fill="none"
+            stroke={corFio}
+            strokeWidth={1.4}
+            strokeDasharray="2 1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {linha}
+          </text>
+        ))}
+        {/* Pontos decorativos de cada lado (simulam pontos de bordado) */}
+        {linhas.map((_, i) => {
+          const y = yInicio + i * lineHeight
+          const margemX = largura * 0.12
+          return (
+            <g key={`pontos-${i}`}>
+              <circle cx={cx - largura / 2 + margemX} cy={y} r={0.8} fill={corFio} opacity={0.7} />
+              <circle cx={cx + largura / 2 - margemX} cy={y} r={0.8} fill={corFio} opacity={0.7} />
+            </g>
+          )
+        })}
+      </g>
+    )
+  }
+
+  return null
+}
+
+// Aplicações decorativas da capa
+function AplicacoesCapa({
+  aplicacoes, cx, cy, largura, altura, raioCanto,
+}: {
+  aplicacoes: string[]
+  cx: number
+  cy: number
+  largura: number
+  altura: number
+  raioCanto: number
+}) {
+  if (!aplicacoes || aplicacoes.length === 0) return null
+
+  return (
+    <g opacity="0.85">
+      {/* Cantoneiras metálicas */}
+      {aplicacoes.includes('metais') && (
+        <g stroke="#D4AF37" strokeWidth="1.2" fill="none">
+          {/* Canto superior esquerdo */}
+          <path d={`M ${cx - largura / 2 + 2} ${cy - altura / 2 + 10} L ${cx - largura / 2 + 2} ${cy - altura / 2 + 2} L ${cx - largura / 2 + 12} ${cy - altura / 2 + 2}`} />
+          {/* Canto superior direito */}
+          <path d={`M ${cx + largura / 2 - 12} ${cy - altura / 2 + 2} L ${cx + largura / 2 - 2} ${cy - altura / 2 + 2} L ${cx + largura / 2 - 2} ${cy - altura / 2 + 10}`} />
+          {/* Canto inferior esquerdo */}
+          <path d={`M ${cx - largura / 2 + 2} ${cy + altura / 2 - 10} L ${cx - largura / 2 + 2} ${cy + altura / 2 - 2} L ${cx - largura / 2 + 12} ${cy + altura / 2 - 2}`} />
+          {/* Canto inferior direito */}
+          <path d={`M ${cx + largura / 2 - 12} ${cy + altura / 2 - 2} L ${cx + largura / 2 - 2} ${cy + altura / 2 - 2} L ${cx + largura / 2 - 2} ${cy + altura / 2 - 10}`} />
+        </g>
+      )}
+
+      {/* Renda — borda decorativa pontilhada */}
+      {aplicacoes.includes('renda') && (
+        <rect
+          x={cx - largura / 2 + 3}
+          y={cy - altura / 2 + 3}
+          width={largura - 6}
+          height={altura - 6}
+          rx={raioCanto}
+          fill="none"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth="1.5"
+          strokeDasharray="1.5 2"
+        />
+      )}
+
+      {/* Botões decorativos */}
+      {aplicacoes.includes('botoes') && (
+        <g>
+          <circle cx={cx} cy={cy + altura / 2 - 12} r={5} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+          <circle cx={cx} cy={cy + altura / 2 - 12} r={2.5} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="0.8" />
+          <circle cx={cx - 2} cy={cy + altura / 2 - 13} r={0.6} fill="rgba(255,255,255,0.7)" />
+          <circle cx={cx + 2} cy={cy + altura / 2 - 13} r={0.6} fill="rgba(255,255,255,0.7)" />
+          <circle cx={cx - 2} cy={cy + altura / 2 - 11} r={0.6} fill="rgba(255,255,255,0.7)" />
+          <circle cx={cx + 2} cy={cy + altura / 2 - 11} r={0.6} fill="rgba(255,255,255,0.7)" />
+        </g>
+      )}
+
+      {/* Recortes — vazados nos cantos */}
+      {aplicacoes.includes('recortes') && (
+        <g fill="rgba(0,0,0,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5">
+          <circle cx={cx - largura / 2 + 8} cy={cy} r={3} />
+          <circle cx={cx + largura / 2 - 8} cy={cy} r={3} />
+        </g>
+      )}
+    </g>
+  )
+}
+
 export default function PreviewCaderno() {
   const { configuracao } = useCadernoStore()
 
   const {
-    tamanho,
-    formato,
-    espessura,
-    corCapa,
-    materialCapa,
-    estampaCapa,
-    tipoEncadernacao,
-    tipoLombada,
-    elasticoAtivo,
-    corElastico,
-    posicaoElastico,
-    marcadorAtivo,
-    corMarcador,
-    corFio,
-    tipoCantos,
-    pinturaBordasAtiva,
-    corPinturaBordas,
-    padraoPaginas,
-    corFolhas,
+    tamanho, formato, espessura,
+    corCapa, materialCapa, estampaCapa,
+    gravacaoCapa, nomeGravado, aplicacoesCapa,
+    tipoEncadernacao, tipoLombada,
+    elasticoAtivo, corElastico, posicaoElastico,
+    marcadorAtivo, corMarcador, corFio,
+    tipoCantos, pinturaBordasAtiva, corPinturaBordas,
+    padraoPaginas, corFolhas,
   } = configuracao
 
-  const proporcao = PROPORCAO_POR_FORMATO[formato]
-  const espessuraLombada = ESPESSURA_POR_TIPO[espessura]
+  const proporcao = PROPORCAO_POR_FORMATO[formato] ?? PROPORCAO_POR_FORMATO['retrato']
+  const espessuraLombada = ESPESSURA_POR_TIPO[espessura] ?? 22
 
-  // Dimensões do preview do caderno
   const larguraCapa = 148 * proporcao.fatorLargura
-  const alturaCapa = 148 * proporcao.fatorAltura
+  const alturaCapa  = 148 * proporcao.fatorAltura
 
-  // Cor interna das páginas
-  const corFolhasMap = {
-    branca: '#FAFAF8',
-    creme: '#F5F0E0',
+  const corFolhasMap: Record<string, string> = {
+    branca:   '#FAFAF8',
+    creme:    '#F5F0E0',
     colorida: '#E8F0D8',
   }
-  const corInternaFolhas = corFolhasMap[corFolhas]
-
-  // Raio dos cantos
+  const corInternaFolhas = corFolhasMap[corFolhas] ?? '#FAFAF8'
   const raioCanto = tipoCantos === 'arredondados' ? 8 : 2
-
-  // Cor de borda das páginas (pintura nas bordas)
   const corBordaPages = pinturaBordasAtiva ? corPinturaBordas : corInternaFolhas
 
   const viewBoxLargura = larguraCapa + espessuraLombada + 80
-  const viewBoxAltura = alturaCapa + 80
+  const viewBoxAltura  = alturaCapa + 80
+
+  // Centro da capa para posicionar a gravação
+  const capaCX = 38 + espessuraLombada + larguraCapa / 2
+  const capaCY = 32 + alturaCapa / 2
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {/* Label da etapa atual */}
+
+      {/* Rótulo */}
       <div className="text-center">
-        <p className="text-xs text-marrom-300 uppercase tracking-widest">Seu caderno</p>
-        <p className="text-sm font-medium text-marrom-400 mt-0.5">
+        <p className="text-xs text-onix-300 uppercase tracking-widest">Prévia do caderno</p>
+        <p className="text-sm font-serif text-onix-500 mt-0.5">
           {tamanho} · {formato} · {espessura}
         </p>
       </div>
 
-      {/* Preview SVG do caderno */}
+      {/* SVG do caderno */}
       <motion.div
         className="relative flex items-center justify-center"
         style={{
-          filter: 'drop-shadow(8px 12px 32px rgba(61, 43, 31, 0.2)) drop-shadow(2px 4px 12px rgba(61, 43, 31, 0.12))',
+          filter: 'drop-shadow(8px 12px 32px rgba(26,24,24,0.18)) drop-shadow(2px 4px 12px rgba(26,24,24,0.10))',
         }}
       >
         <AnimatePresence mode="wait">
@@ -178,33 +404,30 @@ export default function PreviewCaderno() {
                   <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#C4A08A" strokeWidth="0.4" opacity="0.5" />
                 </pattern>
               )}
+              <linearGradient id="reflexo" x1="0" y1="0" x2="0.5" y2="1">
+                <stop offset="0%"   stopColor="white" stopOpacity="0.12" />
+                <stop offset="40%"  stopColor="white" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="black" stopOpacity="0.08" />
+              </linearGradient>
             </defs>
 
-            {/* === MIOLO (páginas empilhadas) === */}
+            {/* MIOLO */}
             <motion.rect
-              x={espessuraLombada + 42}
-              y={36}
-              width={larguraCapa - 4}
-              height={alturaCapa}
-              rx={raioCanto}
-              ry={raioCanto}
+              x={espessuraLombada + 42} y={36}
+              width={larguraCapa - 4} height={alturaCapa}
+              rx={raioCanto} ry={raioCanto}
               fill={corBordaPages}
               animate={{ fill: corBordaPages }}
               transition={{ duration: 0.3 }}
             />
             <motion.rect
-              x={espessuraLombada + 40}
-              y={34}
-              width={larguraCapa - 4}
-              height={alturaCapa}
-              rx={raioCanto}
-              ry={raioCanto}
+              x={espessuraLombada + 40} y={34}
+              width={larguraCapa - 4} height={alturaCapa}
+              rx={raioCanto} ry={raioCanto}
               fill={corInternaFolhas}
               animate={{ fill: corInternaFolhas }}
               transition={{ duration: 0.3 }}
             />
-
-            {/* Linhas internas (padrão de páginas) */}
             <g transform={`translate(${espessuraLombada + 40}, 34)`}>
               {padraoPaginas === 'quadriculado' ? (
                 <rect width={larguraCapa - 4} height={alturaCapa} fill="url(#grid)" rx={raioCanto} />
@@ -213,59 +436,31 @@ export default function PreviewCaderno() {
               )}
             </g>
 
-            {/* === LOMBADA === */}
+            {/* LOMBADA */}
             <motion.rect
-              x={38}
-              y={32}
-              width={espessuraLombada}
-              height={alturaCapa + 4}
+              x={38} y={32}
+              width={espessuraLombada} height={alturaCapa + 4}
               rx={tipoLombada === 'exposta' ? 3 : 0}
               fill={tipoLombada === 'exposta' ? 'transparent' : corCapa}
-              stroke={tipoEncadernacao !== 'espiral' ? corFio : 'none'}
-              strokeWidth={tipoLombada === 'exposta' ? 0 : 0}
-              animate={{
-                fill: tipoLombada === 'exposta' ? 'transparent' : corCapa,
-              }}
+              animate={{ fill: tipoLombada === 'exposta' ? 'transparent' : corCapa }}
               transition={{ duration: 0.3 }}
             />
-
-            {/* Costura aparente (para copta, japonesa, long-stitch) */}
             {tipoLombada === 'exposta' && tipoEncadernacao !== 'espiral' && (
               <g>
                 {tipoEncadernacao === 'copta' &&
                   Array.from({ length: Math.floor(alturaCapa / 18) }, (_, i) => (
-                    <line
-                      key={i}
-                      x1={38}
-                      y1={40 + i * 18}
-                      x2={38 + espessuraLombada}
-                      y2={40 + i * 18}
-                      stroke={corFio}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
+                    <line key={i} x1={38} y1={40 + i * 18} x2={38 + espessuraLombada} y2={40 + i * 18}
+                      stroke={corFio} strokeWidth="1.5" strokeLinecap="round" />
                   ))
                 }
                 {tipoEncadernacao === 'japonesa' &&
                   Array.from({ length: Math.floor(alturaCapa / 12) }, (_, i) => (
                     <g key={i}>
-                      <line
-                        x1={38}
-                        y1={38 + i * 12}
-                        x2={38 + espessuraLombada}
-                        y2={38 + i * 12}
-                        stroke={corFio}
-                        strokeWidth="1"
-                      />
+                      <line x1={38} y1={38 + i * 12} x2={38 + espessuraLombada} y2={38 + i * 12}
+                        stroke={corFio} strokeWidth="1" />
                       {i % 2 === 0 && (
-                        <line
-                          x1={42}
-                          y1={38 + i * 12}
-                          x2={42}
-                          y2={38 + (i + 1) * 12}
-                          stroke={corFio}
-                          strokeWidth="1"
-                        />
+                        <line x1={42} y1={38 + i * 12} x2={42} y2={38 + (i + 1) * 12}
+                          stroke={corFio} strokeWidth="1" />
                       )}
                     </g>
                   ))
@@ -273,71 +468,46 @@ export default function PreviewCaderno() {
                 {tipoEncadernacao === 'long-stitch' &&
                   Array.from({ length: Math.floor(alturaCapa / 22) }, (_, i) => (
                     <g key={i}>
-                      <line
-                        x1={38}
-                        y1={38 + i * 22}
-                        x2={38 + espessuraLombada}
-                        y2={38 + i * 22}
-                        stroke={corFio}
-                        strokeWidth="1.5"
-                      />
-                      <line
-                        x1={38 + espessuraLombada / 2}
-                        y1={38 + i * 22}
-                        x2={38 + espessuraLombada / 2}
-                        y2={38 + (i + 1) * 22}
-                        stroke={corFio}
-                        strokeWidth="1"
-                      />
+                      <line x1={38} y1={38 + i * 22} x2={38 + espessuraLombada} y2={38 + i * 22}
+                        stroke={corFio} strokeWidth="1.5" />
+                      <line x1={38 + espessuraLombada / 2} y1={38 + i * 22}
+                        x2={38 + espessuraLombada / 2} y2={38 + (i + 1) * 22}
+                        stroke={corFio} strokeWidth="1" />
                     </g>
                   ))
                 }
               </g>
             )}
-
-            {/* Espiral */}
             {tipoEncadernacao === 'espiral' &&
               Array.from({ length: Math.floor(alturaCapa / 14) }, (_, i) => (
-                <ellipse
-                  key={i}
-                  cx={38 + espessuraLombada / 2}
-                  cy={40 + i * 14}
-                  rx={espessuraLombada / 2 + 2}
-                  ry={5}
-                  fill="none"
-                  stroke={corFio}
-                  strokeWidth="1.5"
-                />
+                <ellipse key={i}
+                  cx={38 + espessuraLombada / 2} cy={40 + i * 14}
+                  rx={espessuraLombada / 2 + 2} ry={5}
+                  fill="none" stroke={corFio} strokeWidth="1.5" />
               ))
             }
 
-            {/* === CAPA (frente do caderno) === */}
+            {/* CAPA */}
             <motion.rect
-              x={38 + espessuraLombada}
-              y={32}
-              width={larguraCapa}
-              height={alturaCapa + 4}
-              rx={raioCanto}
-              ry={raioCanto}
+              x={38 + espessuraLombada} y={32}
+              width={larguraCapa} height={alturaCapa + 4}
+              rx={raioCanto} ry={raioCanto}
               fill={corCapa}
               animate={{ fill: corCapa }}
               transition={{ duration: 0.4 }}
             />
 
-            {/* Overlay de material (textura) */}
+            {/* Overlay de material */}
             {['linho', 'tecido', 'kraft'].includes(materialCapa) && (
               <rect
-                x={38 + espessuraLombada}
-                y={32}
-                width={larguraCapa}
-                height={alturaCapa + 4}
-                rx={raioCanto}
-                ry={raioCanto}
+                x={38 + espessuraLombada} y={32}
+                width={larguraCapa} height={alturaCapa + 4}
+                rx={raioCanto} ry={raioCanto}
                 fill={`url(#${materialCapa})`}
               />
             )}
 
-            {/* Estampa floral (decorativa simples) */}
+            {/* Estampa floral */}
             {estampaCapa === 'floral' && (
               <g opacity="0.25" transform={`translate(${38 + espessuraLombada + larguraCapa * 0.5}, ${32 + alturaCapa * 0.5})`}>
                 {[0, 60, 120, 180, 240, 300].map((angulo, i) => {
@@ -345,52 +515,60 @@ export default function PreviewCaderno() {
                   const x = Math.cos(rad) * 18
                   const y = Math.sin(rad) * 18
                   return (
-                    <ellipse
-                      key={i}
-                      cx={x}
-                      cy={y}
-                      rx={8}
-                      ry={5}
-                      fill="#FDF8F0"
-                      transform={`rotate(${angulo} ${x} ${y})`}
-                    />
+                    <ellipse key={i} cx={x} cy={y} rx={8} ry={5} fill="#FDF8F0"
+                      transform={`rotate(${angulo} ${x} ${y})`} />
                   )
                 })}
                 <circle cx={0} cy={0} r={6} fill="#FDF8F0" />
               </g>
             )}
 
-            {/* Estampa minimalista (linha geométrica) */}
+            {/* Estampa minimalista */}
             {estampaCapa === 'minimalista' && (
               <g opacity="0.2" transform={`translate(${38 + espessuraLombada}, 32)`}>
-                <line x1={larguraCapa * 0.2} y1={alturaCapa * 0.2} x2={larguraCapa * 0.8} y2={alturaCapa * 0.8} stroke="#FDF8F0" strokeWidth="1" />
-                <rect x={larguraCapa * 0.25} y={alturaCapa * 0.3} width={larguraCapa * 0.5} height={alturaCapa * 0.4} fill="none" stroke="#FDF8F0" strokeWidth="0.8" />
+                <line x1={larguraCapa * 0.2} y1={alturaCapa * 0.2}
+                  x2={larguraCapa * 0.8} y2={alturaCapa * 0.8} stroke="#FDF8F0" strokeWidth="1" />
+                <rect x={larguraCapa * 0.25} y={alturaCapa * 0.3}
+                  width={larguraCapa * 0.5} height={alturaCapa * 0.4}
+                  fill="none" stroke="#FDF8F0" strokeWidth="0.8" />
               </g>
             )}
 
-            {/* Reflexo de luz na capa */}
+            {/* Reflexo de luz */}
             <rect
-              x={38 + espessuraLombada}
-              y={32}
-              width={larguraCapa}
-              height={alturaCapa + 4}
-              rx={raioCanto}
-              ry={raioCanto}
-              fill="url(#reflexo)"
-              style={{ pointerEvents: 'none' }}
+              x={38 + espessuraLombada} y={32}
+              width={larguraCapa} height={alturaCapa + 4}
+              rx={raioCanto} ry={raioCanto}
+              fill="url(#reflexo)" style={{ pointerEvents: 'none' }}
             />
-            <defs>
-              <linearGradient id="reflexo" x1="0" y1="0" x2="0.5" y2="1">
-                <stop offset="0%" stopColor="white" stopOpacity="0.12" />
-                <stop offset="40%" stopColor="white" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="black" stopOpacity="0.08" />
-              </linearGradient>
-            </defs>
 
-            {/* === ELÁSTICO === */}
+            {/* ── GRAVAÇÃO NA CAPA ── */}
+            <GravacaoCapa
+              texto={nomeGravado ?? ''}
+              tipo={gravacaoCapa ?? 'nenhuma'}
+              cx={capaCX}
+              cy={capaCY}
+              largura={larguraCapa}
+              altura={alturaCapa}
+              corCapa={corCapa}
+            />
+
+            {/* ── APLICAÇÕES DECORATIVAS ── */}
+            <AplicacoesCapa
+              aplicacoes={aplicacoesCapa ?? []}
+              cx={capaCX}
+              cy={capaCY}
+              largura={larguraCapa}
+              altura={alturaCapa}
+              raioCanto={raioCanto}
+            />
+
+            {/* ELÁSTICO */}
             {elasticoAtivo && (
               <motion.rect
-                x={posicaoElastico === 'vertical' ? 38 + espessuraLombada + larguraCapa * 0.7 : 38 + espessuraLombada}
+                x={posicaoElastico === 'vertical'
+                  ? 38 + espessuraLombada + larguraCapa * 0.7
+                  : 38 + espessuraLombada}
                 y={posicaoElastico === 'vertical' ? 32 : 32 + alturaCapa * 0.65}
                 width={posicaoElastico === 'vertical' ? 2.5 : larguraCapa + espessuraLombada}
                 height={posicaoElastico === 'vertical' ? alturaCapa + 4 : 2.5}
@@ -402,15 +580,13 @@ export default function PreviewCaderno() {
               />
             )}
 
-            {/* === MARCADOR (fitilho) === */}
+            {/* MARCADOR */}
             {marcadorAtivo && (
               <motion.rect
                 x={38 + espessuraLombada + larguraCapa * 0.5 - 1}
                 y={32}
-                width={2.5}
-                height={alturaCapa + 32}
-                fill={corMarcador}
-                rx={1}
+                width={2.5} height={alturaCapa + 32}
+                fill={corMarcador} rx={1}
                 initial={{ opacity: 0, scaleY: 0 }}
                 animate={{ opacity: 1, scaleY: 1, fill: corMarcador }}
                 exit={{ opacity: 0 }}
@@ -419,19 +595,13 @@ export default function PreviewCaderno() {
               />
             )}
 
-            {/* === PINTURA NAS BORDAS === */}
+            {/* PINTURA NAS BORDAS */}
             {pinturaBordasAtiva && (
               <motion.rect
-                x={38 + espessuraLombada + 2}
-                y={34}
-                width={larguraCapa - 4}
-                height={alturaCapa}
-                rx={raioCanto}
-                ry={raioCanto}
-                fill="none"
-                stroke={corPinturaBordas}
-                strokeWidth={2}
-                opacity={0.6}
+                x={38 + espessuraLombada + 2} y={34}
+                width={larguraCapa - 4} height={alturaCapa}
+                rx={raioCanto} ry={raioCanto}
+                fill="none" stroke={corPinturaBordas} strokeWidth={2} opacity={0.6}
                 animate={{ stroke: corPinturaBordas }}
                 transition={{ duration: 0.3 }}
               />
@@ -440,26 +610,21 @@ export default function PreviewCaderno() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Resumo das opções escolhidas */}
+      {/* Resumo das opções */}
       <div className="flex flex-wrap gap-1.5 justify-center max-w-xs">
-        <span className="text-xs bg-creme-200 text-marrom-400 px-2 py-0.5 rounded-full">
-          {materialCapa}
-        </span>
-        <span className="text-xs bg-creme-200 text-marrom-400 px-2 py-0.5 rounded-full">
-          {tipoEncadernacao}
-        </span>
-        <span className="text-xs bg-creme-200 text-marrom-400 px-2 py-0.5 rounded-full">
-          {padraoPaginas}
-        </span>
-        {elasticoAtivo && (
-          <span className="text-xs bg-creme-200 text-marrom-400 px-2 py-0.5 rounded-full">
-            com elástico
+        <span className="text-xs bg-ivoire-300 text-onix-400 px-2 py-0.5">{materialCapa}</span>
+        <span className="text-xs bg-ivoire-300 text-onix-400 px-2 py-0.5">{tipoEncadernacao}</span>
+        <span className="text-xs bg-ivoire-300 text-onix-400 px-2 py-0.5">{padraoPaginas}</span>
+        {gravacaoCapa && gravacaoCapa !== 'nenhuma' && nomeGravado && (
+          <span className="text-xs bg-ouro-100 text-onix-500 px-2 py-0.5 border border-ouro-300">
+            {gravacaoCapa}: "{nomeGravado}"
           </span>
         )}
+        {elasticoAtivo && (
+          <span className="text-xs bg-ivoire-300 text-onix-400 px-2 py-0.5">com elástico</span>
+        )}
         {marcadorAtivo && (
-          <span className="text-xs bg-creme-200 text-marrom-400 px-2 py-0.5 rounded-full">
-            com marcador
-          </span>
+          <span className="text-xs bg-ivoire-300 text-onix-400 px-2 py-0.5">com marcador</span>
         )}
       </div>
     </div>
