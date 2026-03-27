@@ -37,10 +37,10 @@ const configuracaoPadrao: ConfiguracaoCaderno = {
   divisoriasInternas: false,
 
   // Etapa 5
-  elasticoAtivo: true,
+  elasticoAtivo: false,
   corElastico: '#1A1A1A',
   posicaoElastico: 'vertical',
-  marcadorAtivo: true,
+  marcadorAtivo: false,
   tipoMarcador: 'fitilho',
   larguraMarcador: 'medio',
   corMarcador: '#C4713C',

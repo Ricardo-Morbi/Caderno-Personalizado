@@ -464,11 +464,10 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   const lum = luminancia(corCapa)
   const veinColor = lum < 0.45 ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'
 
-  // Ribbon variables (computed here to avoid IIFE inside JSX)
+  // Ribbon — só a pontinha saindo pela borda inferior, canto esquerdo
   const rW = larguraMarcador === 'fino' ? 3.5 : larguraMarcador === 'largo' ? 8.5 : 5.5
-  const rX = W * 0.615
-  const rYstart = H * 0.54   // ribbon emerge da metade inferior — só parte de baixo visível
-  const tipH = 22
+  const rX = W * 0.22   // canto inferior esquerdo
+  const tipH = 28        // altura da pontinha que fica visível abaixo do caderno
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
@@ -519,11 +518,6 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
         <linearGradient id="htop-fr" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"  stopColor="white" stopOpacity="0.3"/>
           <stop offset="12%" stopColor="white" stopOpacity="0.0"/>
-        </linearGradient>
-        {/* Ribbon fade-in: simula emerge entre as páginas */}
-        <linearGradient id="ribbon-entry-fr" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stopColor={corCapa} stopOpacity="0.85"/>
-          <stop offset="100%" stopColor={corCapa} stopOpacity="0"/>
         </linearGradient>
       </defs>
 
@@ -590,27 +584,24 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
           fill={corElastico}/>
       )}
 
-      {/* Marcador — ribbon emerge da metade inferior, ponta saindo embaixo */}
+      {/* Marcador — ribbon tucked inside: só a pontinha V-cut sai abaixo da capa */}
       {marcadorAtivo && (
         <g>
-          {/* Sombra lateral direita */}
-          <rect x={rX + rW + 0.5} y={rYstart} width={rW * 0.55} height={H - rYstart + tipH}
-            fill="rgba(0,0,0,0.18)" rx={0.8}/>
-          {/* Corpo do ribbon */}
-          <rect x={rX} y={rYstart} width={rW} height={H - rYstart} fill={corMarcador} rx={1}/>
-          {/* Ponta triangular (V-cut) */}
+          {/* Sombra da ponta */}
+          <polygon
+            points={`${rX + rW + 0.8},${H} ${rX + rW * 2 + 0.8},${H} ${rX + rW * 1.5 + 0.8},${H + tipH}`}
+            fill="rgba(0,0,0,0.18)"/>
+          {/* Ponta triangular (V-cut) — único elemento visível */}
           <polygon
             points={`${rX},${H} ${rX + rW},${H} ${rX + rW/2},${H + tipH}`}
             fill={corMarcador}/>
-          {/* Brilho longitudinal */}
-          <rect x={rX + rW * 0.15} y={rYstart} width={rW * 0.22} height={H - rYstart}
-            fill="rgba(255,255,255,0.28)" rx={0.5}/>
-          {/* Fade-in no topo: simula ribbon saindo de entre as páginas */}
-          <rect x={rX - 0.5} y={rYstart} width={rW + 1} height={16}
-            fill="url(#ribbon-entry-fr)" rx={1}/>
-          {/* Sombra de entrada — slot entre páginas e capa */}
-          <rect x={rX - 2} y={rYstart - 1.5} width={rW + 4} height={3}
-            fill="rgba(0,0,0,0.45)" rx={0.8}/>
+          {/* Brilho na ponta */}
+          <polygon
+            points={`${rX + rW * 0.18},${H} ${rX + rW * 0.42},${H} ${rX + rW/2},${H + tipH * 0.35}`}
+            fill="rgba(255,255,255,0.28)"/>
+          {/* Slot de saída — sombra na borda inferior do caderno */}
+          <rect x={rX - 1.5} y={H - 2} width={rW + 3} height={3}
+            fill="rgba(0,0,0,0.35)" rx={0.5}/>
         </g>
       )}
 
