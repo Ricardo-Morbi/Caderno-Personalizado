@@ -6,12 +6,6 @@ import type { TipoCantos, TipoCorteEspecial, TipoLaminacao, TipoTextura } from '
 const CORES_BORDA = [
   { nome: 'Dourado', hex: '#D4AF37' },
   { nome: 'Prata', hex: '#B8B8B8' },
-  { nome: 'Terracota', hex: '#C4713C' },
-  { nome: 'Vermelho', hex: '#C0392B' },
-  { nome: 'Azul', hex: '#2980B9' },
-  { nome: 'Verde', hex: '#27AE60' },
-  { nome: 'Preto', hex: '#1A1A1A' },
-  { nome: 'Rosa', hex: '#E91E8C' },
 ]
 
 const opcoesLaminacao: { valor: TipoLaminacao; label: string; descricao: string }[] = [
@@ -75,26 +69,25 @@ export default function EtapaAcabamentos() {
 
         {configuracao.pinturaBordasAtiva && (
           <div className="pt-2 border-t border-creme-200">
-            <p className="text-xs text-marrom-400 mb-2">Cor da pintura</p>
-            <div className="flex flex-wrap gap-2 mb-2">
+            <p className="text-xs text-marrom-400 mb-2">Acabamento</p>
+            <div className="flex gap-3">
               {CORES_BORDA.map((cor) => (
                 <button
                   key={cor.hex}
-                  title={cor.nome}
                   onClick={() => atualizarOpcao('corPinturaBordas', cor.hex)}
-                  className={`seletor-cor ${configuracao.corPinturaBordas === cor.hex ? 'seletor-cor-selecionado' : ''}`}
-                  style={{ backgroundColor: cor.hex }}
-                />
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                    configuracao.corPinturaBordas === cor.hex
+                      ? 'border-terracota-400 bg-terracota-50 text-terracota-600'
+                      : 'border-creme-300 text-marrom-400 hover:border-creme-400'
+                  }`}
+                >
+                  <span
+                    className="w-4 h-4 rounded-full border border-creme-300 inline-block"
+                    style={{ backgroundColor: cor.hex }}
+                  />
+                  {cor.nome}
+                </button>
               ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-marrom-300">Personalizada:</label>
-              <input
-                type="color"
-                value={configuracao.corPinturaBordas}
-                onChange={(e) => atualizarOpcao('corPinturaBordas', e.target.value)}
-                className="w-7 h-7 rounded cursor-pointer border border-creme-300"
-              />
             </div>
           </div>
         )}

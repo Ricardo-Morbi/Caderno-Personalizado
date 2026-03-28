@@ -210,11 +210,15 @@ function VistaAberto({
   corCapa, corInternaFolhas, corBordaPages,
   padraoPaginas, tipoEncadernacao, corFio,
   marcadorAtivo, corMarcador, pinturaBordasAtiva, corPinturaBordas,
+  materialGuarda, corGuarda, padraoGuarda, bolsoInterno,
+  tipoPapel, envelopeAcoplado, paginaDedicatoria,
 }: {
   larguraCapa: number; alturaCapa: number; espessuraLombada: number; raioCanto: number
   corCapa: string; corInternaFolhas: string; corBordaPages: string
   padraoPaginas: string; tipoEncadernacao: string; corFio: string
   marcadorAtivo: boolean; corMarcador: string; pinturaBordasAtiva: boolean; corPinturaBordas: string
+  materialGuarda: string; corGuarda: string; padraoGuarda: string; bolsoInterno: boolean
+  tipoPapel: string; envelopeAcoplado: boolean; paginaDedicatoria: boolean
 }) {
   const margem = 24
   const lombadaVis = espessuraLombada * 0.7
@@ -248,19 +252,112 @@ function VistaAberto({
           <stop offset="100%" stopColor="white" stopOpacity="0.0"/>
         </linearGradient>
       </defs>
-      {/* Página esquerda */}
-      <rect x={xEsq+3} y={yPag+3} width={pagLarg} height={pagAlt} rx={raioCanto} fill="rgba(0,0,0,0.08)"/>
-      <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill={corBordaPages}/>
-      <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill={corInternaFolhas}/>
-      <g transform={`translate(${xEsq},${yPag})`}>
-        {padraoPaginas === 'quadriculado'
-          ? <rect width={pagLarg} height={pagAlt} fill="url(#grid-ab)" rx={raioCanto}/>
-          : renderPadraoPaginaOffset(padraoPaginas, pagLarg, pagAlt)}
-      </g>
-      {marcadorAtivo && <rect x={xEsq+pagLarg*0.45} y={yPag} width={2} height={pagAlt+16} fill={corMarcador} rx={1} opacity={0.8}/>}
-      {pinturaBordasAtiva && <rect x={xEsq+1} y={yPag+1} width={pagLarg-2} height={pagAlt-2} rx={raioCanto} fill="none" stroke={corPinturaBordas} strokeWidth={1.5} opacity={0.5}/>}
-      <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill="url(#sombra-c)"/>
-      <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt*0.35} rx={raioCanto} fill="url(#refl-p)"/>
+      {/* ── Cor da guarda (página esquerda = guarda anterior) ── */}
+      {(() => {
+        const corG = materialGuarda === 'colorida' ? corGuarda
+          : materialGuarda === 'kraft' ? '#C4A07A'
+          : materialGuarda === 'marmorizada' ? '#E8E4DF'
+          : corInternaFolhas
+        return (
+          <>
+            <rect x={xEsq+3} y={yPag+3} width={pagLarg} height={pagAlt} rx={raioCanto} fill="rgba(0,0,0,0.08)"/>
+            <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill={corBordaPages}/>
+            <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill={corG}/>
+            {/* Padrão da guarda */}
+            {materialGuarda === 'marmorizada' && (
+              <g transform={`translate(${xEsq},${yPag})`} clipPath="url(#clip-esq)">
+                <defs><clipPath id="clip-esq"><rect width={pagLarg} height={pagAlt} rx={raioCanto}/></clipPath></defs>
+                {[0.18,0.34,0.5,0.65,0.8].map((t,i) => (
+                  <path key={i}
+                    d={`M ${pagLarg*(-0.1+t*0.2)} 0 Q ${pagLarg*(t+0.1)} ${pagAlt*0.5} ${pagLarg*(t-0.05)} ${pagAlt}`}
+                    fill="none" stroke={i%2===0 ? 'rgba(150,140,130,0.35)' : 'rgba(200,195,190,0.25)'} strokeWidth={i%2===0?1.5:0.8}/>
+                ))}
+              </g>
+            )}
+            {materialGuarda === 'kraft' && (
+              <g transform={`translate(${xEsq},${yPag})`}>
+                {Array.from({length: Math.floor(pagLarg*pagAlt/180)}, (_,i) => (
+                  <circle key={i} cx={Math.random()*pagLarg} cy={Math.random()*pagAlt}
+                    r={0.7} fill="rgba(120,80,40,0.2)"/>
+                ))}
+              </g>
+            )}
+            {materialGuarda === 'estampada' && padraoGuarda === 'floral' && (
+              <g transform={`translate(${xEsq},${yPag})`} opacity={0.25}>
+                {[[pagLarg*0.25,pagAlt*0.3],[pagLarg*0.7,pagAlt*0.2],[pagLarg*0.45,pagAlt*0.65],[pagLarg*0.8,pagAlt*0.75]].map(([cx,cy],i) => (
+                  <g key={i} transform={`translate(${cx},${cy})`}>
+                    {[0,60,120,180,240,300].map((a,j) => {
+                      const rad = a*Math.PI/180
+                      return <ellipse key={j} cx={Math.cos(rad)*7} cy={Math.sin(rad)*7} rx={4} ry={2.5}
+                        fill="#6B4226" transform={`rotate(${a} ${Math.cos(rad)*7} ${Math.sin(rad)*7})`}/>
+                    })}
+                    <circle r={2.5} fill="#6B4226"/>
+                  </g>
+                ))}
+              </g>
+            )}
+            {materialGuarda === 'estampada' && padraoGuarda === 'geometrico' && (
+              <g transform={`translate(${xEsq},${yPag})`} opacity={0.18}>
+                {Array.from({length: Math.floor(pagLarg/14)}, (_,col) =>
+                  Array.from({length: Math.floor(pagAlt/14)}, (_,row) => (
+                    <rect key={`${col}-${row}`} x={col*14+2} y={row*14+2} width={10} height={10}
+                      fill="none" stroke="#6B4226" strokeWidth={0.6}/>
+                  ))
+                )}
+              </g>
+            )}
+            {/* Aquarela — manchas sobrepostas com cores translúcidas */}
+            {materialGuarda === 'estampada' && padraoGuarda === 'aquarela' && (
+              <g transform={`translate(${xEsq},${yPag})`} opacity={0.28}>
+                {([
+                  [pagLarg*0.22, pagAlt*0.22, pagLarg*0.20, pagAlt*0.13, '#6B9EC4'],
+                  [pagLarg*0.62, pagAlt*0.16, pagLarg*0.24, pagAlt*0.15, '#C46B9E'],
+                  [pagLarg*0.38, pagAlt*0.55, pagLarg*0.28, pagAlt*0.17, '#7EC46B'],
+                  [pagLarg*0.74, pagAlt*0.62, pagLarg*0.18, pagAlt*0.13, '#C4A06B'],
+                  [pagLarg*0.15, pagAlt*0.72, pagLarg*0.22, pagAlt*0.14, '#6BC4C4'],
+                  [pagLarg*0.50, pagAlt*0.38, pagLarg*0.16, pagAlt*0.11, '#C4C46B'],
+                ] as [number,number,number,number,string][]).map(([cx,cy,rx,ry,fill], i) => (
+                  <ellipse key={i} cx={cx} cy={cy} rx={rx} ry={ry}
+                    fill={fill} opacity={0.38}/>
+                ))}
+              </g>
+            )}
+            {/* Página de dedicatória — moldura decorativa sobre a guarda */}
+            {paginaDedicatoria && (
+              <g>
+                <rect x={xEsq + pagLarg*0.09} y={yPag + pagAlt*0.09}
+                  width={pagLarg*0.82} height={pagAlt*0.82}
+                  rx={raioCanto*0.5} fill="none"
+                  stroke="rgba(160,130,90,0.38)" strokeWidth="0.8"/>
+                <rect x={xEsq + pagLarg*0.13} y={yPag + pagAlt*0.13}
+                  width={pagLarg*0.74} height={pagAlt*0.74}
+                  rx={raioCanto*0.3} fill="none"
+                  stroke="rgba(160,130,90,0.22)" strokeWidth="0.4" strokeDasharray="2 1.5"/>
+                {([
+                  [xEsq+pagLarg*0.09, yPag+pagAlt*0.09],
+                  [xEsq+pagLarg*0.91, yPag+pagAlt*0.09],
+                  [xEsq+pagLarg*0.09, yPag+pagAlt*0.91],
+                  [xEsq+pagLarg*0.91, yPag+pagAlt*0.91],
+                ] as [number,number][]).map(([cx,cy], i) => (
+                  <g key={i}>
+                    <circle cx={cx} cy={cy} r={2} fill="rgba(160,130,90,0.42)"/>
+                    <circle cx={cx} cy={cy} r={4} fill="none" stroke="rgba(160,130,90,0.22)" strokeWidth="0.5"/>
+                  </g>
+                ))}
+                <text x={xEsq + pagLarg*0.5} y={yPag + pagAlt*0.5}
+                  textAnchor="middle" dominantBaseline="middle"
+                  fontSize="5" fill="rgba(140,110,80,0.48)" fontFamily="Georgia, serif" letterSpacing="0.18em">
+                  dedicatória
+                </text>
+              </g>
+            )}
+            {marcadorAtivo && <rect x={xEsq+pagLarg*0.45} y={yPag} width={2} height={pagAlt+16} fill={corMarcador} rx={1} opacity={0.8}/>}
+            {pinturaBordasAtiva && <rect x={xEsq+1} y={yPag+1} width={pagLarg-2} height={pagAlt-2} rx={raioCanto} fill="none" stroke={corPinturaBordas} strokeWidth={1.5} opacity={0.5}/>}
+            <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill="url(#sombra-c)"/>
+            <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt*0.35} rx={raioCanto} fill="url(#refl-p)"/>
+          </>
+        )
+      })()}
       {/* Lombada central */}
       <rect x={xEsq+pagLarg} y={yPag} width={lombadaVis} height={pagAlt} fill={corCapa} opacity={0.9}/>
       {tipoEncadernacao !== 'espiral' && Array.from({ length: Math.floor(pagAlt/14) }, (_, i) => (
@@ -282,6 +379,77 @@ function VistaAberto({
           ? <rect width={pagLarg} height={pagAlt} fill="url(#grid-ab)" rx={raioCanto}/>
           : renderPadraoPaginaOffset(padraoPaginas, pagLarg, pagAlt)}
       </g>
+      {/* Textura de papel do miolo */}
+      {tipoPapel === 'polen' && (
+        <g transform={`translate(${xDir},${yPag})`}>
+          <rect width={pagLarg} height={pagAlt} rx={raioCanto} fill="rgba(245,238,215,0.22)"/>
+          {Array.from({length: 40}, (_,i) => (
+            <circle key={i}
+              cx={(Math.sin(i*17.3)*0.5+0.5)*pagLarg}
+              cy={(Math.cos(i*13.7)*0.5+0.5)*pagAlt}
+              r={0.6} fill="rgba(200,175,120,0.18)"/>
+          ))}
+        </g>
+      )}
+      {tipoPapel === 'reciclado' && (
+        <g transform={`translate(${xDir},${yPag})`}>
+          <rect width={pagLarg} height={pagAlt} rx={raioCanto} fill="rgba(205,195,182,0.20)"/>
+          {Array.from({length: 38}, (_,i) => {
+            const x = (Math.sin(i*19.1)*0.5+0.5)*pagLarg
+            const y = (Math.cos(i*11.3)*0.5+0.5)*pagAlt
+            const a = (i*53) % 180
+            return <line key={i} x1={x} y1={y}
+              x2={x+Math.cos(a*Math.PI/180)*3.5} y2={y+Math.sin(a*Math.PI/180)*3.5}
+              stroke="rgba(90,70,50,0.22)" strokeWidth="0.7" strokeLinecap="round"/>
+          })}
+        </g>
+      )}
+      {tipoPapel === 'vegetal' && (
+        <g transform={`translate(${xDir},${yPag})`}>
+          <rect width={pagLarg} height={pagAlt} rx={raioCanto} fill="rgba(225,232,238,0.18)"/>
+          <rect width={pagLarg} height={pagAlt} rx={raioCanto}
+            fill="none" stroke="rgba(195,208,215,0.28)" strokeWidth="0.5"/>
+        </g>
+      )}
+      {/* Bolso interno — aba no canto inferior direito da página direita */}
+      {bolsoInterno && (
+        <g>
+          <rect x={xDir + pagLarg*0.08} y={yPag + pagAlt*0.72} width={pagLarg*0.84} height={pagAlt*0.26}
+            rx={raioCanto} fill={corInternaFolhas} stroke="rgba(150,130,110,0.45)" strokeWidth="0.8"/>
+          <rect x={xDir + pagLarg*0.08} y={yPag + pagAlt*0.72} width={pagLarg*0.84} height={4}
+            rx={raioCanto} fill="rgba(150,130,110,0.2)"/>
+          {/* Costura do bolso */}
+          <line x1={xDir + pagLarg*0.08} y1={yPag + pagAlt*0.72}
+                x2={xDir + pagLarg*0.92} y2={yPag + pagAlt*0.72}
+            stroke="rgba(150,130,110,0.6)" strokeWidth="0.6" strokeDasharray="2 1.5"/>
+          <text x={xDir + pagLarg*0.5} y={yPag + pagAlt*0.865}
+            textAnchor="middle" dominantBaseline="middle"
+            fontSize="5" fill="rgba(150,130,110,0.55)" fontFamily="Georgia, serif" letterSpacing="0.08em">
+            bolso
+          </text>
+        </g>
+      )}
+      {/* Envelope acoplado — bolso em forma de envelope na página direita */}
+      {envelopeAcoplado && (
+        <g>
+          <rect x={xDir + pagLarg*0.06} y={yPag + pagAlt*0.62}
+            width={pagLarg*0.88} height={pagAlt*0.35}
+            rx={raioCanto*0.5} fill="rgba(232,224,208,0.92)"
+            stroke="rgba(150,128,105,0.50)" strokeWidth="0.8"/>
+          {/* Aba triangular do envelope */}
+          <path d={`M ${xDir+pagLarg*0.06},${yPag+pagAlt*0.62} L ${xDir+pagLarg*0.5},${yPag+pagAlt*0.755} L ${xDir+pagLarg*0.94},${yPag+pagAlt*0.62} Z`}
+            fill="rgba(218,208,190,0.90)" stroke="rgba(150,128,105,0.38)" strokeWidth="0.6"/>
+          {/* Linha de dobra */}
+          <line x1={xDir+pagLarg*0.06} y1={yPag+pagAlt*0.62}
+                x2={xDir+pagLarg*0.94} y2={yPag+pagAlt*0.62}
+            stroke="rgba(150,128,105,0.45)" strokeWidth="0.5" strokeDasharray="2 1.5"/>
+          <text x={xDir + pagLarg*0.5} y={yPag + pagAlt*0.86}
+            textAnchor="middle" dominantBaseline="middle"
+            fontSize="4.5" fill="rgba(140,115,88,0.58)" fontFamily="Georgia, serif" letterSpacing="0.10em">
+            envelope
+          </text>
+        </g>
+      )}
       {pinturaBordasAtiva && <rect x={xDir+1} y={yPag+1} width={pagLarg-2} height={pagAlt-2} rx={raioCanto} fill="none" stroke={corPinturaBordas} strokeWidth={1.5} opacity={0.5}/>}
       <rect x={xDir} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill="url(#sombra-cd)"/>
       <rect x={xDir} y={yPag} width={pagLarg} height={pagAlt*0.35} rx={raioCanto} fill="url(#refl-p)"/>
@@ -449,18 +617,24 @@ function Costura({ tipoEncadernacao, corFio, W, H }: {
 function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   gravacaoCapa, nomeGravado, posicaoGravacao, aplicacoesCapa,
   raioCanto, elasticoAtivo, corElastico, posicaoElastico,
-  marcadorAtivo, corMarcador, larguraMarcador,
+  marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
+  portaCaneta,
   pinturaBordasAtiva, corPinturaBordas,
   corBordado, tipoTipografia,
+  tipoTextura, tipoLaminacao, abasOrelhas,
 }: {
   W: number; H: number; corCapa: string; materialCapa: string; estampaCapa: string
   gravacaoCapa: string; nomeGravado: string; posicaoGravacao: string; aplicacoesCapa: string[]
   raioCanto: number; elasticoAtivo: boolean; corElastico: string; posicaoElastico: string
-  marcadorAtivo: boolean; corMarcador: string; larguraMarcador: string
+  marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string
+  portaCaneta: boolean
   pinturaBordasAtiva: boolean; corPinturaBordas: string
   corBordado: string; tipoTipografia: string
+  tipoTextura: string; tipoLaminacao: string; abasOrelhas: boolean
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
+  // granulada força grain em qualquer material; lisa remove grain até do couro
+  const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
   const lum = luminancia(corCapa)
   const veinColor = lum < 0.45 ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'
 
@@ -491,8 +665,8 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
             <circle cx="4" cy="4" r="0.9" fill={`${corCapa}35`}/>
           </pattern>
         )}
-        {/* Leather grain filter */}
-        {ehCouro && (
+        {/* Material grain filter — couro/sintetico por padrão, ou forçado por tipoTextura */}
+        {useGrain && (
           <filter id="grain-fr" x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
             <feTurbulence type="fractalNoise" baseFrequency="0.76 0.70" numOctaves="4" seed="5" result="pebble"/>
             <feDiffuseLighting in="pebble" lightingColor="white" surfaceScale="4.5" diffuseConstant="0.9" result="lit">
@@ -503,6 +677,23 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
             <feComposite in="lit" in2="microGray" operator="arithmetic" k1="0" k2="0.82" k3="0.18" k4="0" result="combined"/>
             <feBlend in="SourceGraphic" in2="combined" mode="soft-light"/>
           </filter>
+        )}
+        {/* Papel especial — linhas vergê (laid paper) */}
+        {materialCapa === 'papel-especial' && (
+          <pattern id="verge-fr" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
+            <line x1={0} y1={0} x2={W} y2={0}
+              stroke={lum < 0.45 ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.07)'}
+              strokeWidth="0.5"/>
+          </pattern>
+        )}
+        {/* Laminação brilho — gradiente especular forte */}
+        {tipoLaminacao === 'brilho' && (
+          <radialGradient id="brilho-fr" cx="25%" cy="12%" r="60%" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stopColor="white" stopOpacity="0.60"/>
+            <stop offset="30%"  stopColor="white" stopOpacity="0.22"/>
+            <stop offset="70%"  stopColor="white" stopOpacity="0.05"/>
+            <stop offset="100%" stopColor="white" stopOpacity="0.0"/>
+          </radialGradient>
         )}
         {/* Lighting - radial from upper left */}
         <radialGradient id="luz-fr" cx="28%" cy="18%" r="88%" gradientUnits="objectBoundingBox">
@@ -524,12 +715,16 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
       {/* Base cover */}
       <rect width={W} height={H} rx={raioCanto}
         fill={corCapa}
-        filter={ehCouro ? 'url(#grain-fr)' : undefined}/>
+        filter={useGrain ? 'url(#grain-fr)' : undefined}/>
 
       {/* Material overlay */}
       {materialCapa === 'linho'  && <rect width={W} height={H} rx={raioCanto} fill="url(#lf)"/>}
       {materialCapa === 'tecido' && <rect width={W} height={H} rx={raioCanto} fill="url(#tf)"/>}
       {materialCapa === 'kraft'  && <rect width={W} height={H} rx={raioCanto} fill="url(#kf)"/>}
+      {/* Papel especial — linhas vergê sobrepostas */}
+      {materialCapa === 'papel-especial' && (
+        <rect width={W} height={H} rx={raioCanto} fill="url(#verge-fr)"/>
+      )}
 
       {/* Leather veins (couro real) */}
       {materialCapa === 'couro' && (
@@ -573,6 +768,28 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
           <rect x={W*0.25} y={H*0.3} width={W*0.5} height={H*0.4} fill="none" stroke="#FDF8F0" strokeWidth="0.9"/>
         </g>
       )}
+      {estampaCapa === 'abstrata' && (
+        <g opacity="0.20">
+          <circle cx={W*0.25} cy={H*0.3} r={W*0.18} fill="none" stroke="#FDF8F0" strokeWidth="1.2"/>
+          <circle cx={W*0.7} cy={H*0.6} r={W*0.25} fill="none" stroke="#FDF8F0" strokeWidth="0.9"/>
+          <line x1={W*0.1} y1={H*0.55} x2={W*0.9} y2={H*0.42} stroke="#FDF8F0" strokeWidth="0.8"/>
+          <circle cx={W*0.55} cy={H*0.25} r={W*0.08} fill="#FDF8F0"/>
+          <line x1={W*0.4} y1={H*0.75} x2={W*0.6} y2={H*0.9} stroke="#FDF8F0" strokeWidth="1.4"/>
+        </g>
+      )}
+      {estampaCapa === 'tematica' && (
+        <g opacity="0.20" stroke="#FDF8F0" fill="none">
+          {/* Ornamento de canto em cada extremidade */}
+          {[[6,6],[W-6,6],[6,H-6],[W-6,H-6]].map(([x,y],i) => (
+            <g key={i} transform={`translate(${x},${y}) rotate(${[0,90,270,180][i]})`}>
+              <path d="M 0 0 L 8 0 M 0 0 L 0 8" strokeWidth="1.2" strokeLinecap="round"/>
+              <circle cx="3" cy="3" r="1.5" fill="#FDF8F0" stroke="none"/>
+            </g>
+          ))}
+          {/* Moldura central */}
+          <rect x={W*0.15} y={H*0.15} width={W*0.7} height={H*0.7} rx="3" strokeWidth="0.7" strokeDasharray="3 2"/>
+        </g>
+      )}
 
       {/* Elástico */}
       {elasticoAtivo && (
@@ -584,24 +801,65 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
           fill={corElastico}/>
       )}
 
-      {/* Marcador — ribbon tucked inside: só a pontinha V-cut sai abaixo da capa */}
+      {/* Marcador — ponta sai abaixo da capa, forma varia pelo tipo */}
       {marcadorAtivo && (
         <g>
           {/* Sombra da ponta */}
           <polygon
             points={`${rX + rW + 0.8},${H} ${rX + rW * 2 + 0.8},${H} ${rX + rW * 1.5 + 0.8},${H + tipH}`}
             fill="rgba(0,0,0,0.18)"/>
-          {/* Ponta triangular (V-cut) — único elemento visível */}
-          <polygon
-            points={`${rX},${H} ${rX + rW},${H} ${rX + rW/2},${H + tipH}`}
-            fill={corMarcador}/>
-          {/* Brilho na ponta */}
-          <polygon
-            points={`${rX + rW * 0.18},${H} ${rX + rW * 0.42},${H} ${rX + rW/2},${H + tipH * 0.35}`}
-            fill="rgba(255,255,255,0.28)"/>
-          {/* Slot de saída — sombra na borda inferior do caderno */}
+          {/* fitilho: V-cut triangular */}
+          {(tipoMarcador === 'fitilho' || !tipoMarcador) && (
+            <>
+              <polygon points={`${rX},${H} ${rX + rW},${H} ${rX + rW/2},${H + tipH}`} fill={corMarcador}/>
+              <polygon points={`${rX + rW*0.18},${H} ${rX + rW*0.42},${H} ${rX + rW/2},${H + tipH*0.35}`}
+                fill="rgba(255,255,255,0.28)"/>
+            </>
+          )}
+          {/* couro: trapézio com bordas — mais largo e quadrado */}
+          {tipoMarcador === 'couro' && (
+            <>
+              <polygon points={`${rX},${H} ${rX + rW},${H} ${rX + rW*0.85},${H + tipH} ${rX + rW*0.15},${H + tipH}`}
+                fill={corMarcador}/>
+              <polygon points={`${rX + rW*0.15},${H} ${rX + rW*0.38},${H} ${rX + rW*0.32},${H + tipH*0.4} ${rX + rW*0.18},${H + tipH*0.4}`}
+                fill="rgba(255,255,255,0.22)"/>
+              {/* Costura decorativa nas bordas do couro */}
+              <line x1={rX + rW*0.12} y1={H + 2} x2={rX + rW*0.22} y2={H + tipH - 2}
+                stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
+              <line x1={rX + rW*0.78} y1={H + 2} x2={rX + rW*0.88} y2={H + tipH - 2}
+                stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
+            </>
+          )}
+          {/* cordão: círculo/oval representando o cabo do cordão */}
+          {tipoMarcador === 'cordao' && (
+            <>
+              <line x1={rX + rW/2} y1={H} x2={rX + rW/2} y2={H + tipH - 4}
+                stroke={corMarcador} strokeWidth={rW * 0.55} strokeLinecap="round"/>
+              <ellipse cx={rX + rW/2} cy={H + tipH - 3} rx={rW * 0.45} ry={rW * 0.45}
+                fill={corMarcador}/>
+              <ellipse cx={rX + rW/2 - rW*0.12} cy={H + tipH - 4} rx={rW*0.14} ry={rW*0.14}
+                fill="rgba(255,255,255,0.35)"/>
+            </>
+          )}
+          {/* Slot de saída */}
           <rect x={rX - 1.5} y={H - 2} width={rW + 3} height={3}
             fill="rgba(0,0,0,0.35)" rx={0.5}/>
+        </g>
+      )}
+
+      {/* Porta-caneta — tira vertical na borda direita da capa */}
+      {portaCaneta && (
+        <g>
+          <rect x={W - 10} y={H*0.25} width={8} height={H*0.5} rx={3}
+            fill="rgba(0,0,0,0.28)" />
+          <rect x={W - 9.5} y={H*0.25 + 1} width={7} height={H*0.5 - 2} rx={2.5}
+            fill={corCapa} opacity={0.9}/>
+          {/* Costura lateral */}
+          <line x1={W - 9} y1={H*0.27} x2={W - 9} y2={H*0.75}
+            stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" strokeDasharray="2 1.5"/>
+          {/* Abertura do topo */}
+          <ellipse cx={W - 6} cy={H*0.25} rx={3} ry={1.5}
+            fill="rgba(0,0,0,0.4)"/>
         </g>
       )}
 
@@ -616,11 +874,36 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
       <rect width={W} height={H} rx={raioCanto} fill="url(#bdir-fr)" style={{ pointerEvents: 'none' }}/>
       <rect width={W} height={H} rx={raioCanto} fill="url(#htop-fr)" style={{ pointerEvents: 'none' }}/>
 
+      {/* Laminação brilho — reflexo especular adicional */}
+      {tipoLaminacao === 'brilho' && (
+        <rect width={W} height={H} rx={raioCanto} fill="url(#brilho-fr)" style={{ pointerEvents: 'none' }}/>
+      )}
+      {/* Laminação fosca — véu que atenua reflexos (aspecto aveludado) */}
+      {tipoLaminacao === 'fosca' && (
+        <rect width={W} height={H} rx={raioCanto} fill="rgba(240,236,232,0.13)" style={{ pointerEvents: 'none' }}/>
+      )}
+
       {/* Highlight aresta esquerda (costura lombada) */}
       <line x1={2} y1={raioCanto*1.5} x2={2} y2={H-raioCanto*1.5}
         stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" style={{ pointerEvents: 'none' }}/>
       <line x1={0.8} y1={raioCanto} x2={0.8} y2={H-raioCanto}
         stroke="rgba(0,0,0,0.22)" strokeWidth="1" style={{ pointerEvents: 'none' }}/>
+
+      {/* Abas / orelhas — dobras decorativas nos cantos da capa */}
+      {abasOrelhas && (
+        <g>
+          {/* Canto superior direito */}
+          <polygon points={`${W-14},0 ${W},0 ${W},14`}
+            fill="rgba(255,255,255,0.82)" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5"/>
+          <polygon points={`${W-14},0 ${W},14 ${W-14},14`}
+            fill="rgba(0,0,0,0.10)"/>
+          {/* Canto inferior direito */}
+          <polygon points={`${W-14},${H} ${W},${H} ${W},${H-14}`}
+            fill="rgba(255,255,255,0.82)" stroke="rgba(0,0,0,0.08)" strokeWidth="0.5"/>
+          <polygon points={`${W-14},${H} ${W},${H-14} ${W-14},${H-14}`}
+            fill="rgba(0,0,0,0.10)"/>
+        </g>
+      )}
 
       {/* Gravação */}
       <GravacaoCapa texto={nomeGravado ?? ''} tipo={gravacaoCapa ?? 'nenhuma'}
@@ -636,14 +919,16 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
 }
 
 // ─── Face: Verso (contracapa) ─────────────────────────────────
-function FaceVerso({ W, H, corCapa, materialCapa, raioCanto }: {
+function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao }: {
   W: number; H: number; corCapa: string; materialCapa: string; raioCanto: number
+  tipoTextura: string; tipoLaminacao: string
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
+  const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        {ehCouro && (
+        {useGrain && (
           <filter id="grain-v" x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
             <feTurbulence type="fractalNoise" baseFrequency="0.76 0.70" numOctaves="4" seed="11" result="pebble"/>
             <feDiffuseLighting in="pebble" lightingColor="white" surfaceScale="4.5" diffuseConstant="0.9" result="lit">
@@ -661,13 +946,20 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto }: {
           <stop offset="70%"  stopColor="black" stopOpacity="0.0"/>
           <stop offset="100%" stopColor="black" stopOpacity="0.2"/>
         </radialGradient>
+        {tipoLaminacao === 'brilho' && (
+          <radialGradient id="brilho-v" cx="75%" cy="12%" r="60%" gradientUnits="objectBoundingBox">
+            <stop offset="0%"   stopColor="white" stopOpacity="0.55"/>
+            <stop offset="35%"  stopColor="white" stopOpacity="0.18"/>
+            <stop offset="100%" stopColor="white" stopOpacity="0.0"/>
+          </radialGradient>
+        )}
         <linearGradient id="htop-v" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"  stopColor="white" stopOpacity="0.25"/>
           <stop offset="10%" stopColor="white" stopOpacity="0.0"/>
         </linearGradient>
       </defs>
       <rect width={W} height={H} rx={raioCanto} fill={corCapa}
-        filter={ehCouro ? 'url(#grain-v)' : undefined}/>
+        filter={useGrain ? 'url(#grain-v)' : undefined}/>
       {materialCapa === 'linho' && (
         <pattern id="lv" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
           <line x1="0" y1="0" x2="4" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
@@ -676,6 +968,12 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto }: {
       )}
       <rect width={W} height={H} rx={raioCanto} fill="url(#luz-v)"/>
       <rect width={W} height={H} rx={raioCanto} fill="url(#htop-v)"/>
+      {tipoLaminacao === 'brilho' && (
+        <rect width={W} height={H} rx={raioCanto} fill="url(#brilho-v)" style={{ pointerEvents: 'none' }}/>
+      )}
+      {tipoLaminacao === 'fosca' && (
+        <rect width={W} height={H} rx={raioCanto} fill="rgba(240,236,232,0.13)" style={{ pointerEvents: 'none' }}/>
+      )}
       {/* Highlight aresta direita */}
       <line x1={W-2} y1={raioCanto} x2={W-2} y2={H-raioCanto}
         stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
@@ -752,48 +1050,121 @@ function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada,
 }
 
 // ─── Face: Corte (borda direita — páginas) ────────────────────
-function FaceCorte({ W, H, corInternaFolhas, pinturaBordasAtiva, corPinturaBordas }: {
+function FaceCorte({ W, H, corInternaFolhas, pinturaBordasAtiva, corPinturaBordas, tipoCorteEspecial }: {
   W: number; H: number; corInternaFolhas: string
-  pinturaBordasAtiva: boolean; corPinturaBordas: string
+  pinturaBordasAtiva: boolean; corPinturaBordas: string; tipoCorteEspecial: string
 }) {
+  // ~0.55px por folha — linhas verticais ao longo da largura (W ≈ 28px → ~50 linhas)
+  const spacing = 0.55
+  const total = Math.floor(W / spacing)
+
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        {/* Sombra vertical — pilha fica mais escura embaixo (folhas comprimidas) */}
+        <linearGradient id="sombra-c2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="rgba(0,0,0,0)"   stopOpacity="0"/>
+          <stop offset="70%"  stopColor="rgba(0,0,0,0.08)" stopOpacity="1"/>
+          <stop offset="100%" stopColor="rgba(0,0,0,0.22)" stopOpacity="1"/>
+        </linearGradient>
+        {/* Luz lateral — brilho sutil vindo da esquerda */}
         <linearGradient id="luz-c2" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stopColor="white" stopOpacity="0.18"/>
-          <stop offset="60%"  stopColor="white" stopOpacity="0.0"/>
-          <stop offset="100%" stopColor="black" stopOpacity="0.1"/>
+          <stop offset="0%"   stopColor="white" stopOpacity="0.30"/>
+          <stop offset="35%"  stopColor="white" stopOpacity="0.06"/>
+          <stop offset="100%" stopColor="black" stopOpacity="0.12"/>
         </linearGradient>
       </defs>
+
+      {/* Fundo — cor base das folhas */}
       <rect width={W} height={H} fill={corInternaFolhas}/>
-      {/* Linhas de páginas */}
-      {Array.from({ length: Math.floor(H / 1.2) }, (_, i) => (
-        <line key={i} x1={0} y1={i*1.2} x2={W} y2={i*1.2}
-          stroke="rgba(180,160,140,0.45)" strokeWidth="0.35"/>
-      ))}
-      {/* Gilding / pintura de bordas */}
-      {pinturaBordasAtiva && (
-        <rect width={W} height={H} fill={corPinturaBordas} opacity={0.4}/>
+
+      {/* Linhas verticais de páginas — cada linha é a borda de uma folha */}
+      {Array.from({ length: total }, (_, i) => {
+        const x = i * spacing
+        const isDark = i % 2 === 0
+        return (
+          <line key={i}
+            x1={x} y1={0} x2={x} y2={H}
+            stroke={isDark ? 'rgba(130,110,90,0.80)' : 'rgba(210,195,180,0.30)'}
+            strokeWidth={isDark ? 0.55 : 0.28}
+          />
+        )
+      })}
+
+      {/* Pintura de bordas (gilding) — cobre as linhas completamente */}
+      {pinturaBordasAtiva ? (
+        <>
+          <rect width={W} height={H} fill={corPinturaBordas} opacity={1}/>
+          <rect width={W} height={H} fill="url(#luz-c2)" opacity={1.5}/>
+        </>
+      ) : (
+        <>
+          <rect width={W} height={H} fill="url(#sombra-c2)"/>
+          <rect width={W} height={H} fill="url(#luz-c2)"/>
+        </>
       )}
-      <rect width={W} height={H} fill="url(#luz-c2)"/>
+
+      {/* Deckle-edge — borda direita irregular (papel artesanal rasgado) */}
+      {tipoCorteEspecial === 'deckle-edge' && (() => {
+        const pts: string[] = [`${W},0`]
+        const steps = 28
+        for (let i = 1; i <= steps; i++) {
+          const y = (H / steps) * i
+          // alternância pseudo-aleatória determinística
+          const jitter = (Math.sin(i * 7.3) * 0.5 + 0.5) * W * 0.45
+          pts.push(`${W - jitter},${y}`)
+        }
+        pts.push(`${W},${H}`, `${W},0`)
+        return (
+          <polygon points={pts.join(' ')}
+            fill={corInternaFolhas} opacity={0.92}/>
+        )
+      })()}
     </svg>
   )
 }
 
 // ─── Face: Topo e Base ────────────────────────────────────────
-function FaceTopo({ W, H, corCapa, corInternaFolhas, spineRatio = 0.14 }: {
-  W: number; H: number; corCapa: string; corInternaFolhas: string; spineRatio?: number
+function FaceTopo({ W, H, corCapa, corInternaFolhas, pinturaBordasAtiva, corPinturaBordas, spineRatio = 0.14 }: {
+  W: number; H: number; corCapa: string; corInternaFolhas: string
+  pinturaBordasAtiva: boolean; corPinturaBordas: string; spineRatio?: number
 }) {
   const sW = W * spineRatio
+  const spacing = 0.55
+  const total = Math.floor((W - sW) / spacing)
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="luz-topo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="white" stopOpacity="0.30"/>
+          <stop offset="100%" stopColor="black" stopOpacity="0.10"/>
+        </linearGradient>
+      </defs>
+      {/* Fundo folhas */}
       <rect width={W} height={H} fill={corInternaFolhas}/>
-      {Array.from({ length: Math.floor(W*(1-spineRatio)/0.8) }, (_, i) => (
-        <line key={i} x1={sW+i*0.8} y1={0} x2={sW+i*0.8} y2={H}
-          stroke="rgba(180,160,140,0.4)" strokeWidth="0.25"/>
-      ))}
+
+      {pinturaBordasAtiva ? (
+        /* Gilding — cobre todo o corte das páginas (exceto lombada) */
+        <rect x={sW} y={0} width={W - sW} height={H} fill={corPinturaBordas} opacity={1}/>
+      ) : (
+        /* Linhas verticais das páginas */
+        Array.from({ length: total }, (_, i) => {
+          const x = sW + i * spacing
+          const isDark = i % 2 === 0
+          return (
+            <line key={i}
+              x1={x} y1={0} x2={x} y2={H}
+              stroke={isDark ? 'rgba(130,110,90,0.80)' : 'rgba(210,195,180,0.30)'}
+              strokeWidth={isDark ? 0.55 : 0.28}
+            />
+          )
+        })
+      )}
+
+      {/* Lombada */}
       <rect width={sW} height={H} fill={corCapa} opacity="0.9"/>
-      <rect width={W} height={H} fill="rgba(255,255,255,0.12)"/>
+      {/* Luz */}
+      <rect width={W} height={H} fill="url(#luz-topo)"/>
     </svg>
   )
 }
@@ -806,15 +1177,20 @@ function Livro3D({ bW, bH, bD, props }: {
     gravacaoCapa: string; nomeGravado: string; posicaoGravacao: string; aplicacoesCapa: string[]
     raioCanto: number; tipoEncadernacao: string; tipoLombada: string; corFio: string
     elasticoAtivo: boolean; corElastico: string; posicaoElastico: string
-    marcadorAtivo: boolean; corMarcador: string; larguraMarcador: string
+    marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string
+    portaCaneta: boolean
     pinturaBordasAtiva: boolean; corPinturaBordas: string
+    tipoCorteEspecial: string
     corInternaFolhas: string; corBordado: string; tipoTipografia: string
+    tipoTextura: string; tipoLaminacao: string; abasOrelhas: boolean
   }
 }) {
   const { corCapa, materialCapa, estampaCapa, gravacaoCapa, nomeGravado, posicaoGravacao,
     aplicacoesCapa, raioCanto, tipoEncadernacao, tipoLombada, corFio,
-    elasticoAtivo, corElastico, posicaoElastico, marcadorAtivo, corMarcador, larguraMarcador,
-    pinturaBordasAtiva, corPinturaBordas, corInternaFolhas, corBordado, tipoTipografia } = props
+    elasticoAtivo, corElastico, posicaoElastico, marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
+    portaCaneta, pinturaBordasAtiva, corPinturaBordas, tipoCorteEspecial,
+    corInternaFolhas, corBordado, tipoTipografia,
+    tipoTextura, tipoLaminacao, abasOrelhas } = props
 
   const face: React.CSSProperties = { position: 'absolute', overflow: 'hidden' }
   const faceOpen: React.CSSProperties = { position: 'absolute', overflow: 'visible' }
@@ -830,16 +1206,19 @@ function Livro3D({ bW, bH, bD, props }: {
           estampaCapa={estampaCapa} gravacaoCapa={gravacaoCapa} nomeGravado={nomeGravado}
           posicaoGravacao={posicaoGravacao} aplicacoesCapa={aplicacoesCapa}
           raioCanto={raioCanto} elasticoAtivo={elasticoAtivo} corElastico={corElastico}
-          posicaoElastico={posicaoElastico} marcadorAtivo={marcadorAtivo} corMarcador={corMarcador}
-          larguraMarcador={larguraMarcador}
+          posicaoElastico={posicaoElastico} marcadorAtivo={marcadorAtivo}
+          tipoMarcador={tipoMarcador} corMarcador={corMarcador} larguraMarcador={larguraMarcador}
+          portaCaneta={portaCaneta}
           pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}
-          corBordado={corBordado} tipoTipografia={tipoTipografia}/>
+          corBordado={corBordado} tipoTipografia={tipoTipografia}
+          tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} abasOrelhas={abasOrelhas}/>
       </div>
 
       {/* VERSO */}
       <div style={{ ...face, width: W, height: H, left: 0, top: 0,
         transform: `rotateY(180deg) translateZ(${D/2}px)`, backfaceVisibility: 'hidden' }}>
-        <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}/>
+        <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}
+          tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao}/>
       </div>
 
       {/* LOMBADA (esquerda) */}
@@ -853,19 +1232,22 @@ function Livro3D({ bW, bH, bD, props }: {
       <div style={{ ...face, width: D, height: H, left: (W-D)/2, top: 0,
         transform: `rotateY(90deg) translateZ(${W/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceCorte W={D} H={H} corInternaFolhas={corInternaFolhas}
-          pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}/>
+          pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}
+          tipoCorteEspecial={tipoCorteEspecial}/>
       </div>
 
       {/* TOPO */}
       <div style={{ ...face, width: W, height: D, left: 0, top: (H-D)/2,
         transform: `rotateX(90deg) translateZ(${H/2}px)`, backfaceVisibility: 'hidden' }}>
-        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}/>
+        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}
+          pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}/>
       </div>
 
       {/* BASE */}
       <div style={{ ...face, width: W, height: D, left: 0, top: (H-D)/2,
         transform: `rotateX(-90deg) translateZ(${H/2}px)`, backfaceVisibility: 'hidden' }}>
-        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}/>
+        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}
+          pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}/>
       </div>
     </div>
   )
@@ -892,9 +1274,13 @@ export default function PreviewCaderno() {
     tipoTipografia, corBordado,
     tipoEncadernacao, tipoLombada, corFio,
     elasticoAtivo, corElastico, posicaoElastico,
-    marcadorAtivo, corMarcador, larguraMarcador,
+    marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
+    bolsoInterno, portaCaneta, envelopeAcoplado, abasOrelhas,
     tipoCantos, pinturaBordasAtiva, corPinturaBordas,
-    padraoPaginas, corFolhas,
+    tipoCorteEspecial, tipoLaminacao, tipoTextura,
+    padraoPaginas, corFolhas, tipoPapel,
+    materialGuarda, corGuarda, padraoGuarda,
+    paginaDedicatoria,
   } = configuracao
 
   const prop = PROPORCAO_POR_FORMATO[formato] ?? PROPORCAO_POR_FORMATO['retrato']
@@ -918,9 +1304,15 @@ export default function PreviewCaderno() {
     posicaoGravacao, aplicacoesCapa: aplicacoesCapa ?? [],
     raioCanto, tipoEncadernacao, tipoLombada, corFio,
     elasticoAtivo: elasticoAtivo ?? false, corElastico, posicaoElastico,
-    marcadorAtivo: marcadorAtivo ?? false, corMarcador, larguraMarcador: larguraMarcador ?? 'medio',
+    marcadorAtivo: marcadorAtivo ?? false, tipoMarcador: tipoMarcador ?? 'fitilho',
+    corMarcador, larguraMarcador: larguraMarcador ?? 'medio',
+    portaCaneta: portaCaneta ?? false,
     pinturaBordasAtiva: pinturaBordasAtiva ?? false, corPinturaBordas,
+    tipoCorteEspecial: tipoCorteEspecial ?? 'nenhum',
     corInternaFolhas, corBordado: corBordado ?? '#F5DFA0', tipoTipografia: tipoTipografia ?? 'serif',
+    tipoTextura: tipoTextura ?? 'granulada',
+    tipoLaminacao: tipoLaminacao ?? 'nenhuma',
+    abasOrelhas: abasOrelhas ?? false,
   }
 
   const propsAberto = {
@@ -929,6 +1321,13 @@ export default function PreviewCaderno() {
     padraoPaginas, tipoEncadernacao, corFio,
     marcadorAtivo: marcadorAtivo ?? false, corMarcador,
     pinturaBordasAtiva: pinturaBordasAtiva ?? false, corPinturaBordas,
+    materialGuarda: materialGuarda ?? 'branca',
+    corGuarda: corGuarda ?? '#F5F0E0',
+    padraoGuarda: padraoGuarda ?? 'liso',
+    bolsoInterno: bolsoInterno ?? false,
+    tipoPapel: tipoPapel ?? 'offset',
+    envelopeAcoplado: envelopeAcoplado ?? false,
+    paginaDedicatoria: paginaDedicatoria ?? false,
   }
 
   // Aplica rotação diretamente no DOM — sem passar pelo React

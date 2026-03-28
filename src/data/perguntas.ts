@@ -162,6 +162,27 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
   },
 
   {
+    id: 'corBordado',
+    grupo: 2,
+    titulo: 'Qual a cor do fio de bordado?',
+    descricao: 'Escolha o fio que vai dar vida ao bordado na capa',
+    tipo: 'cor',
+    campo: 'corBordado',
+    visivel: (c) => c.gravacaoCapa === 'bordado',
+    opcoes: [
+      { valor: '#F5DFA0', label: 'Dourado',   hex: '#F5DFA0' },
+      { valor: '#D4D4D4', label: 'Prata',     hex: '#D4D4D4' },
+      { valor: '#F8F8F8', label: 'Branco',    hex: '#F8F8F8' },
+      { valor: '#C0392B', label: 'Vermelho',  hex: '#C0392B' },
+      { valor: '#C4713C', label: 'Terracota', hex: '#C4713C' },
+      { valor: '#2980B9', label: 'Azul',      hex: '#2980B9' },
+      { valor: '#27AE60', label: 'Verde',     hex: '#27AE60' },
+      { valor: '#E91E8C', label: 'Rosa',      hex: '#E91E8C' },
+      { valor: '#1A1A1A', label: 'Preto',     hex: '#1A1A1A' },
+    ],
+  },
+
+  {
     id: 'posicaoGravacao',
     grupo: 2,
     titulo: 'Onde fica a gravação na capa?',

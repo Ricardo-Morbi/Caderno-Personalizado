@@ -143,10 +143,42 @@ export default function EtapaCapa() {
           ))}
         </div>
 
-        {/* Campo de texto + tipografia + cor do bordado */}
+        {/* Cor do bordado — aparece IMEDIATAMENTE ao selecionar Bordado */}
+        {configuracao.gravacaoCapa === 'bordado' && (
+          <div className="mt-3 p-3 rounded-xl bg-creme-100 border border-creme-300">
+            <p className="text-xs font-medium text-marrom-500 mb-3">Cor do fio de bordado</p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {CORES_BORDADO.map((cor) => (
+                <button
+                  key={cor.hex}
+                  title={cor.nome}
+                  onClick={() => atualizarOpcao('corBordado', cor.hex)}
+                  className={`seletor-cor ${configuracao.corBordado === cor.hex ? 'seletor-cor-selecionado' : ''}`}
+                  style={{
+                    backgroundColor: cor.hex,
+                    border: cor.hex === '#F8F8F8' ? '2px solid #E8D5B7' : undefined,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="cor-bordado-custom" className="text-xs text-marrom-300">Cor personalizada:</label>
+              <input
+                id="cor-bordado-custom"
+                type="color"
+                value={configuracao.corBordado}
+                onChange={(e) => atualizarOpcao('corBordado', e.target.value)}
+                className="w-8 h-8 rounded cursor-pointer border border-creme-300"
+              />
+              <span className="text-xs font-mono text-marrom-400">{configuracao.corBordado}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Texto + tipografia — para qualquer tipo de gravação */}
         {configuracao.gravacaoCapa !== 'nenhuma' && (
-          <div className="mt-2 flex flex-col gap-4">
-            {/* 1. Texto a gravar */}
+          <div className="mt-3 flex flex-col gap-4">
+            {/* Texto a gravar */}
             <div>
               <label htmlFor="nome-gravado" className="block text-xs text-marrom-400 mb-1">
                 O que você quer gravar?
@@ -167,7 +199,7 @@ export default function EtapaCapa() {
               </p>
             </div>
 
-            {/* 2. Tipografia */}
+            {/* Tipografia */}
             <div>
               <p className="text-xs text-marrom-400 mb-2">Estilo de tipografia</p>
               <div className="grid grid-cols-2 gap-2">
@@ -196,38 +228,6 @@ export default function EtapaCapa() {
                 ))}
               </div>
             </div>
-
-            {/* 3. Cor do bordado — só quando bordado selecionado */}
-            {configuracao.gravacaoCapa === 'bordado' && (
-              <div>
-                <p className="text-xs text-marrom-400 mb-2">Cor do fio de bordado</p>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {CORES_BORDADO.map((cor) => (
-                    <button
-                      key={cor.hex}
-                      title={cor.nome}
-                      onClick={() => atualizarOpcao('corBordado', cor.hex)}
-                      className={`seletor-cor ${configuracao.corBordado === cor.hex ? 'seletor-cor-selecionado' : ''}`}
-                      style={{
-                        backgroundColor: cor.hex,
-                        border: cor.hex === '#F8F8F8' ? '2px solid #E8D5B7' : undefined,
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <label htmlFor="cor-bordado-custom" className="text-xs text-marrom-300">Personalizada:</label>
-                  <input
-                    id="cor-bordado-custom"
-                    type="color"
-                    value={configuracao.corBordado}
-                    onChange={(e) => atualizarOpcao('corBordado', e.target.value)}
-                    className="w-7 h-7 rounded cursor-pointer border border-creme-300"
-                  />
-                  <span className="text-xs font-mono text-marrom-300">{configuracao.corBordado}</span>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

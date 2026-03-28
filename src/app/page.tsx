@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useCadernoStore } from '@/store/useCadernoStore'
+import type { ConfiguracaoCaderno } from '@/types/caderno'
 import { getPerguntasVisiveis, GRUPOS } from '@/data/perguntas'
 import PreviewCaderno from '@/components/configurador/PreviewCaderno'
 import PerguntaUnica from '@/components/configurador/PerguntaUnica'
@@ -11,7 +12,7 @@ import {
   IconeSeta, IconeSetaEsq, IconeCheck,
 } from '@/components/ui/Icons'
 
-// Mapa de ícones SVG por grupo
+// ─── Mapa de ícones SVG por grupo ─────────────────────────────
 const ICONES_GRUPO: Record<string, React.FC<{ tamanho?: number; className?: string }>> = {
   tamanho:  IconeTamanho,
   capa:     IconeLivroAberto,
@@ -22,17 +23,176 @@ const ICONES_GRUPO: Record<string, React.FC<{ tamanho?: number; className?: stri
   coracao:  IconeCoracao,
 }
 
+// ─── Mensagens da sobrancelha ──────────────────────────────────
+const MENSAGENS_SOBRANCELHA = [
+  '✦  Entregas rápidas em todo o país',
+  '✦  Garantia de 10 anos',
+  '✦  Feito à mão com amor artesanal',
+]
+
+// ─── Cálculo do total ──────────────────────────────────────────
+function calcularTotal(c: ConfiguracaoCaderno): number {
+  let total = 89 // base
+
+  // Tamanho
+  if (c.tamanho === 'A5')            total += 15
+  else if (c.tamanho === 'A4')       total += 30
+  else if (c.tamanho === 'personalizado') total += 50
+
+  // Espessura
+  if (c.espessura === 'medio')       total += 10
+  else if (c.espessura === 'grosso') total += 20
+  else if (c.espessura === 'extra-grosso') total += 35
+
+  // Material capa
+  if      (c.materialCapa === 'couro')         total += 80
+  else if (c.materialCapa === 'sintetico')     total += 40
+  else if (c.materialCapa === 'linho')         total += 35
+  else if (c.materialCapa === 'tecido')        total += 30
+  else if (c.materialCapa === 'papel-especial') total += 20
+  else if (c.materialCapa === 'kraft')         total += 10
+
+  // Estampa
+  if      (c.estampaCapa === 'tematica')   total += 30
+  else if (c.estampaCapa === 'abstrata')   total += 20
+  else if (c.estampaCapa === 'floral')     total += 15
+  else if (c.estampaCapa === 'minimalista') total += 10
+
+  // Gravação
+  if      (c.gravacaoCapa === 'bordado')      total += 45
+  else if (c.gravacaoCapa === 'alto-relevo')  total += 35
+  else if (c.gravacaoCapa === 'baixo-relevo') total += 25
+
+  // Encadernação
+  if      (c.tipoEncadernacao === 'francesa-cruzada') total += 25
+  else if (c.tipoEncadernacao === 'wire-o')            total += 30
+  else if (c.tipoEncadernacao === 'long-stitch')       total += 20
+
+  // Papel
+  if      (c.tipoPapel === 'vegetal')   total += 20
+  else if (c.tipoPapel === 'polen')     total += 10
+  else if (c.tipoPapel === 'reciclado') total += 5
+
+  // Gramatura
+  if      (c.graturaPapel === '240g') total += 30
+  else if (c.graturaPapel === '180g') total += 18
+  else if (c.graturaPapel === '120g') total += 8
+
+  // Elementos funcionais
+  if (c.elasticoAtivo)       total += 12
+  if (c.marcadorAtivo)       total += 15
+  if (c.bolsoInterno)        total += 20
+  if (c.portaCaneta)         total += 10
+  if (c.envelopeAcoplado)    total += 18
+  if (c.abasOrelhas)         total += 12
+
+  // Acabamentos
+  if (c.pinturaBordasAtiva)             total += 35
+  if (c.tipoCorteEspecial === 'deckle-edge') total += 25
+  if (c.tipoLaminacao === 'fosca')      total += 15
+  else if (c.tipoLaminacao === 'brilho') total += 15
+
+  // Guarda
+  if (c.materialGuarda !== 'branca')    total += 15
+
+  return total
+}
+
+// ─── Componente sobrancelha ────────────────────────────────────
+function Sobrancelha() {
+  const [idx, setIdx] = useState(0)
+  const [visivel, setVisivel] = useState(true)
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setVisivel(false)
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % MENSAGENS_SOBRANCELHA.length)
+        setVisivel(true)
+      }, 350)
+    }, 3500)
+    return () => clearInterval(intervalo)
+  }, [])
+
+  return (
+    <div className="bg-onix-800 text-ivoire-100 text-center py-2 px-4 text-xs tracking-widest font-sans uppercase overflow-hidden">
+      <span
+        className="inline-block transition-all duration-300"
+        style={{ opacity: visivel ? 1 : 0, transform: visivel ? 'translateY(0)' : 'translateY(-6px)' }}
+      >
+        {MENSAGENS_SOBRANCELHA[idx]}
+      </span>
+    </div>
+  )
+}
+
+// ─── Componente total ──────────────────────────────────────────
+function TotalPedido({ valor }: { valor: number }) {
+  return (
+    <div className="px-6 py-4 border-t border-ivoire-300 bg-ivoire-50">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-onix-300 tracking-widest uppercase font-sans">Total estimado</p>
+          <p className="text-xs text-onix-200 font-sans mt-0.5">Valores finais confirmados no pedido</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xl font-serif text-onix-700 tracking-tight">
+            R$ {valor.toFixed(2).replace('.', ',')}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal de solicitação ──────────────────────────────────────
+function ModalSolicitar({ total, aoFechar }: { total: number; aoFechar: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-onix-800/60 backdrop-blur-sm px-4 pb-8 lg:pb-0"
+      onClick={aoFechar}
+    >
+      <div
+        className="bg-white w-full max-w-sm p-8 border border-ivoire-400"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-8 h-px bg-ouro-400 mb-6" />
+        <h3 className="text-lg font-serif text-onix-700 mb-2">Pedido pronto!</h3>
+        <p className="text-sm text-onix-400 leading-relaxed mb-1">
+          Seu caderno foi configurado. O valor estimado é:
+        </p>
+        <p className="text-2xl font-serif text-onix-700 mb-6">
+          R$ {total.toFixed(2).replace('.', ',')}
+        </p>
+        <p className="text-xs text-onix-300 mb-6 leading-relaxed">
+          Em breve você poderá finalizar o pedido diretamente pelo WhatsApp. Aguarde!
+        </p>
+        <button
+          onClick={aoFechar}
+          className="w-full bg-onix-700 hover:bg-onix-800 text-ivoire-100 py-3 text-xs tracking-widest uppercase font-sans transition-colors duration-200"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Página principal ──────────────────────────────────────────
 export default function PaginaConfigurador() {
   const { configuracao, perguntaIndex, avancarPergunta, voltarPergunta, irParaPergunta } = useCadernoStore()
   const direcaoRef = useRef(1)
   const previewRef = useRef<HTMLElement>(null)
   const configAnteriorRef = useRef(configuracao)
+  const [modalAberto, setModalAberto] = useState(false)
 
-  // Auto-scroll ao preview no mobile quando qualquer opção muda
+  const abrirModal = useCallback(() => setModalAberto(true), [])
+  const fecharModal = useCallback(() => setModalAberto(false), [])
+
   useEffect(() => {
     if (configuracao !== configAnteriorRef.current) {
       configAnteriorRef.current = configuracao
-      if (typeof window !== 'undefined' && window.innerWidth < 1024 && previewRef.current) {
+      if (typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth < 1024 && previewRef.current) {
         previewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
     }
@@ -55,14 +215,33 @@ export default function PaginaConfigurador() {
     voltarPergunta()
   }
 
+  function avancarSeAutomatico() {
+    if (perguntaAtual?.avancaAutomatico && perguntaIndex < total - 1) {
+      setTimeout(() => {
+        direcaoRef.current = 1
+        avancarPergunta(total)
+      }, 160)
+    }
+  }
+
+  const totalValor = calcularTotal(configuracao)
+
   return (
     <div className="flex flex-col min-h-screen bg-ivoire-100">
 
-      {/* ── CABEÇALHO MONTBLANC ── */}
-      <header className="sticky top-0 z-40 bg-ivoire-100/95 backdrop-blur-sm border-b border-ivoire-400">
+      {/* Modal de solicitação */}
+      {modalAberto && (
+        <ModalSolicitar total={totalValor} aoFechar={fecharModal} />
+      )}
+
+      {/* ── SOBRANCELHA ── */}
+      <Sobrancelha />
+
+      {/* ── CABEÇALHO ── */}
+      <header className="sticky top-[33px] z-40 bg-ivoire-100/95 backdrop-blur-sm border-b border-ivoire-400">
         <div className="flex items-center justify-between px-5 py-4 max-w-screen-xl mx-auto">
 
-          {/* Logo / título */}
+          {/* Logo */}
           <div>
             <p className="text-xs tracking-widest text-onix-300 uppercase font-sans mb-0.5">Ateliê</p>
             <h1 className="text-base font-serif text-onix-700 leading-tight tracking-tight">
@@ -70,23 +249,15 @@ export default function PaginaConfigurador() {
             </h1>
           </div>
 
-          {/* Contador central — apenas desktop */}
-          <div className="hidden md:block text-center">
+          {/* Contador central */}
+          <div className="text-center">
             <p className="text-xs text-onix-300 tracking-widest uppercase">
               {perguntaIndex + 1} <span className="text-onix-200">de</span> {total}
             </p>
           </div>
-
-          {/* Botão finalizar */}
-          <button
-            className="botao-primario"
-            onClick={() => alert('Em breve: envio via WhatsApp!')}
-          >
-            Solicitar
-          </button>
         </div>
 
-        {/* Linha de progresso — muito fina */}
+        {/* Linha de progresso */}
         <div className="h-px bg-ivoire-400">
           <div
             className="h-full bg-ouro-400 transition-all duration-700"
@@ -95,8 +266,8 @@ export default function PaginaConfigurador() {
         </div>
       </header>
 
-      {/* ── NAVEGAÇÃO DE GRUPOS — mobile (chips minimalistas) ── */}
-      <div className="lg:hidden sticky top-[61px] z-30 bg-ivoire-100/98 backdrop-blur-sm border-b border-ivoire-300">
+      {/* ── NAVEGAÇÃO DE GRUPOS — mobile ── */}
+      <div className="lg:hidden sticky top-[94px] z-30 bg-ivoire-100/98 backdrop-blur-sm border-b border-ivoire-300">
         <div className="flex gap-0 overflow-x-auto no-scrollbar">
           {GRUPOS.map((grupo) => {
             const perguntasDoGrupo = perguntas.filter((p) => p.grupo === grupo.numero)
@@ -115,21 +286,11 @@ export default function PaginaConfigurador() {
                 }}
                 className={`
                   flex-shrink-0 flex flex-col items-center gap-1 px-4 py-2.5 border-b-2 transition-all duration-200 text-xs
-                  ${ativo
-                    ? 'border-ouro-400 text-onix-700'
-                    : completo
-                    ? 'border-transparent text-onix-300'
-                    : 'border-transparent text-onix-200'
-                  }
+                  ${ativo ? 'border-ouro-400 text-onix-700' : completo ? 'border-transparent text-onix-300' : 'border-transparent text-onix-200'}
                 `}
               >
-                {completo
-                  ? <IconeCheck tamanho={14} className="text-ouro-400" />
-                  : Icone && <Icone tamanho={14} />
-                }
-                {ativo && (
-                  <span className="font-sans tracking-wide text-xs">{grupo.titulo}</span>
-                )}
+                {completo ? <IconeCheck tamanho={14} className="text-ouro-400" /> : Icone && <Icone tamanho={14} />}
+                {ativo && <span className="font-sans tracking-wide text-xs">{grupo.titulo}</span>}
               </button>
             )
           })}
@@ -139,8 +300,8 @@ export default function PaginaConfigurador() {
       {/* ── LAYOUT PRINCIPAL ── */}
       <div className="flex flex-1 max-w-screen-xl mx-auto w-full">
 
-        {/* SIDEBAR — só desktop */}
-        <aside className="hidden lg:flex flex-col w-52 xl:w-60 flex-shrink-0 border-r border-ivoire-400 bg-white sticky top-[61px] h-[calc(100vh-61px)] overflow-y-auto py-8 px-4">
+        {/* SIDEBAR — desktop */}
+        <aside className="hidden lg:flex flex-col w-52 xl:w-60 flex-shrink-0 border-r border-ivoire-400 bg-white sticky top-[94px] h-[calc(100vh-94px)] overflow-y-auto py-8 px-4">
 
           <p className="label-categoria mb-5 px-2">Categorias</p>
 
@@ -160,14 +321,8 @@ export default function PaginaConfigurador() {
                   irParaPergunta(primeiroIndex)
                 }}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 mb-px
-                  border-l-2
-                  ${ativo
-                    ? 'border-l-ouro-400 text-onix-700'
-                    : completo
-                    ? 'border-l-transparent text-onix-300'
-                    : 'border-l-transparent text-onix-200 hover:text-onix-400'
-                  }
+                  flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 mb-px border-l-2
+                  ${ativo ? 'border-l-ouro-400 text-onix-700' : completo ? 'border-l-transparent text-onix-300' : 'border-l-transparent text-onix-200 hover:text-onix-400'}
                 `}
               >
                 <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
@@ -183,7 +338,6 @@ export default function PaginaConfigurador() {
             )
           })}
 
-          {/* Contador desktop */}
           <div className="mt-auto px-2 pt-6 border-t border-ivoire-400">
             <p className="text-xs text-onix-300 text-center tracking-widest">
               {perguntaIndex + 1} / {total}
@@ -195,8 +349,8 @@ export default function PaginaConfigurador() {
         <div className="flex flex-col flex-1 min-w-0">
           <div className="flex flex-col lg:flex-row flex-1">
 
-            {/* PREVIEW — topo no mobile, centro fixo no desktop */}
-            <section ref={previewRef} className="lg:flex-1 flex items-center justify-center bg-ivoire-200 py-8 px-6 lg:sticky lg:top-[61px] lg:h-[calc(100vh-61px)]">
+            {/* PREVIEW */}
+            <section ref={previewRef} className="lg:flex-1 flex items-center justify-center bg-ivoire-200 py-8 px-6 lg:sticky lg:top-[94px] lg:h-[calc(100vh-94px)]">
               <PreviewCaderno />
             </section>
 
@@ -205,7 +359,7 @@ export default function PaginaConfigurador() {
               w-full lg:w-96 xl:w-[420px] flex-shrink-0
               border-t lg:border-t-0 lg:border-l border-ivoire-400
               bg-white flex flex-col
-              lg:sticky lg:top-[61px] lg:h-[calc(100vh-61px)] lg:overflow-hidden
+              lg:sticky lg:top-[94px] lg:h-[calc(100vh-94px)] lg:overflow-hidden
             ">
               {/* Cabeçalho do painel — desktop */}
               <div className="hidden lg:flex items-center justify-between px-6 py-4 border-b border-ivoire-300 flex-shrink-0">
@@ -224,12 +378,13 @@ export default function PaginaConfigurador() {
                     pergunta={perguntaAtual}
                     totalPerguntas={total}
                     direcao={direcaoRef.current}
+                    aoAvancarAutomatico={avancarSeAutomatico}
                   />
                 )}
               </div>
 
               {/* Navegação — desktop */}
-              <div className="hidden lg:flex gap-2 px-6 py-5 border-t border-ivoire-300 flex-shrink-0">
+              <div className="hidden lg:flex gap-2 px-6 py-4 border-t border-ivoire-300 flex-shrink-0">
                 <button
                   onClick={voltar}
                   disabled={perguntaIndex === 0}
@@ -244,7 +399,7 @@ export default function PaginaConfigurador() {
                   Voltar
                 </button>
                 <button
-                  onClick={eUltima ? () => alert('Em breve: envio via WhatsApp!') : avancar}
+                  onClick={eUltima ? abrirModal : avancar}
                   className="
                     flex-1 flex items-center justify-center gap-2
                     bg-onix-700 hover:bg-onix-800 text-ivoire-100
@@ -256,61 +411,76 @@ export default function PaginaConfigurador() {
                   {!eUltima && <IconeSeta tamanho={14} />}
                 </button>
               </div>
+
+              {/* Total — desktop */}
+              <div className="hidden lg:block flex-shrink-0">
+                <TotalPedido valor={totalValor} />
+              </div>
             </aside>
           </div>
         </div>
       </div>
 
-      {/* ── BARRA FIXA INFERIOR — apenas mobile ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/98 backdrop-blur-sm border-t border-ivoire-400 px-5 py-3 flex items-center gap-3 safe-bottom">
+      {/* ── BARRA FIXA INFERIOR — mobile ── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/98 backdrop-blur-sm border-t border-ivoire-400 safe-bottom">
 
-        {/* Mini progresso */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-xs text-onix-300 tracking-wide truncate">
-              {GRUPOS.find(g => g.numero === grupoAtual)?.titulo}
-            </span>
-            <span className="text-xs font-mono text-onix-300 flex-shrink-0 ml-2">
-              {perguntaIndex + 1}/{total}
-            </span>
-          </div>
-          <div className="h-px bg-ivoire-400 overflow-hidden">
-            <div
-              className="h-full bg-ouro-400 transition-all duration-500"
-              style={{ width: `${progresso}%` }}
-            />
-          </div>
+        {/* Total mobile */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-1">
+          <span className="text-xs text-onix-300 tracking-widest uppercase font-sans">Total</span>
+          <span className="text-base font-serif text-onix-700">
+            R$ {totalValor.toFixed(2).replace('.', ',')}
+          </span>
         </div>
 
-        {/* Botão voltar */}
-        <button
-          onClick={voltar}
-          disabled={perguntaIndex === 0}
-          className="
-            w-10 h-10 border border-ivoire-400 flex items-center justify-center
-            text-onix-400 disabled:opacity-20 hover:border-onix-300
-            transition-all duration-150 flex-shrink-0 active:scale-90
-          "
-        >
-          <IconeSetaEsq tamanho={16} />
-        </button>
+        <div className="flex items-center gap-3 px-5 py-3">
+          {/* Mini progresso */}
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-xs text-onix-300 tracking-wide truncate">
+                {GRUPOS.find(g => g.numero === grupoAtual)?.titulo}
+              </span>
+              <span className="text-xs font-mono text-onix-300 flex-shrink-0 ml-2">
+                {perguntaIndex + 1}/{total}
+              </span>
+            </div>
+            <div className="h-px bg-ivoire-400 overflow-hidden">
+              <div
+                className="h-full bg-ouro-400 transition-all duration-500"
+                style={{ width: `${progresso}%` }}
+              />
+            </div>
+          </div>
 
-        {/* Botão próximo */}
-        <button
-          onClick={eUltima ? () => alert('Em breve: envio via WhatsApp!') : avancar}
-          className="
-            flex items-center gap-2
-            bg-onix-700 hover:bg-onix-800 text-ivoire-100
-            px-5 h-10 text-xs tracking-widest uppercase font-sans
-            transition-all duration-200 active:scale-95 flex-shrink-0
-          "
-        >
-          {eUltima ? 'Solicitar' : 'Próximo'}
-          {!eUltima && <IconeSeta tamanho={14} />}
-        </button>
+          {/* Botão voltar */}
+          <button
+            onClick={voltar}
+            disabled={perguntaIndex === 0}
+            className="
+              w-10 h-10 border border-ivoire-400 flex items-center justify-center
+              text-onix-400 disabled:opacity-20 hover:border-onix-300
+              transition-all duration-150 flex-shrink-0 active:scale-90
+            "
+          >
+            <IconeSetaEsq tamanho={16} />
+          </button>
+
+          {/* Botão próximo */}
+          <button
+            onClick={eUltima ? abrirModal : avancar}
+            className="
+              flex items-center gap-2
+              bg-onix-700 hover:bg-onix-800 text-ivoire-100
+              px-5 h-10 text-xs tracking-widest uppercase font-sans
+              transition-all duration-200 active:scale-95 flex-shrink-0
+            "
+          >
+            {eUltima ? 'Solicitar' : 'Próximo'}
+            {!eUltima && <IconeSeta tamanho={14} />}
+          </button>
+        </div>
       </nav>
 
-      <div className="lg:hidden h-20" />
+      <div className="lg:hidden h-28" />
     </div>
   )
 }

@@ -10,6 +10,7 @@ interface Props {
   pergunta: Pergunta
   totalPerguntas: number
   direcao: number   // 1 = avançando, -1 = voltando
+  aoAvancarAutomatico?: () => void
 }
 
 // ─── Seleção em grade (2 colunas) ────────────────────────────
@@ -314,15 +315,17 @@ function CampoTexto({ pergunta }: { pergunta: Pergunta }) {
 }
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────
-export default function PerguntaUnica({ pergunta, totalPerguntas, direcao }: Props) {
+export default function PerguntaUnica({ pergunta, totalPerguntas: _totalPerguntas, direcao, aoAvancarAutomatico }: Props) {
   const { atualizarOpcao } = useCadernoStore()
 
   function aoSelecionar(valor: string) {
     atualizarOpcao(pergunta.campo as keyof ConfiguracaoCaderno, valor as never)
+    if (pergunta.avancaAutomatico) aoAvancarAutomatico?.()
   }
 
   function aoSelecionarToggle(valor: boolean) {
     atualizarOpcao(pergunta.campo as keyof ConfiguracaoCaderno, valor as never)
+    if (pergunta.avancaAutomatico) aoAvancarAutomatico?.()
   }
 
   return (
