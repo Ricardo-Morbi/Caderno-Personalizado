@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 // ─── Security Headers ─────────────────────────────────────────
 // Aplicados em todas as rotas da aplicação.
@@ -66,15 +67,19 @@ const nextConfig: NextConfig = {
     inlineCss: true,
   },
 
-  webpack(config) {
-    // O Next.js injeta next-polyfill-module incondicionalmente, mesmo com
-    // browserslist moderno. Este alias aponta o módulo para false (noop),
-    // eliminando os 12 KiB de polyfills desnecessários para browsers modernos.
-    // Seguro para o público-alvo: Chrome 111+, Edge 111+, Firefox 111+, Safari 16.4+
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'next/dist/build/polyfills/polyfill-module': false,
-    }
+  webpack(config, { webpack: wp }) {
+    // O Next.js carrega polyfill-module via require() relativo em app-globals.js.
+    // O webpack resolve o caminho para um path absoluto antes de aplicar aliases,
+    // então resolve.alias com string de módulo não intercepta.
+    // NormalModuleReplacementPlugin opera no path já resolvido — funciona.
+    // Elimina ~12 KiB de polyfills desnecessários para browsers modernos.
+    // Seguro para: Chrome 111+, Edge 111+, Firefox 111+, Safari 16.4+
+    config.plugins.push(
+      new wp.NormalModuleReplacementPlugin(
+        /[\\/]next[\\/]dist[\\/]build[\\/]polyfills[\\/]polyfill-module/,
+        path.resolve('./src/lib/empty.js'),
+      ),
+    )
     return config
   },
 

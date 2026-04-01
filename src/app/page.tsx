@@ -252,7 +252,7 @@ export default function PaginaConfigurador() {
           {/* Contador central */}
           <div className="text-center">
             <p className="text-xs text-onix-500 tracking-widest uppercase">
-              {perguntaIndex + 1} <span className="text-onix-400">de</span> {total}
+              {perguntaIndex + 1} <span className="text-onix-500">de</span> {total}
             </p>
           </div>
         </div>
