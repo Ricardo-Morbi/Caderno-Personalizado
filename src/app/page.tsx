@@ -323,13 +323,13 @@ export default function PaginaConfigurador() {
                 }}
                 className={`
                   flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-200 mb-px border-l-2
-                  ${ativo ? 'border-l-ouro-400 text-onix-700' : completo ? 'border-l-transparent text-onix-300' : 'border-l-transparent text-onix-200 hover:text-onix-400'}
+                  ${ativo ? 'border-l-ouro-400 text-onix-700' : completo ? 'border-l-transparent text-onix-500' : 'border-l-transparent text-onix-500 hover:text-onix-700'}
                 `}
               >
                 <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                   {completo
                     ? <IconeCheck tamanho={12} className="text-ouro-400" />
-                    : Icone && <Icone tamanho={14} className={ativo ? 'text-onix-600' : 'text-onix-300'} />
+                    : Icone && <Icone tamanho={14} className={ativo ? 'text-onix-600' : 'text-onix-500'} />
                   }
                 </span>
                 <span className={`text-xs font-sans tracking-wide ${ativo ? 'font-medium' : 'font-normal'}`}>

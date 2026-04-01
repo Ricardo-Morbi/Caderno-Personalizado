@@ -83,7 +83,7 @@
 
   /* Label de categoria — tracking muito aberto */
   .label-categoria {
-    @apply text-xs font-sans font-medium text-onix-300 uppercase tracking-widest;
+    @apply text-xs font-sans font-medium text-onix-500 uppercase tracking-widest;
   }
 }
 
