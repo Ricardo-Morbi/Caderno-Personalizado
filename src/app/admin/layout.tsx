@@ -42,6 +42,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Contatos
               </Link>
               <Link
+                href="/admin/materiais"
+                className={`px-4 py-1.5 text-xs tracking-widest uppercase font-sans rounded-sm transition-colors ${
+                  pathname === '/admin/materiais'
+                    ? 'bg-white/10 text-ivoire-100'
+                    : 'text-ivoire-300 hover:text-ivoire-100'
+                }`}
+              >
+                Materiais
+              </Link>
+              <Link
                 href="/admin/dashboard"
                 className={`px-4 py-1.5 text-xs tracking-widest uppercase font-sans rounded-sm transition-colors ${
                   pathname === '/admin/dashboard'

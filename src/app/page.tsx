@@ -6,6 +6,7 @@ import type { ConfiguracaoCaderno } from '@/types/caderno'
 import { getPerguntasVisiveis, GRUPOS } from '@/data/perguntas'
 import PreviewCaderno from '@/components/configurador/PreviewCaderno'
 import PerguntaUnica from '@/components/configurador/PerguntaUnica'
+import { calcularPreco, TABELA_PADRAO, type TabelaPrecos } from '@/lib/calcularPreco'
 import {
   IconeTamanho, IconeLivroAberto, IconeCostura, IconePapel,
   IconeElastico, IconeCantos, IconeCoracao,
@@ -30,73 +31,6 @@ const MENSAGENS_SOBRANCELHA = [
   '✦  Feito à mão com amor artesanal',
 ]
 
-// ─── Cálculo do total ──────────────────────────────────────────
-function calcularTotal(c: ConfiguracaoCaderno): number {
-  let total = 89 // base
-
-  // Tamanho
-  if (c.tamanho === 'A5')            total += 15
-  else if (c.tamanho === 'A4')       total += 30
-  else if (c.tamanho === 'personalizado') total += 50
-
-  // Espessura
-  if (c.espessura === 'medio')       total += 10
-  else if (c.espessura === 'grosso') total += 20
-  else if (c.espessura === 'extra-grosso') total += 35
-
-  // Material capa
-  if      (c.materialCapa === 'couro')         total += 80
-  else if (c.materialCapa === 'sintetico')     total += 40
-  else if (c.materialCapa === 'linho')         total += 35
-  else if (c.materialCapa === 'tecido')        total += 30
-  else if (c.materialCapa === 'papel-especial') total += 20
-  else if (c.materialCapa === 'kraft')         total += 10
-
-  // Estampa
-  if      (c.estampaCapa === 'tematica')   total += 30
-  else if (c.estampaCapa === 'abstrata')   total += 20
-  else if (c.estampaCapa === 'floral')     total += 15
-  else if (c.estampaCapa === 'minimalista') total += 10
-
-  // Gravação
-  if      (c.gravacaoCapa === 'bordado')      total += 45
-  else if (c.gravacaoCapa === 'alto-relevo')  total += 35
-  else if (c.gravacaoCapa === 'baixo-relevo') total += 25
-
-  // Encadernação
-  if      (c.tipoEncadernacao === 'francesa-cruzada') total += 25
-  else if (c.tipoEncadernacao === 'wire-o')            total += 30
-  else if (c.tipoEncadernacao === 'long-stitch')       total += 20
-
-  // Papel
-  if      (c.tipoPapel === 'vegetal')   total += 20
-  else if (c.tipoPapel === 'polen')     total += 10
-  else if (c.tipoPapel === 'reciclado') total += 5
-
-  // Gramatura
-  if      (c.graturaPapel === '240g') total += 30
-  else if (c.graturaPapel === '180g') total += 18
-  else if (c.graturaPapel === '120g') total += 8
-
-  // Elementos funcionais
-  if (c.elasticoAtivo)       total += 12
-  if (c.marcadorAtivo)       total += 15
-  if (c.bolsoInterno)        total += 20
-  if (c.portaCaneta)         total += 10
-  if (c.envelopeAcoplado)    total += 18
-  if (c.abasOrelhas)         total += 12
-
-  // Acabamentos
-  if (c.pinturaBordasAtiva)             total += 35
-  if (c.tipoCorteEspecial === 'deckle-edge') total += 25
-  if (c.tipoLaminacao === 'fosca')      total += 15
-  else if (c.tipoLaminacao === 'brilho') total += 15
-
-  // Guarda
-  if (c.materialGuarda !== 'branca')    total += 15
-
-  return total
-}
 
 // ─── Componente sobrancelha ────────────────────────────────────
 function Sobrancelha() {
@@ -262,9 +196,17 @@ export default function PaginaConfigurador() {
   const previewRef = useRef<HTMLElement>(null)
   const configAnteriorRef = useRef(configuracao)
   const [modalAberto, setModalAberto] = useState(false)
+  const [tabelaPrecos, setTabelaPrecos] = useState<TabelaPrecos>(TABELA_PADRAO)
 
   const abrirModal = useCallback(() => setModalAberto(true), [])
   const fecharModal = useCallback(() => setModalAberto(false), [])
+
+  useEffect(() => {
+    fetch('/api/configuracoes-preco')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setTabelaPrecos(d) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (configuracao !== configAnteriorRef.current) {
@@ -301,7 +243,7 @@ export default function PaginaConfigurador() {
     }
   }
 
-  const totalValor = calcularTotal(configuracao)
+  const totalValor = calcularPreco(configuracao, tabelaPrecos)
 
   return (
     <div className="flex flex-col min-h-screen bg-ivoire-100">
