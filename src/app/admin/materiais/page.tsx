@@ -7,21 +7,34 @@ import type { ConfiguracaoCaderno } from '@/types/caderno'
 
 // Config de simulação (caderno médio padrão)
 const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
-  tamanho: 'A5', formato: 'retrato', espessura: 'medio',
-  materialCapa: 'couro', corCapa: '#6B4226', estampaCapa: 'nenhuma',
-  gravacaoCapa: 'nenhuma', nomeGravado: '', tipoTipografia: 'serif',
-  corBordado: '#F5DFA0', posicaoGravacao: 'centro', aplicacoesCapa: [],
-  tipoEncadernacao: 'copta', tipoLombada: 'exposta', tipoAbertura: '180-graus', corFio: '#E8D5B7',
-  tipoPapel: 'offset', graturaPapel: '90g', corFolhas: 'branca', padraoPaginas: 'pautado',
-  impressoesInternas: false, divisoriasInternas: false,
+  // Miolo
+  temaCaderno: 'sem-tema-1', temaPersonalizado: '', padraoPaginas: 'liso',
+  paginaDedicatoria: false, frasesAoLongo: false, frasePersonalizada: '',
+  datasImportantes: false, datasPersonalizadas: '', essenciaNoParapel: false,
+  formato: 'retrato',
+  tipoPapel: 'offset', graturaPapel: '90g',
+  tamanho: 'A5', espessura: 'medio',
+  folhasColoridas: false, corFolhasColoridas: '#F5F0E0',
+  materialGuarda: 'branca', padraoGuardaEstampado: 'flores', corGuarda: '#F5F0E0', padraoGuarda: 'liso',
+  tipoCorteEspecial: 'nenhum', tipoCantos: 'retos',
+  pinturaBordasAtiva: false, corPinturaBordas: '#D4AF37',
+  // Capa
+  materialCapa: 'couro', corCapa: '#6B4226', corCapaTecido: '',
+  nomeGravado: '', gravacaoCapa: 'nenhuma',
+  tipoBordado: 'cor-unica', corBordado: '#F5DFA0',
+  tipoTipografia: 'serif', posicaoGravacao: 'centro', estampaCapa: 'nenhuma',
+  aplicacoesCapa: [], tipoCantoneiras: 'nenhuma',
+  tipoLombada: 'exposta',
+  tipoEncadernacao: 'copta', corFio: '#E8D5B7', tipoAbertura: '180-graus',
   elasticoAtivo: false, corElastico: '#1A1A1A', posicaoElastico: 'vertical',
-  marcadorAtivo: true, tipoMarcador: 'fitilho', larguraMarcador: 'medio', corMarcador: '#C4713C',
-  bolsoInterno: false, envelopeAcoplado: false, portaCaneta: false, abasOrelhas: false,
-  tipoCantos: 'arredondados', pinturaBordasAtiva: false, corPinturaBordas: '#C4713C',
-  tipoCorteEspecial: 'nenhum', tipoLaminacao: 'nenhuma', tipoTextura: 'lisa',
-  paginaDedicatoria: false, frasesAoLongo: false, datasImportantes: false,
-  temaCaderno: 'nenhum', essenciaNoParapel: false, proposicaoCaderno: 'escrita-livre',
-  materialGuarda: 'branca', corGuarda: '#F5F0E0', padraoGuarda: 'liso',
+  marcadorAtivo: true, tipoMarcador: 'fita-cetim', larguraMarcador: '7mm', corMarcador: '#C4713C',
+  quantidadeMarcadores: 1,
+  bolsoInterno: false, envelopeAcoplado: false, envelopeContracapa: false, portaCaneta: false, abasOrelhas: false,
+  tipoEmbalagem: 'padrao', padraoEmbalagem: 'algodao-cru',
+  // Legado
+  impressoesInternas: false, divisoriasInternas: false,
+  tipoLaminacao: 'nenhuma', tipoTextura: 'lisa', proposicaoCaderno: 'escrita-livre',
+  corFolhas: 'branca',
 }
 
 type Aba = 'materiais' | 'maoObra' | 'fixos' | 'simulador'

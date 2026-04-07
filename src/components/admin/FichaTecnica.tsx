@@ -99,7 +99,7 @@ export default function FichaTecnica({ c }: { c: ConfiguracaoCaderno }) {
         <Secao titulo="Miolo" linhas={[
           { titulo: 'Papel',     valor: label('tipoPapel', c.tipoPapel) },
           { titulo: 'Gramatura', valor: label('graturaPapel', c.graturaPapel) },
-          { titulo: 'Cor',       valor: label('corFolhas', c.corFolhas) },
+          { titulo: 'Folhas coloridas', valor: c.folhasColoridas ? <Cor hex={c.corFolhasColoridas} /> : null },
           { titulo: 'Padrão',    valor: label('padraoPaginas', c.padraoPaginas) },
           { titulo: 'Impressões internas', valor: c.impressoesInternas ? 'Sim' : null },
           { titulo: 'Divisórias', valor: c.divisoriasInternas ? 'Sim' : null },

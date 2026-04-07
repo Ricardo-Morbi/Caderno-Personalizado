@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel projects:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel env:*)",
+      "Bash(vercel --prod --scope ricardo-morbis-projects)",
+      "Bash(printf '122419Ric@')",
+      "Bash(vercel redeploy:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(mkdir -p \"C:/Users/Ricardo/.claude/skills/meta-ads-tracking/references\")",
+      "Bash(mkdir -p \"C:/Users/Ricardo/.claude/skills/meta-ads-tracking/assets\")",
+      "Bash(mkdir -p \"C:/Users/Ricardo/.claude/skills/meta-ads-tracking/evals\")",
+      "Bash(mkdir -p \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/funnel-hacking/confeitaria-bolos/objetivo-1-concorrentes\")",
+      "Bash(mkdir -p \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/funnel-hacking/confeitaria-bolos/objetivo-2-ofertas\")",
+      "Bash(mkdir -p \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/funnel-hacking/confeitaria-bolos/objetivo-3-escalados/dossies\")",
+      "Bash(mkdir -p \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/funnel-hacking/confeitaria-bolos/swipefile\")",
+      "Bash(vercel --prod)",
+      "Read(//c/Users/Ricardo/.claude/skills/criador-de-projetos/**)",
+      "Bash(powershell.exe -Command \"Remove-Item -Recurse -Force ''C:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\funnel-hacking''\")",
+      "Bash(gh repo:*)",
+      "Read(//c/Users/Ricardo/Downloads/logo DMO PAPELARIA/**)",
+      "Read(//c/Users/Ricardo/Downloads/**)",
+      "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/favicon.png\" \"C:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/favicon.png\")",
+      "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/1.png\" \"C:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/logo.png\")",
+      "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/favicon.png\" \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/favicon.png\")",
+      "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/1.png\" \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/logo.png\")",
+      "Bash(find c:UsersRicardoDocumentsVSCODEcaderno-artesanal-configuradorsrccomponentsconfiguradoretapas -type f -name *.tsx -o -name *.ts)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Ricardo\\.claude\\skills\\meta-ads-tracking\\references",
+      "C:\\Users\\Ricardo\\.claude\\skills\\meta-ads-tracking",
+      "C:\\Users\\Ricardo\\.claude\\skills\\criador-de-projetos",
+      "C:\\Users\\Ricardo\\Documents\\VSCODE\\funnel-hacking",
+      "C:\\Users\\Ricardo\\Documents\\VSCODE",
+      "C:\\Users\\Ricardo\\Downloads\\logo DMO PAPELARIA"
+    ]
+  }
+}

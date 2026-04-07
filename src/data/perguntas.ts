@@ -1,5 +1,11 @@
-import type { ConfiguracaoCaderno, MaterialGuarda, PadraoGuarda } from '@/types/caderno'
-import { CORES_CAPA_PADRAO, CORES_FIO_PADRAO, CORES_ELASTICO_PADRAO } from '@/types/caderno'
+import type { ConfiguracaoCaderno } from '@/types/caderno'
+import {
+  CORES_CAPA_COURO,
+  CORES_CAPA_SINTETICO,
+  CORES_CAPA_PAPEL_ESPECIAL,
+  CORES_FIO_PADRAO,
+  CORES_ELASTICO_PADRAO,
+} from '@/types/caderno'
 
 // ============================================================
 // TIPOS
@@ -23,7 +29,7 @@ export interface OpcaoPergunta {
 
 export interface Pergunta {
   id: string
-  grupo: number                                   // 1-7 qual categoria pertence
+  grupo: number                                   // 1-2 qual categoria pertence
   titulo: string
   descricao?: string
   tipo: TipoPergunta
@@ -39,22 +45,88 @@ export interface Pergunta {
 
 export const TODAS_PERGUNTAS: Pergunta[] = [
 
-  // ─── GRUPO 1: Tamanho e Formato ───────────────────────────
+  // ─── GRUPO 1: MIOLO ───────────────────────────────────────
 
   {
-    id: 'tamanho',
+    id: 'temaCaderno',
     grupo: 1,
-    titulo: 'Qual o tamanho do caderno?',
-    descricao: 'Define o espaço que você terá para escrever',
-    tipo: 'selecao-grade',
-    campo: 'tamanho',
+    titulo: 'Você quer um tema especial para seu caderno/livro?',
+    descricao: 'Customizamos elementos internos para o tema escolhido',
+    tipo: 'selecao-lista',
+    campo: 'temaCaderno',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'A6', label: 'A6', descricao: 'De bolso · 10,5 × 14,8 cm' },
-      { valor: 'A5', label: 'A5', descricao: 'Popular · 14,8 × 21 cm' },
-      { valor: 'A4', label: 'A4', descricao: 'Folha cheia · 21 × 29,7 cm' },
-      { valor: 'personalizado', label: 'Sob medida', descricao: 'Combinamos juntos' },
+      { valor: 'sem-tema-1',  label: 'Sem tema — Folhas lisas',                  descricao: 'Sem impressão alguma · Folhas em branco' },
+      { valor: 'sem-tema-2',  label: 'Sem tema — Com pauta/pontilhado/quadriculado', descricao: 'Impressão P&B · Escolha o padrão a seguir' },
+      { valor: 'versatil',    label: 'Caderno Versátil',                          descricao: 'Tema personalizado a sua escolha · Especifique a seguir' },
+      { valor: 'maternidade', label: 'Maternidade',                               descricao: 'Para mamães e bebês · Impressão padrão DMO' },
+      { valor: 'casamento',   label: 'Casamento',                                 descricao: 'Diário da noiva · Impressão padrão DMO' },
+      { valor: 'viagens',     label: 'Viagens',                                   descricao: 'Para registrar aventuras · Impressão padrão DMO' },
+      { valor: 'gratidao',    label: 'Gratidão',                                  descricao: 'Diário de gratidão · Impressão padrão DMO' },
+      { valor: 'estudos',     label: 'Estudos / Trabalho',                        descricao: 'Otimizado para aprender e trabalhar' },
+      { valor: 'planner',     label: 'Planner',                                   descricao: 'Organização pessoal e profissional' },
     ],
+  },
+
+  {
+    id: 'temaPersonalizado',
+    grupo: 1,
+    titulo: 'Qual tema você deseja?',
+    descricao: 'Escreva aqui qual tema deseja (ex: girassóis, pássaros, natureza...)',
+    tipo: 'texto',
+    campo: 'temaPersonalizado',
+    visivel: (c) => c.temaCaderno === 'versatil',
+  },
+
+  {
+    id: 'padraoPaginas',
+    grupo: 1,
+    titulo: 'Qual o padrão de impressão do miolo?',
+    descricao: 'Escolha o padrão das páginas internas',
+    tipo: 'selecao-grade',
+    campo: 'padraoPaginas',
+    avancaAutomatico: true,
+    visivel: (c) => ['sem-tema-2', 'planner', 'estudos', 'versatil'].includes(c.temaCaderno),
+    opcoes: [
+      { valor: 'pautado',      label: 'Pautado',      descricao: 'Linhas horizontais — escrita organizada' },
+      { valor: 'pontilhado',   label: 'Pontilhado',   descricao: 'Grid discreto — versátil e moderno' },
+      { valor: 'quadriculado', label: 'Quadriculado', descricao: 'Grade completa — projetos e técnico' },
+    ],
+  },
+
+  {
+    id: 'extras-afetivos',
+    grupo: 1,
+    titulo: 'Deseja que seu caderno/livro traga toques afetivos?',
+    descricao: 'Elementos especiais que tornam o caderno único — R$15,00 cada',
+    tipo: 'multipla-escolha',
+    campo: 'paginaDedicatoria',
+    opcoes: [
+      { valor: 'paginaDedicatoria', label: 'Página de dedicatória', descricao: 'Espaço para mensagem especial no início' },
+      { valor: 'frasesAoLongo',     label: 'Frases ao longo',       descricao: 'Citações inspiradoras na frente de cada página' },
+      { valor: 'datasImportantes',  label: 'Datas marcadas',        descricao: 'Aniversários e eventos especiais' },
+      { valor: 'essenciaNoParapel', label: 'Essência no papel',     descricao: 'Aroma sutil e especial nas páginas' },
+    ],
+  },
+
+  {
+    id: 'frasePersonalizada',
+    grupo: 1,
+    titulo: 'Qual frase ou citação você deseja?',
+    descricao: 'Escreva aqui qual frase ou citação deseja ao longo das páginas',
+    tipo: 'texto',
+    campo: 'frasePersonalizada',
+    visivel: (c) => c.frasesAoLongo,
+  },
+
+  {
+    id: 'datasPersonalizadas',
+    grupo: 1,
+    titulo: 'Quais datas deseja acrescentar?',
+    descricao: 'Escreva as datas de aniversários e eventos especiais',
+    tipo: 'texto',
+    campo: 'datasPersonalizadas',
+    visivel: (c) => c.datasImportantes,
   },
 
   {
@@ -66,9 +138,56 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'formato',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'retrato',   label: 'Retrato',   descricao: 'Vertical — o mais comum' },
-      { valor: 'paisagem',  label: 'Paisagem',  descricao: 'Horizontal — ideal para sketches' },
-      { valor: 'quadrado',  label: 'Quadrado',  descricao: 'Igual largura e altura' },
+      { valor: 'retrato',  label: 'Retrato',  descricao: 'Vertical — o mais comum' },
+      { valor: 'paisagem', label: 'Paisagem', descricao: 'Horizontal — ideal para sketches' },
+      { valor: 'quadrado', label: 'Quadrado', descricao: 'Igual na largura e na altura' },
+    ],
+  },
+
+  {
+    id: 'tipoPapel',
+    grupo: 1,
+    titulo: 'Qual o tipo de papel?',
+    descricao: 'O papel interno do caderno',
+    tipo: 'selecao-grade',
+    campo: 'tipoPapel',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'offset',    label: 'Offset',      descricao: 'Branco · O mais comum · Versátil' },
+      { valor: 'polen',     label: 'Pólen Bold',  descricao: 'Creme · Confortável para escrita e leitura longa' },
+      { valor: 'reciclado', label: 'Reciclado',   descricao: 'Ecológico · Texturizado · Sustentável' },
+    ],
+  },
+
+  {
+    id: 'graturaPapel',
+    grupo: 1,
+    titulo: 'Qual a gramatura do papel?',
+    descricao: 'Peso e espessura de cada folha',
+    tipo: 'selecao-grade',
+    campo: 'graturaPapel',
+    avancaAutomatico: true,
+    visivel: (c) => c.tipoPapel === 'offset',
+    opcoes: [
+      { valor: '90g',  label: '90 g',  descricao: 'Leve e econômico' },
+      { valor: '120g', label: '120 g', descricao: 'Equilibrado — o mais popular' },
+      { valor: '180g', label: '180 g', descricao: 'Resistente à caneta e marcador' },
+    ],
+  },
+
+  {
+    id: 'tamanho',
+    grupo: 1,
+    titulo: 'Qual o tamanho do seu caderno/livro?',
+    descricao: 'Define o espaço que você terá para escrever',
+    tipo: 'selecao-grade',
+    campo: 'tamanho',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'A6',          label: 'A6',        descricao: 'De bolso · 10,5 × 14,8 cm' },
+      { valor: 'A5',          label: 'A5',        descricao: 'Popular · 14,8 × 21 cm' },
+      { valor: 'A4',          label: 'A4',        descricao: 'Folha cheia · 21 × 29,7 cm' },
+      { valor: 'personalizado',label: 'Sob medida', descricao: 'Tamanho personalizado · Combinamos juntos' },
     ],
   },
 
@@ -81,121 +200,250 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'espessura',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'fino',         label: 'Fino',         descricao: '~40 folhas · Leve, discreto',           altura: 14 },
-      { valor: 'medio',        label: 'Médio',         descricao: '~80 folhas · O mais equilibrado',       altura: 22 },
-      { valor: 'grosso',       label: 'Grosso',        descricao: '~120 folhas · Dura mais tempo',         altura: 32 },
-      { valor: 'extra-grosso', label: 'Extra grosso',  descricao: '~160 folhas · Para quem escreve muito', altura: 44 },
+      { valor: 'fino',   label: 'Fino',   descricao: '~40 folhas · Leve, discreto',        altura: 14 },
+      { valor: 'medio',  label: 'Médio',  descricao: '~80 folhas · O mais equilibrado',    altura: 22 },
+      { valor: 'grosso', label: 'Grosso', descricao: '~120 folhas · Dura mais tempo',      altura: 32 },
     ],
   },
 
-  // ─── GRUPO 2: Capa ────────────────────────────────────────
+  {
+    id: 'folhasColoridas',
+    grupo: 1,
+    titulo: 'Deseja folhas coloridas intercaladas?',
+    descricao: 'De 5 a 10 folhas coloridas — R$0,50 por folha',
+    tipo: 'toggle',
+    campo: 'folhasColoridas',
+    avancaAutomatico: true,
+  },
+
+  {
+    id: 'corFolhasColoridas',
+    grupo: 1,
+    titulo: 'Qual a cor das folhas intercaladas?',
+    descricao: 'Serão acrescentadas de 5 a 10 folhas conforme a espessura escolhida',
+    tipo: 'selecao-grade',
+    campo: 'corFolhasColoridas',
+    avancaAutomatico: true,
+    visivel: (c) => c.folhasColoridas,
+    opcoes: [
+      { valor: '#F5F0E0', label: 'Creme',       hex: '#F5F0E0' },
+      { valor: '#1A1A1A', label: 'Preto',        hex: '#1A1A1A' },
+      { valor: '#6B4226', label: 'Marrom',        hex: '#6B4226' },
+      { valor: '#1B3A5C', label: 'Azul Marinho',  hex: '#1B3A5C' },
+      { valor: '#87CEEB', label: 'Azul Claro',    hex: '#87CEEB' },
+      { valor: '#C0392B', label: 'Vermelho',      hex: '#C0392B' },
+      { valor: '#FF1493', label: 'Rosa Pink',     hex: '#FF1493' },
+      { valor: '#FFB6C1', label: 'Rosa Claro',    hex: '#FFB6C1' },
+      { valor: '#FFD700', label: 'Amarelo',       hex: '#FFD700' },
+      { valor: '#FF8C00', label: 'Laranja',       hex: '#FF8C00' },
+    ],
+  },
+
+  {
+    id: 'materialGuarda',
+    grupo: 1,
+    titulo: 'Qual o material da guarda?',
+    descricao: 'A folha decorativa no início e fim do caderno — R$7,00',
+    tipo: 'selecao-grade',
+    campo: 'materialGuarda',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'branca',      label: 'Branca',      descricao: 'Clássica · Neutra · Elegante' },
+      { valor: 'colorida',    label: 'Colorida',    descricao: 'Cor sólida personalizada' },
+      { valor: 'marmorizada', label: 'Marmorizada', descricao: 'Efeito mármore · Sofisticado' },
+      { valor: 'kraft',       label: 'Kraft',       descricao: 'Rústica · Natural · Artesanal' },
+      { valor: 'estampada',   label: 'Estampada',   descricao: 'Com padrão estampado' },
+    ],
+  },
+
+  {
+    id: 'padraoGuardaEstampado',
+    grupo: 1,
+    titulo: 'Qual o padrão da estampa da guarda?',
+    descricao: 'As cores combinadas com a capa ficarão a critério da DMO Papelaria',
+    tipo: 'selecao-grade',
+    campo: 'padraoGuardaEstampado',
+    avancaAutomatico: true,
+    visivel: (c) => c.materialGuarda === 'estampada',
+    opcoes: [
+      { valor: 'poas',     label: 'Poás (bolinhas)', descricao: 'Bolinhas delicadas' },
+      { valor: 'flores',   label: 'Flores',          descricao: 'Floral delicado' },
+      { valor: 'abstrata', label: 'Abstrata',        descricao: 'Arte livre e expressiva' },
+    ],
+  },
+
+  {
+    id: 'tipoCorteEspecial',
+    grupo: 1,
+    titulo: 'Quer corte especial nas páginas?',
+    descricao: 'Tipo de acabamento das bordas do papel',
+    tipo: 'selecao-grade',
+    campo: 'tipoCorteEspecial',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'nenhum',      label: 'Corte reto',  descricao: 'Bordas uniformes e precisas' },
+      { valor: 'deckle-edge', label: 'Deckle Edge', descricao: 'Bordas irregulares artesanais — especial · +R$5,00' },
+    ],
+  },
+
+  {
+    id: 'tipoCantos',
+    grupo: 1,
+    titulo: 'Como ficam os cantos?',
+    tipo: 'selecao-grade',
+    campo: 'tipoCantos',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'arredondados', label: 'Arredondados', descricao: 'Cantos curvos e suaves · +R$5,00' },
+      { valor: 'retos',        label: 'Retos',        descricao: 'Cantos em 90° — clássico' },
+    ],
+  },
+
+  {
+    id: 'pinturaBordasAtiva',
+    grupo: 1,
+    titulo: 'Quer pintura nas bordas (cortes) das páginas?',
+    descricao: 'Cor nos cortes laterais das folhas — efeito incrível ao abrir',
+    tipo: 'toggle',
+    campo: 'pinturaBordasAtiva',
+    avancaAutomatico: true,
+  },
+
+  {
+    id: 'corPinturaBordas',
+    grupo: 1,
+    titulo: 'Qual a cor da pintura?',
+    tipo: 'selecao-grade',
+    campo: 'corPinturaBordas',
+    avancaAutomatico: true,
+    visivel: (c) => c.pinturaBordasAtiva,
+    opcoes: [
+      { valor: '#C0C0C0', label: 'Prata',   hex: '#C0C0C0' },
+      { valor: '#D4AF37', label: 'Dourada', hex: '#D4AF37' },
+    ],
+  },
+
+  // ─── GRUPO 2: CAPA ────────────────────────────────────────
 
   {
     id: 'materialCapa',
     grupo: 2,
-    titulo: 'Qual o material da capa?',
-    descricao: 'O toque e a aparência do caderno',
-    tipo: 'selecao-grade',
+    titulo: 'Qual o material do revestimento da capa?',
+    descricao: 'Como será o toque e a aparência do seu caderno/livro',
+    tipo: 'selecao-lista',
     campo: 'materialCapa',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'couro',         label: 'Couro',          descricao: 'Natural · Durável · Envelhece bem' },
-      { valor: 'sintetico',     label: 'Sintético',      descricao: 'Vegano · Resistente · Moderno' },
-      { valor: 'tecido',        label: 'Tecido',         descricao: 'Suave · Colorido · Delicado' },
-      { valor: 'papel-especial',label: 'Papel especial', descricao: 'Elegante · Leve · Texturizado' },
-      { valor: 'kraft',         label: 'Kraft',          descricao: 'Rústico · Natural · Artesanal' },
-      { valor: 'linho',         label: 'Linho',          descricao: 'Chic · Texturizado · Refinado' },
+      { valor: 'couro',          label: 'Couro',          descricao: 'Natural · Durável · Envelhece bem' },
+      { valor: 'sintetico',      label: 'Sintético',      descricao: 'Vegano · Resistente · Moderno' },
+      { valor: 'tecido',         label: 'Tecido',         descricao: 'Suave · Colorido · Delicado' },
+      { valor: 'papel-especial', label: 'Papel especial', descricao: 'Elegante · Leve · Texturizado' },
+      { valor: 'kraft',          label: 'Kraft',          descricao: 'Rústico · Natural · Artesanal' },
+      { valor: 'linho',          label: 'Linho',          descricao: 'Chic · Texturizado · Refinado' },
     ],
   },
 
+  // Cor da capa — couro
   {
-    id: 'corCapa',
+    id: 'corCapa-couro',
     grupo: 2,
     titulo: 'Qual a cor da capa?',
-    descricao: 'Escolha ou personalize a cor exata',
+    descricao: 'Escolha a cor do revestimento em couro',
     tipo: 'cor',
     campo: 'corCapa',
-    opcoes: CORES_CAPA_PADRAO.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
+    visivel: (c) => c.materialCapa === 'couro',
+    opcoes: CORES_CAPA_COURO.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
   },
 
+  // Cor da capa — sintético
   {
-    id: 'estampaCapa',
+    id: 'corCapa-sintetico',
     grupo: 2,
-    titulo: 'Quer alguma estampa?',
-    descricao: 'Padrão visual sobre a cor da capa',
-    tipo: 'selecao-lista',
+    titulo: 'Qual a cor da capa?',
+    descricao: 'Escolha a cor do revestimento sintético',
+    tipo: 'cor',
+    campo: 'corCapa',
+    visivel: (c) => c.materialCapa === 'sintetico',
+    opcoes: CORES_CAPA_SINTETICO.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
+  },
+
+  // Cor da capa — papel especial
+  {
+    id: 'corCapa-papel',
+    grupo: 2,
+    titulo: 'Qual a cor da capa?',
+    descricao: 'Escolha a opção de papel especial',
+    tipo: 'cor',
+    campo: 'corCapa',
+    visivel: (c) => c.materialCapa === 'papel-especial',
+    opcoes: CORES_CAPA_PAPEL_ESPECIAL.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
+  },
+
+  // Cor da capa — tecido: campo de texto para cor principal
+  {
+    id: 'corCapaTecido',
+    grupo: 2,
+    titulo: 'Qual a cor principal do revestimento em tecido?',
+    descricao: 'Escreva a seguir qual a cor principal do tecido do seu caderno/livro',
+    tipo: 'texto',
+    campo: 'corCapaTecido',
+    visivel: (c) => c.materialCapa === 'tecido',
+  },
+
+  // Padrão do tecido
+  {
+    id: 'padrao-tecido',
+    grupo: 2,
+    titulo: 'Qual o padrão do tecido?',
+    tipo: 'selecao-grade',
     campo: 'estampaCapa',
     avancaAutomatico: true,
+    visivel: (c) => c.materialCapa === 'tecido',
     opcoes: [
-      { valor: 'nenhuma',      label: 'Sem estampa',   descricao: 'Capa lisa e limpa' },
-      { valor: 'floral',       label: 'Floral',         descricao: 'Flores e folhagens delicadas' },
-      { valor: 'minimalista',  label: 'Minimalista',    descricao: 'Linhas e formas geométricas' },
-      { valor: 'abstrata',     label: 'Abstrata',       descricao: 'Arte livre e expressiva' },
-      { valor: 'tematica',     label: 'Temática',       descricao: 'Combinamos um tema especial' },
-    ],
-  },
-
-  {
-    id: 'gravacaoCapa',
-    grupo: 2,
-    titulo: 'Quer personalização gravada?',
-    descricao: 'Nome, iniciais ou frase na capa',
-    tipo: 'selecao-lista',
-    campo: 'gravacaoCapa',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'nenhuma',      label: 'Sem gravação',  descricao: 'Capa sem texto' },
-      { valor: 'baixo-relevo', label: 'Baixo relevo',  descricao: 'Sutil e elegante — afundado na capa' },
-      { valor: 'alto-relevo',  label: 'Alto relevo',   descricao: 'Marcante — elevado na capa' },
-      { valor: 'bordado',      label: 'Bordado',        descricao: 'Feito à mão com fio — o mais artesanal' },
+      { valor: 'nenhuma',     label: 'Liso (cor única)',           descricao: 'Sem estampa' },
+      { valor: 'floral',      label: 'Flores',                     descricao: 'Estampa floral' },
+      { valor: 'minimalista', label: 'Grid (mini xadrez)',          descricao: 'Grade discreta' },
+      { valor: 'abstrata',    label: 'Geométrico/Borboletas',       descricao: 'Padrão geométrico' },
+      { valor: 'tematica',    label: 'Poás (bolinhas)',             descricao: 'Bolinhas delicadas' },
     ],
   },
 
   {
     id: 'nomeGravado',
     grupo: 2,
-    titulo: 'O que você quer gravar?',
-    descricao: 'Nome, iniciais, data ou frase (máx. 40 caracteres)',
+    titulo: 'Deseja personalizar a capa?',
+    descricao: 'Nome, iniciais, data ou frase (máx. 40 caracteres) — ou deixe em branco para sem personalização',
     tipo: 'texto',
     campo: 'nomeGravado',
-    visivel: (c) => c.gravacaoCapa !== 'nenhuma',
   },
 
   {
-    id: 'corBordado',
+    id: 'gravacaoCapa',
     grupo: 2,
-    titulo: 'Qual a cor do fio de bordado?',
-    descricao: 'Escolha o fio que vai dar vida ao bordado na capa',
-    tipo: 'cor',
-    campo: 'corBordado',
-    visivel: (c) => c.gravacaoCapa === 'bordado',
+    titulo: 'Como você quer essa personalização?',
+    tipo: 'selecao-lista',
+    campo: 'gravacaoCapa',
+    avancaAutomatico: true,
+    visivel: (c) => c.nomeGravado.trim().length > 0,
     opcoes: [
-      { valor: '#F5DFA0', label: 'Dourado',   hex: '#F5DFA0' },
-      { valor: '#D4D4D4', label: 'Prata',     hex: '#D4D4D4' },
-      { valor: '#F8F8F8', label: 'Branco',    hex: '#F8F8F8' },
-      { valor: '#C0392B', label: 'Vermelho',  hex: '#C0392B' },
-      { valor: '#C4713C', label: 'Terracota', hex: '#C4713C' },
-      { valor: '#2980B9', label: 'Azul',      hex: '#2980B9' },
-      { valor: '#27AE60', label: 'Verde',     hex: '#27AE60' },
-      { valor: '#E91E8C', label: 'Rosa',      hex: '#E91E8C' },
-      { valor: '#1A1A1A', label: 'Preto',     hex: '#1A1A1A' },
+      { valor: 'baixo-relevo', label: 'Baixo relevo', descricao: 'Sutil e elegante — afundado na capa · +R$25,00' },
+      { valor: 'alto-relevo',  label: 'Alto relevo',  descricao: 'Marcante — elevado na capa · +R$25,00' },
+      { valor: 'bordado',      label: 'Bordado',      descricao: 'Feito à mão com fio — o mais artesanal · +R$25,00' },
     ],
   },
 
   {
-    id: 'posicaoGravacao',
+    id: 'tipoBordado',
     grupo: 2,
-    titulo: 'Onde fica a gravação na capa?',
-    descricao: 'Escolha o posicionamento do texto na capa',
+    titulo: 'Como você prefere que seja o bordado?',
+    descricao: 'A combinação das cores do bordado com a capa será feita pela DMO Papelaria',
     tipo: 'selecao-grade',
-    campo: 'posicaoGravacao',
+    campo: 'tipoBordado',
     avancaAutomatico: true,
-    visivel: (c) => c.gravacaoCapa !== 'nenhuma' && c.nomeGravado.trim().length > 0,
+    visivel: (c) => c.gravacaoCapa === 'bordado',
     opcoes: [
-      { valor: 'terco-superior',    label: 'Topo',           descricao: 'Terço superior — centralizado' },
-      { valor: 'centro',            label: 'Centro',          descricao: 'Meio da capa — destaque máximo' },
-      { valor: 'terco-inferior',    label: 'Base',            descricao: 'Terço inferior — centralizado' },
-      { valor: 'canto-inf-direito', label: 'Assinatura',      descricao: 'Canto inferior direito — discreto' },
+      { valor: 'cor-unica', label: 'Cor única',  descricao: 'Um fio, resultado elegante e clássico' },
+      { valor: 'colorido',  label: 'Colorido',   descricao: 'Duas ou mais cores combinando com a capa' },
     ],
   },
 
@@ -203,171 +451,86 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'aplicacoesCapa',
     grupo: 2,
     titulo: 'Quer aplicações extras na capa?',
-    descricao: 'Elementos decorativos adicionais (opcional)',
+    descricao: 'Elementos decorativos adicionais — R$18,00 cada',
     tipo: 'multipla-escolha',
     campo: 'aplicacoesCapa',
     opcoes: [
-      { valor: 'renda',    label: 'Renda',    descricao: 'Detalhe em renda delicada' },
-      { valor: 'botoes',   label: 'Botões',   descricao: 'Botões decorativos' },
-      { valor: 'metais',   label: 'Metais',   descricao: 'Cantoneiras ou apliques metálicos' },
-      { valor: 'recortes', label: 'Recortes', descricao: 'Vazados na capa' },
+      { valor: 'renda',     label: 'Renda',      descricao: 'Detalhe em renda delicada ao redor da capa — aspecto vintage' },
+      { valor: 'pespontos', label: 'Pespontos',  descricao: 'Costura delicada com linha ao redor da capa e contra capa' },
+      { valor: 'botoes',    label: 'Botões',     descricao: 'Botões decorativos' },
     ],
   },
 
-  // ─── GRUPO 3: Encadernação ────────────────────────────────
+  {
+    id: 'tipoCantoneiras',
+    grupo: 2,
+    titulo: 'Deseja cantoneiras na capa?',
+    tipo: 'selecao-lista',
+    campo: 'tipoCantoneiras',
+    avancaAutomatico: true,
+    opcoes: [
+      { valor: 'nenhuma',          label: 'Sem cantoneiras',      descricao: 'Capa sem adicional' },
+      { valor: 'papel',            label: 'Em papel',             descricao: '+R$5,00' },
+      { valor: 'metal-simples',    label: 'Em metal simples',     descricao: '+R$9,00' },
+      { valor: 'metal-trabalhado', label: 'Em metal trabalhado',  descricao: '+R$12,00' },
+    ],
+  },
 
   {
     id: 'tipoLombada',
-    grupo: 3,
-    titulo: 'Como quer a lombada?',
+    grupo: 2,
+    titulo: 'Como deseja a lombada?',
     descricao: 'A lateral onde as páginas são costuradas',
-    tipo: 'selecao-grade',
+    tipo: 'selecao-lista',
     campo: 'tipoLombada',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'exposta',   label: 'Exposta',   descricao: 'Costura visível — visual artesanal autêntico' },
-      { valor: 'protegida', label: 'Protegida', descricao: 'Capa cobre a costura — mais clean' },
+      { valor: 'exposta',                     label: 'Exposta',                           descricao: 'Costura visível — visual artesanal autêntico' },
+      { valor: 'protegida',                   label: 'Protegida',                         descricao: 'Capa cobre a costura — mais clean' },
+      { valor: 'protegida-costura-aparente',  label: 'Protegida com costura aparente',    descricao: 'Artesanal e exclusivo' },
     ],
   },
 
   {
     id: 'tipoEncadernacao',
-    grupo: 3,
+    grupo: 2,
     titulo: 'Qual tipo de costura?',
-    descricao: 'Define como as páginas são presas',
+    descricao: 'Define como as páginas são presas — +R$6,00 (Wire-O: +R$9,00)',
     tipo: 'selecao-lista',
     campo: 'tipoEncadernacao',
     avancaAutomatico: true,
-    visivel: (c) => c.tipoLombada === 'exposta',
     opcoes: [
-      { valor: 'copta',            label: 'Copta',             descricao: 'Costura tradicional — muito resistente e durável' },
-      { valor: 'long-stitch',      label: 'Long Stitch',       descricao: 'Costura longa aparente — visual artístico e moderno' },
-      { valor: 'francesa-cruzada', label: 'Francesa Cruzada',  descricao: 'Padrão de losangos — delicada e elegante' },
-      { valor: 'wire-o',           label: 'Wire-O',            descricao: 'Anéis metálicos duplos — abre 360°, ideal para planners' },
-    ],
-  },
-
-  {
-    id: 'tipoAbertura',
-    grupo: 3,
-    titulo: 'Como o caderno vai abrir?',
-    descricao: 'Tipo de abertura das páginas',
-    tipo: 'selecao-grade',
-    campo: 'tipoAbertura',
-    avancaAutomatico: true,
-    visivel: (c) => c.tipoLombada === 'exposta',
-    opcoes: [
-      { valor: '180-graus',   label: 'Abertura 180°', descricao: 'Abre completamente plano — escrever fica fácil' },
-      { valor: 'tradicional', label: 'Tradicional',   descricao: 'Abertura padrão — mais compacto' },
+      { valor: 'copta',            label: 'Copta',            descricao: 'Abertura 180° · Costura Aparente — muito resistente e durável' },
+      { valor: 'long-stitch',      label: 'Long Stitch',      descricao: 'Abertura 180° · Costura longa aparente — visual artístico' },
+      { valor: 'francesa-cruzada', label: 'Francesa Cruzada', descricao: 'Abertura 180° · Padrão de losangos — delicada e elegante' },
+      { valor: 'belga',            label: 'Belga',            descricao: 'Abertura 360° — ideal para uso intenso' },
+      { valor: 'wire-o',           label: 'Wire-O',           descricao: 'Anéis metálicos duplos — abre 360°, ideal para planners' },
     ],
   },
 
   {
     id: 'corFio',
-    grupo: 3,
-    titulo: 'Qual a cor do fio?',
-    descricao: 'Cor da linha de costura visível na lombada',
+    grupo: 2,
+    titulo: 'Qual a cor do fio de costura?',
     tipo: 'cor',
     campo: 'corFio',
-    visivel: (c) => c.tipoLombada === 'exposta',
+    visivel: (c) => ['copta', 'long-stitch', 'francesa-cruzada', 'belga'].includes(c.tipoEncadernacao),
     opcoes: CORES_FIO_PADRAO.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
   },
 
-  // ─── GRUPO 4: Miolo ───────────────────────────────────────
-
-  {
-    id: 'tipoPapel',
-    grupo: 4,
-    titulo: 'Qual o tipo de papel?',
-    descricao: 'O papel interno do caderno',
-    tipo: 'selecao-grade',
-    campo: 'tipoPapel',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'offset',    label: 'Offset',    descricao: 'Branco · O mais comum · Versátil' },
-      { valor: 'polen',     label: 'Pólen',     descricao: 'Creme · Confortável para leitura longa' },
-      { valor: 'reciclado', label: 'Reciclado', descricao: 'Ecológico · Texturizado · Sustentável' },
-      { valor: 'vegetal',   label: 'Vegetal',   descricao: 'Translúcido · Especial · Único' },
-    ],
-  },
-
-  {
-    id: 'graturaPapel',
-    grupo: 4,
-    titulo: 'Qual a gramatura do papel?',
-    descricao: 'Peso e espessura de cada folha',
-    tipo: 'selecao-grade',
-    campo: 'graturaPapel',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: '90g',  label: '90 g',  descricao: 'Leve e econômico' },
-      { valor: '120g', label: '120 g', descricao: 'Equilibrado — o mais popular' },
-      { valor: '180g', label: '180 g', descricao: 'Resistente à caneta e marcador' },
-      { valor: '240g', label: '240 g', descricao: 'Premium — ideal para aquarela' },
-    ],
-  },
-
-  {
-    id: 'corFolhas',
-    grupo: 4,
-    titulo: 'Qual a cor das folhas?',
-    descricao: 'Tom do papel interno',
-    tipo: 'selecao-grade',
-    campo: 'corFolhas',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'branca',   label: 'Branca',   descricao: 'Clássica · Contraste forte',            hex: '#FAFAF8' },
-      { valor: 'creme',    label: 'Creme',    descricao: 'Aconchegante · Cansa menos os olhos',   hex: '#F5F0E0' },
-      { valor: 'colorida', label: 'Colorida', descricao: 'Cor especial · Combinamos juntos',       hex: '#E8F0D8' },
-    ],
-  },
-
-  {
-    id: 'padraoPaginas',
-    grupo: 4,
-    titulo: 'Qual o padrão das páginas?',
-    descricao: 'Layout impresso nas folhas',
-    tipo: 'selecao-grade',
-    campo: 'padraoPaginas',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'liso',          label: 'Liso',          descricao: 'Em branco — para desenho e escrita livre' },
-      { valor: 'pautado',       label: 'Pautado',       descricao: 'Linhas horizontais — escrita organizada' },
-      { valor: 'pontilhado',    label: 'Pontilhado',    descricao: 'Grid discreto — versátil e moderno' },
-      { valor: 'quadriculado',  label: 'Quadriculado',  descricao: 'Grade completa — projetos e técnico' },
-    ],
-  },
-
-  // ─── GRUPO 5: Elementos Funcionais ───────────────────────
-
   {
     id: 'elasticoAtivo',
-    grupo: 5,
+    grupo: 2,
     titulo: 'Quer elástico de fechamento?',
-    descricao: 'Mantém o caderno fechado e protegido',
+    descricao: 'Mantém o caderno fechado e protegido — +R$6,00',
     tipo: 'toggle',
     campo: 'elasticoAtivo',
     avancaAutomatico: true,
   },
 
   {
-    id: 'posicaoElastico',
-    grupo: 5,
-    titulo: 'Como o elástico vai ficar?',
-    descricao: 'Posição do elástico na capa',
-    tipo: 'selecao-grade',
-    campo: 'posicaoElastico',
-    avancaAutomatico: true,
-    visivel: (c) => c.elasticoAtivo,
-    opcoes: [
-      { valor: 'vertical',   label: 'Vertical',   descricao: 'Elástico na lateral — mais comum' },
-      { valor: 'horizontal', label: 'Horizontal', descricao: 'Elástico na parte de baixo' },
-    ],
-  },
-
-  {
     id: 'corElastico',
-    grupo: 5,
+    grupo: 2,
     titulo: 'Qual a cor do elástico?',
     tipo: 'cor',
     campo: 'corElastico',
@@ -377,9 +540,9 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
 
   {
     id: 'marcadorAtivo',
-    grupo: 5,
+    grupo: 2,
     titulo: 'Quer marcador de páginas?',
-    descricao: 'Fitilho, couro ou cordão saindo do caderno',
+    descricao: 'Fita de cetim, couro ou cordão saindo do caderno — +R$8,00',
     tipo: 'toggle',
     campo: 'marcadorAtivo',
     avancaAutomatico: true,
@@ -387,246 +550,96 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
 
   {
     id: 'tipoMarcador',
-    grupo: 5,
-    titulo: 'Qual tipo de marcador?',
+    grupo: 2,
+    titulo: 'Qual o tipo de marcador?',
     tipo: 'selecao-grade',
     campo: 'tipoMarcador',
     avancaAutomatico: true,
     visivel: (c) => c.marcadorAtivo,
     opcoes: [
-      { valor: 'fitilho', label: 'Fitilho', descricao: 'Fita de cetim ou seda' },
-      { valor: 'couro',   label: 'Couro',   descricao: 'Tira de couro artesanal' },
-      { valor: 'cordao',  label: 'Cordão',  descricao: 'Cordão decorativo trançado' },
+      { valor: 'fita-cetim',   label: 'Fita de cetim',   descricao: 'Suave e elegante' },
+      { valor: 'couro',        label: 'Couro',           descricao: 'Acrescenta espessura ao caderno' },
+      { valor: 'cordao-cetim', label: 'Cordão de cetim', descricao: 'Trançado e encantador' },
     ],
   },
 
   {
-    id: 'corMarcador',
-    grupo: 5,
-    titulo: 'Qual a cor do marcador?',
-    tipo: 'cor',
-    campo: 'corMarcador',
+    id: 'larguraMarcador',
+    grupo: 2,
+    titulo: 'Qual largura terá o marcador?',
+    tipo: 'selecao-grade',
+    campo: 'larguraMarcador',
+    avancaAutomatico: true,
     visivel: (c) => c.marcadorAtivo,
     opcoes: [
-      { valor: '#C4713C', label: 'Terracota',  hex: '#C4713C' },
-      { valor: '#C0392B', label: 'Vermelho',   hex: '#C0392B' },
-      { valor: '#D4AF37', label: 'Dourado',    hex: '#D4AF37' },
-      { valor: '#27AE60', label: 'Verde',      hex: '#27AE60' },
-      { valor: '#2980B9', label: 'Azul',       hex: '#2980B9' },
-      { valor: '#E91E8C', label: 'Rosa',       hex: '#E91E8C' },
-      { valor: '#1A1A1A', label: 'Preto',      hex: '#1A1A1A' },
-      { valor: '#F5F5F5', label: 'Branco',     hex: '#F5F5F5' },
+      { valor: '7mm',  label: '7 mm',  descricao: 'Discreto e elegante' },
+      { valor: '10mm', label: '10 mm', descricao: 'Mais visível e marcante' },
+    ],
+  },
+
+  {
+    id: 'quantidadeMarcadores',
+    grupo: 2,
+    titulo: 'Quantos marcadores deseja?',
+    tipo: 'selecao-grade',
+    campo: 'quantidadeMarcadores',
+    avancaAutomatico: true,
+    visivel: (c) => c.marcadorAtivo,
+    opcoes: [
+      { valor: '1', label: 'Apenas um',      descricao: 'Um marcador' },
+      { valor: '2', label: 'Dois marcadores', descricao: 'Segundo marcador · +R$8,00' },
     ],
   },
 
   {
     id: 'extras-elementos',
-    grupo: 5,
+    grupo: 2,
     titulo: 'Outros elementos funcionais?',
-    descricao: 'Itens extras no caderno (opcional)',
+    descricao: 'Itens extras para seu caderno/livro — R$7,00 cada',
     tipo: 'multipla-escolha',
-    campo: 'bolsoInterno', // campo fictício — tratado especialmente no componente
+    campo: 'bolsoInterno',
     opcoes: [
-      { valor: 'bolsoInterno',      label: 'Bolso interno',      descricao: 'Para guardar papeis e cartões' },
-      { valor: 'envelopeAcoplado',  label: 'Envelope acoplado',  descricao: 'Envelope na contracapa' },
-      { valor: 'portaCaneta',       label: 'Porta-caneta',       descricao: 'Tira para guardar a caneta' },
-      { valor: 'abasOrelhas',       label: 'Abas / orelhas',     descricao: 'Dobra protetora nas bordas' },
+      { valor: 'bolsoInterno',       label: 'Bolso interno',            descricao: 'Fixado nas contra capas, para guardar papeis e cartões' },
+      { valor: 'envelopeAcoplado',   label: 'Envelope acoplado',        descricao: 'Fixado logo depois da capa ou no centro' },
+      { valor: 'envelopeContracapa', label: 'Envelope na contra capa',  descricao: 'Com aba de fechamento' },
+      { valor: 'portaCaneta',        label: 'Porta-caneta',             descricao: 'Suporte para guardar a caneta' },
+      { valor: 'abasOrelhas',        label: 'Abas / orelhas',           descricao: 'Dobra protetora nas bordas (incompatível com cantoneiras)' },
     ],
   },
 
-  // ─── GRUPO 6: Acabamentos ─────────────────────────────────
-
   {
-    id: 'tipoCantos',
-    grupo: 6,
-    titulo: 'Como ficam os cantos?',
+    id: 'tipoEmbalagem',
+    grupo: 2,
+    titulo: 'Deseja embalagem para presente?',
     tipo: 'selecao-grade',
-    campo: 'tipoCantos',
+    campo: 'tipoEmbalagem',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'arredondados', label: 'Arredondados', descricao: 'Cantos curvos e suaves' },
-      { valor: 'retos',        label: 'Retos',         descricao: 'Cantos em 90° — clássico' },
+      { valor: 'padrao',   label: 'Embalagem padrão',        descricao: 'Saquinho em tecido de algodão · +R$25,00' },
+      { valor: 'presente', label: 'Embalagem para presente', descricao: 'Saquinho + caixa personalizada · +R$65,00' },
     ],
   },
 
   {
-    id: 'pinturaBordasAtiva',
-    grupo: 6,
-    titulo: 'Quer pintura nas bordas das páginas?',
-    descricao: 'Cor nos cortes laterais das folhas — efeito incrível ao abrir',
-    tipo: 'toggle',
-    campo: 'pinturaBordasAtiva',
-    avancaAutomatico: true,
-  },
-
-  {
-    id: 'corPinturaBordas',
-    grupo: 6,
-    titulo: 'Qual a cor da pintura?',
-    tipo: 'cor',
-    campo: 'corPinturaBordas',
-    visivel: (c) => c.pinturaBordasAtiva,
-    opcoes: [
-      { valor: '#D4AF37', label: 'Dourado',   hex: '#D4AF37' },
-      { valor: '#B8B8B8', label: 'Prata',     hex: '#B8B8B8' },
-      { valor: '#C4713C', label: 'Terracota', hex: '#C4713C' },
-      { valor: '#C0392B', label: 'Vermelho',  hex: '#C0392B' },
-      { valor: '#2980B9', label: 'Azul',      hex: '#2980B9' },
-      { valor: '#27AE60', label: 'Verde',     hex: '#27AE60' },
-      { valor: '#1A1A1A', label: 'Preto',     hex: '#1A1A1A' },
-      { valor: '#E91E8C', label: 'Rosa',      hex: '#E91E8C' },
-    ],
-  },
-
-  {
-    id: 'tipoCorteEspecial',
-    grupo: 6,
-    titulo: 'Quer corte especial nas páginas?',
-    descricao: 'Tipo de acabamento das bordas do papel',
-    tipo: 'selecao-grade',
-    campo: 'tipoCorteEspecial',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'nenhum',      label: 'Corte reto',   descricao: 'Bordas uniformes e precisas' },
-      { valor: 'deckle-edge', label: 'Deckle Edge',  descricao: 'Bordas irregulares artesanais — especial' },
-    ],
-  },
-
-  {
-    id: 'tipoLaminacao',
-    grupo: 6,
-    titulo: 'Qual a laminação da capa?',
-    descricao: 'Disponível apenas para capa em papel especial',
+    id: 'padraoEmbalagem',
+    grupo: 2,
+    titulo: 'Qual padrão para a embalagem?',
+    descricao: 'O saquinho e a caixa serão feitos com a mesma estampa escolhida',
     tipo: 'selecao-lista',
-    campo: 'tipoLaminacao',
+    campo: 'padraoEmbalagem',
     avancaAutomatico: true,
-    visivel: (c) => c.materialCapa === 'papel-especial',
     opcoes: [
-      { valor: 'nenhuma', label: 'Sem laminação',    descricao: 'Toque natural do material' },
-      { valor: 'fosca',   label: 'Laminação fosca',  descricao: 'Aveludado · Elegante · Premium' },
-      { valor: 'brilho',  label: 'Laminação brilho', descricao: 'Vibrante · Moderno · Impactante' },
+      { valor: 'poas',            label: 'Poás (bolinhas)' },
+      { valor: 'floral-delicado', label: 'Floral delicado' },
+      { valor: 'floral-marcante', label: 'Floral marcante' },
+      { valor: 'listrado',        label: 'Listrado' },
+      { valor: 'xadrez',          label: 'Xadrez' },
+      { valor: 'folhagens',       label: 'Folhagens' },
+      { valor: 'animal-print',    label: 'Animal Print' },
+      { valor: 'abstrato',        label: 'Abstrato' },
+      { valor: 'algodao-cru',     label: 'Algodão cru' },
     ],
   },
-
-  {
-    id: 'tipoTextura',
-    grupo: 6,
-    titulo: 'Qual a textura ao toque?',
-    tipo: 'selecao-lista',
-    campo: 'tipoTextura',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'lisa',      label: 'Lisa',      descricao: 'Superfície suave e uniforme' },
-      { valor: 'granulada', label: 'Granulada', descricao: 'Textura sutil sob os dedos' },
-    ],
-  },
-
-  // ─── GRUPO 7: Extras Afetivos ─────────────────────────────
-
-  {
-    id: 'proposicaoCaderno',
-    grupo: 7,
-    titulo: 'Qual o propósito do caderno?',
-    descricao: 'Para que ele vai servir no dia a dia',
-    tipo: 'selecao-lista',
-    campo: 'proposicaoCaderno',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'escrita-livre',        label: 'Escrita livre',          descricao: 'Para escrever o que vier à mente' },
-      { valor: 'diario',               label: 'Diário pessoal',         descricao: 'Registros do dia a dia' },
-      { valor: 'planner',              label: 'Planner',                descricao: 'Organização e produtividade' },
-      { valor: 'memorias',             label: 'Livro de memórias',      descricao: 'Fotos, colagens e lembranças' },
-      { valor: 'profissional-estudos', label: 'Profissional / Estudos', descricao: 'Trabalho e aprendizado' },
-    ],
-  },
-
-  {
-    id: 'temaCaderno',
-    grupo: 7,
-    titulo: 'Quer um tema especial?',
-    descricao: 'Customizamos elementos internos para o tema escolhido',
-    tipo: 'selecao-grade',
-    campo: 'temaCaderno',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'nenhum',      label: 'Sem tema',    descricao: 'Caderno versátil' },
-      { valor: 'maternidade', label: 'Maternidade', descricao: 'Para mamães e bebês' },
-      { valor: 'viagens',     label: 'Viagens',     descricao: 'Para registrar aventuras' },
-      { valor: 'gratidao',    label: 'Gratidão',    descricao: 'Diário de gratidão' },
-      { valor: 'estudos',     label: 'Estudos',     descricao: 'Otimizado para aprender' },
-    ],
-  },
-
-  {
-    id: 'extras-afetivos',
-    grupo: 7,
-    titulo: 'Quer toques afetivos?',
-    descricao: 'Elementos especiais que tornam o caderno único',
-    tipo: 'multipla-escolha',
-    campo: 'paginaDedicatoria', // campo fictício — tratado especialmente no componente
-    opcoes: [
-      { valor: 'paginaDedicatoria',  label: 'Página de dedicatória', descricao: 'Espaço para mensagem especial no início' },
-      { valor: 'frasesAoLongo',      label: 'Frases ao longo',       descricao: 'Citações inspiradoras pelas páginas' },
-      { valor: 'datasImportantes',   label: 'Datas marcadas',        descricao: 'Aniversários e eventos especiais' },
-      { valor: 'essenciaNoParapel',  label: 'Essência no papel',     descricao: 'Aroma sutil e especial nas páginas' },
-    ],
-  },
-
-  // ─── GRUPO 8: Guarda ──────────────────────────────────────
-
-  {
-    id: 'materialGuarda',
-    grupo: 8,
-    titulo: 'Qual o material da guarda?',
-    descricao: 'A folha decorativa no início e fim do caderno',
-    tipo: 'selecao-grade',
-    campo: 'materialGuarda',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'branca',      label: 'Branca',      descricao: 'Clássica · Neutra · Elegante' },
-      { valor: 'colorida',    label: 'Colorida',    descricao: 'Cor sólida personalizada' },
-      { valor: 'marmorizada', label: 'Marmorizada', descricao: 'Efeito mármore · Sofisticado' },
-      { valor: 'kraft',       label: 'Kraft',       descricao: 'Rústica · Natural · Artesanal' },
-      { valor: 'estampada',   label: 'Estampada',   descricao: 'Com padrão impresso' },
-    ],
-  } as Pergunta & { campo: keyof ConfiguracaoCaderno },
-
-  {
-    id: 'corGuarda',
-    grupo: 8,
-    titulo: 'Qual a cor da guarda?',
-    descricao: 'Cor de fundo da guarda',
-    tipo: 'cor',
-    campo: 'corGuarda',
-    visivel: (c) => c.materialGuarda === 'colorida',
-    opcoes: [
-      { valor: '#F5DEB3', label: 'Trigo',         hex: '#F5DEB3' },
-      { valor: '#B5C4B1', label: 'Sálvia',        hex: '#B5C4B1' },
-      { valor: '#D4B8A0', label: 'Terracota claro', hex: '#D4B8A0' },
-      { valor: '#8B9DC3', label: 'Azul cinza',    hex: '#8B9DC3' },
-      { valor: '#C3A8C8', label: 'Lavanda',       hex: '#C3A8C8' },
-      { valor: '#D4AF37', label: 'Dourado',       hex: '#D4AF37' },
-      { valor: '#1A1A1A', label: 'Preto',         hex: '#1A1A1A' },
-      { valor: '#F5F0E0', label: 'Creme',         hex: '#F5F0E0' },
-    ],
-  } as Pergunta & { campo: keyof ConfiguracaoCaderno },
-
-  {
-    id: 'padraoGuarda',
-    grupo: 8,
-    titulo: 'Qual o padrão da guarda?',
-    descricao: 'Estampa impressa na folha de guarda',
-    tipo: 'selecao-grade',
-    campo: 'padraoGuarda',
-    avancaAutomatico: true,
-    visivel: (c) => c.materialGuarda === 'estampada',
-    opcoes: [
-      { valor: 'liso',       label: 'Liso',       descricao: 'Cor uniforme, sem padrão' },
-      { valor: 'floral',     label: 'Floral',     descricao: 'Flores delicadas e botânicos' },
-      { valor: 'geometrico', label: 'Geométrico', descricao: 'Formas e linhas precisas' },
-      { valor: 'aquarela',   label: 'Aquarela',   descricao: 'Pinceladas suaves de tinta' },
-    ],
-  } as Pergunta & { campo: keyof ConfiguracaoCaderno },
 ]
 
 // ─── Utilitários ─────────────────────────────────────────────
@@ -636,12 +649,6 @@ export function getPerguntasVisiveis(config: ConfiguracaoCaderno): Pergunta[] {
 }
 
 export const GRUPOS = [
-  { numero: 1, titulo: 'Tamanho',      iconeKey: 'tamanho' },
-  { numero: 2, titulo: 'Capa',         iconeKey: 'capa' },
-  { numero: 3, titulo: 'Encadernação', iconeKey: 'costura' },
-  { numero: 4, titulo: 'Miolo',        iconeKey: 'papel' },
-  { numero: 5, titulo: 'Funcionais',   iconeKey: 'elastico' },
-  { numero: 6, titulo: 'Acabamentos',  iconeKey: 'cantos' },
-  { numero: 7, titulo: 'Extras',       iconeKey: 'coracao' },
-  { numero: 8, titulo: 'Guarda',       iconeKey: 'guarda' },
+  { numero: 1, titulo: 'Miolo', iconeKey: 'papel' },
+  { numero: 2, titulo: 'Capa',  iconeKey: 'capa'  },
 ]

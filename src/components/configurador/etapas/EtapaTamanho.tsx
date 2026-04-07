@@ -17,10 +17,9 @@ const opcoesFormato: { valor: FormatoCaderno; label: string; icone: string }[] =
 ]
 
 const opcoesEspessura: { valor: EspessuraCaderno; label: string; folhas: string }[] = [
-  { valor: 'fino', label: 'Fino', folhas: '~40 folhas' },
-  { valor: 'medio', label: 'Médio', folhas: '~80 folhas' },
+  { valor: 'fino',   label: 'Fino',   folhas: '~40 folhas' },
+  { valor: 'medio',  label: 'Médio',  folhas: '~80 folhas' },
   { valor: 'grosso', label: 'Grosso', folhas: '~120 folhas' },
-  { valor: 'extra-grosso', label: 'Extra grosso', folhas: '~160 folhas' },
 ]
 
 export default function EtapaTamanho() {

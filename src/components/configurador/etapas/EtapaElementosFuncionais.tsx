@@ -5,9 +5,8 @@ import { CORES_ELASTICO_PADRAO } from '@/types/caderno'
 import type { TipoMarcador, PosicaoElastico, LarguraMarcador } from '@/types/caderno'
 
 const opcoesLarguraMarcador: { valor: LarguraMarcador; label: string; descricao: string }[] = [
-  { valor: 'fino',  label: 'Fino',  descricao: '~3 mm' },
-  { valor: 'medio', label: 'Médio', descricao: '~5 mm' },
-  { valor: 'largo', label: 'Largo', descricao: '~8 mm' },
+  { valor: '7mm',  label: '7 mm',  descricao: 'Discreto e elegante' },
+  { valor: '10mm', label: '10 mm', descricao: 'Mais visível e marcante' },
 ]
 
 const CORES_MARCADOR = [
@@ -22,9 +21,9 @@ const CORES_MARCADOR = [
 ]
 
 const opcoesTipoMarcador: { valor: TipoMarcador; label: string; descricao: string }[] = [
-  { valor: 'fitilho', label: 'Fitilho', descricao: 'Fita de cetim ou seda' },
-  { valor: 'couro', label: 'Couro', descricao: 'Tira de couro artesanal' },
-  { valor: 'cordao', label: 'Cordão', descricao: 'Cordão decorativo' },
+  { valor: 'fita-cetim',   label: 'Fita de cetim',   descricao: 'Suave e elegante' },
+  { valor: 'couro',        label: 'Couro',           descricao: 'Acrescenta espessura ao caderno' },
+  { valor: 'cordao-cetim', label: 'Cordão de cetim', descricao: 'Trançado e encantador' },
 ]
 
 const opcoesPosicaoElastico: { valor: PosicaoElastico; label: string; icone: string }[] = [

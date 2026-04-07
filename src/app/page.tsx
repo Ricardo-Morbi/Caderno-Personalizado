@@ -8,20 +8,14 @@ import PreviewCaderno from '@/components/configurador/PreviewCaderno'
 import PerguntaUnica from '@/components/configurador/PerguntaUnica'
 import { calcularPreco, TABELA_PADRAO, type TabelaPrecos } from '@/lib/calcularPreco'
 import {
-  IconeTamanho, IconeLivroAberto, IconeCostura, IconePapel,
-  IconeElastico, IconeCantos, IconeCoracao,
+  IconeLivroAberto, IconePapel,
   IconeSeta, IconeSetaEsq, IconeCheck,
 } from '@/components/ui/Icons'
 
 // ─── Mapa de ícones SVG por grupo ─────────────────────────────
 const ICONES_GRUPO: Record<string, React.FC<{ tamanho?: number; className?: string }>> = {
-  tamanho:  IconeTamanho,
-  capa:     IconeLivroAberto,
-  costura:  IconeCostura,
-  papel:    IconePapel,
-  elastico: IconeElastico,
-  cantos:   IconeCantos,
-  coracao:  IconeCoracao,
+  papel: IconePapel,
+  capa:  IconeLivroAberto,
 }
 
 // ─── Mensagens da sobrancelha ──────────────────────────────────

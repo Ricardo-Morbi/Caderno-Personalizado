@@ -1,26 +1,18 @@
 'use client'
 
 import { useCadernoStore } from '@/store/useCadernoStore'
-import type { TipoPapelMiolo, GraturaPapel, CorFolhas, PadraoPaginas } from '@/types/caderno'
+import type { TipoPapelMiolo, GraturaPapel, PadraoPaginas } from '@/types/caderno'
 
 const opcoesPapel: { valor: TipoPapelMiolo; label: string; descricao: string }[] = [
-  { valor: 'offset', label: 'Offset', descricao: 'O mais comum, leve e branco' },
-  { valor: 'polen', label: 'Pólen', descricao: 'Creme, confortável para leitura' },
-  { valor: 'reciclado', label: 'Reciclado', descricao: 'Ecológico, texturizado' },
-  { valor: 'vegetal', label: 'Vegetal', descricao: 'Translúcido, especial' },
+  { valor: 'offset',    label: 'Offset',     descricao: 'O mais comum, leve e branco' },
+  { valor: 'polen',     label: 'Pólen Bold', descricao: 'Creme, confortável para leitura' },
+  { valor: 'reciclado', label: 'Reciclado',  descricao: 'Ecológico, texturizado' },
 ]
 
 const opcoesGratura: { valor: GraturaPapel; label: string; descricao: string }[] = [
-  { valor: '90g', label: '90g', descricao: 'Leve, econômico' },
+  { valor: '90g',  label: '90g',  descricao: 'Leve, econômico' },
   { valor: '120g', label: '120g', descricao: 'Equilibrado, popular' },
   { valor: '180g', label: '180g', descricao: 'Espesso, resist. à caneta' },
-  { valor: '240g', label: '240g', descricao: 'Premium, aquarela' },
-]
-
-const opcoesCorFolhas: { valor: CorFolhas; label: string; cor: string; descricao: string }[] = [
-  { valor: 'branca', label: 'Branca', cor: '#FAFAF8', descricao: 'Clássica' },
-  { valor: 'creme', label: 'Creme', cor: '#F5F0E0', descricao: 'Aconchegante' },
-  { valor: 'colorida', label: 'Colorida', cor: '#E8F0D8', descricao: 'Especial' },
 ]
 
 const opcoesPadrao: { valor: PadraoPaginas; label: string; icone: string; descricao: string }[] = [
@@ -68,29 +60,6 @@ export default function EtapaMiolo() {
             >
               <span className="block text-base font-bold font-mono text-marrom-500">{opcao.label}</span>
               <span className="block text-xs text-marrom-300 mt-0.5">{opcao.descricao}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Cor das folhas */}
-      <div>
-        <h3 className="text-sm font-medium text-marrom-400 mb-3">Cor das folhas</h3>
-        <div className="flex gap-2">
-          {opcoesCorFolhas.map((opcao) => (
-            <button
-              key={opcao.valor}
-              onClick={() => atualizarOpcao('corFolhas', opcao.valor)}
-              className={`flex-1 cartao-opcao text-center transition-all duration-200 ${
-                configuracao.corFolhas === opcao.valor ? 'cartao-opcao-selecionado' : ''
-              }`}
-            >
-              <span
-                className="block w-8 h-8 rounded-full mx-auto mb-1.5 border border-creme-300"
-                style={{ backgroundColor: opcao.cor }}
-              />
-              <span className="block text-xs font-medium text-marrom-400">{opcao.label}</span>
-              <span className="block text-xs text-marrom-300">{opcao.descricao}</span>
             </button>
           ))}
         </div>
