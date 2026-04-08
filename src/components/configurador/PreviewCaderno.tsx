@@ -1410,9 +1410,9 @@ export default function PreviewCaderno() {
   const paginaFocoAtual: 'guarda' | 'miolo' | 'ambas' =
     PAGINA_FOCO[perguntaAtualPreview?.id ?? ''] ?? 'ambas'
 
-  // Auto-modo: grupo 1 = aberto (miolo), grupo 2 = fechado (capa)
+  // Auto-modo: grupo 1 = fechado (aparência/capa), grupo 2 = aberto (miolo)
   useEffect(() => {
-    setModo(perguntaAtualPreview?.grupo === 1 ? 'aberto' : 'fechado')
+    setModo(perguntaAtualPreview?.grupo === 2 ? 'aberto' : 'fechado')
   }, [perguntaAtualPreview?.grupo])
 
   // Refs para manipulação DOM direta — zero re-renders durante drag

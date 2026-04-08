@@ -256,15 +256,15 @@ export interface DefinicaoEtapa {
 export const ETAPAS: DefinicaoEtapa[] = [
   {
     numero: 1,
-    titulo: 'Miolo',
-    descricao: 'Tema, papel, acabamentos internos',
-    icone: '📄',
+    titulo: 'Aparência',
+    descricao: 'Capa, tamanho, personalização e acessórios',
+    icone: '📕',
   },
   {
     numero: 2,
-    titulo: 'Capa',
-    descricao: 'Material, cor, personalização e encadernação',
-    icone: '📕',
+    titulo: 'Miolo',
+    descricao: 'Papel, tema e acabamentos internos',
+    icone: '📄',
   },
 ]
 
