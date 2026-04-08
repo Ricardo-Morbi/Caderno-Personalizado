@@ -973,22 +973,21 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
         </g>
       )}
 
-      {/* Cantoneiras metálicas */}
-      {tipoCantoneiras !== 'sem-cantoneiras' && tipoCantoneiras && (() => {
-        const s = 14 // tamanho do triângulo
-        const metalFill = tipoCantoneiras === 'douradas' ? '#C8A96E' : tipoCantoneiras === 'prateadas' ? '#B8B8C0' : '#8B7355'
-        const metalGlow = tipoCantoneiras === 'douradas' ? 'rgba(255,215,100,0.5)' : tipoCantoneiras === 'prateadas' ? 'rgba(200,200,220,0.5)' : 'rgba(180,160,120,0.4)'
+      {/* Cantoneiras — apenas no lado oposto à lombada (direito) */}
+      {tipoCantoneiras !== 'nenhuma' && tipoCantoneiras && (() => {
+        const s = 14
+        // papel=kraft, metal-simples=prata, metal-trabalhado=ouro
+        const metalFill = tipoCantoneiras === 'metal-trabalhado' ? '#C8A96E'
+          : tipoCantoneiras === 'metal-simples' ? '#B8B8C0'
+          : '#C4A07A' // papel
+        const metalGlow = tipoCantoneiras === 'metal-trabalhado' ? 'rgba(255,215,100,0.5)'
+          : tipoCantoneiras === 'metal-simples' ? 'rgba(200,200,220,0.5)'
+          : 'rgba(196,160,122,0.4)'
         return (
           <g>
-            {/* Superior esquerdo */}
-            <polygon points={`0,0 ${s},0 0,${s}`} fill={metalFill}/>
-            <line x1={2} y1={0} x2={0} y2={2} stroke={metalGlow} strokeWidth="1.5"/>
-            {/* Superior direito */}
+            {/* Superior direito (lado livre — sem lombada) */}
             <polygon points={`${W},0 ${W-s},0 ${W},${s}`} fill={metalFill}/>
             <line x1={W-2} y1={0} x2={W} y2={2} stroke={metalGlow} strokeWidth="1.5"/>
-            {/* Inferior esquerdo */}
-            <polygon points={`0,${H} ${s},${H} 0,${H-s}`} fill={metalFill}/>
-            <line x1={2} y1={H} x2={0} y2={H-2} stroke={metalGlow} strokeWidth="1.5"/>
             {/* Inferior direito */}
             <polygon points={`${W},${H} ${W-s},${H} ${W},${H-s}`} fill={metalFill}/>
             <line x1={W-2} y1={H} x2={W} y2={H-2} stroke={metalGlow} strokeWidth="1.5"/>

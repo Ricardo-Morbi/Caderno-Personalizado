@@ -532,6 +532,30 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
   },
 
   {
+    id: 'corBordado',
+    grupo: 2,
+    titulo: 'Qual a cor do fio do bordado?',
+    descricao: 'Cor principal usada no bordado da capa',
+    tipo: 'cor',
+    campo: 'corBordado',
+    visivel: (c) => c.querPersonalizacaoCapa && c.gravacaoCapa === 'bordado',
+    opcoes: [
+      { valor: '#F5DFA0', label: 'Dourado claro',  hex: '#F5DFA0' },
+      { valor: '#D4AF37', label: 'Dourado',        hex: '#D4AF37' },
+      { valor: '#C0C0C0', label: 'Prata',          hex: '#C0C0C0' },
+      { valor: '#FFFFFF', label: 'Branco',         hex: '#FFFFFF' },
+      { valor: '#1A1A1A', label: 'Preto',          hex: '#1A1A1A' },
+      { valor: '#C0392B', label: 'Vermelho',       hex: '#C0392B' },
+      { valor: '#2980B9', label: 'Azul',           hex: '#2980B9' },
+      { valor: '#27AE60', label: 'Verde',          hex: '#27AE60' },
+      { valor: '#E91E8C', label: 'Rosa',           hex: '#E91E8C' },
+      { valor: '#E67E22', label: 'Laranja',        hex: '#E67E22' },
+      { valor: '#C4713C', label: 'Terracota',      hex: '#C4713C' },
+      { valor: '#6B4226', label: 'Marrom',         hex: '#6B4226' },
+    ],
+  },
+
+  {
     id: 'aplicacoesCapa',
     grupo: 2,
     titulo: 'Quer aplicações extras na capa?',
