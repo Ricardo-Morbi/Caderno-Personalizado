@@ -109,7 +109,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     opcoes: [
       { valor: 'paginaDedicatoria', label: 'Página de dedicatória', descricao: 'Espaço para mensagem especial no início' },
       { valor: 'frasesAoLongo',     label: 'Frases ao longo',       descricao: 'Citações inspiradoras na frente de cada página' },
-      { valor: 'datasImportantes',  label: 'Datas marcadas',        descricao: 'Aniversários e eventos especiais' },
       { valor: 'essenciaNoParapel', label: 'Essência no papel',     descricao: 'Aroma sutil e especial nas páginas' },
     ],
   },
@@ -124,18 +123,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     placeholder: 'Ex: A vida é bela · Viver plena e livremente · Carpe diem...',
     maxLength: 120,
     visivel: (c) => c.frasesAoLongo,
-  },
-
-  {
-    id: 'datasPersonalizadas',
-    grupo: 1,
-    titulo: 'Quais datas deseja acrescentar?',
-    descricao: 'Escreva as datas de aniversários e eventos especiais',
-    tipo: 'texto',
-    campo: 'datasPersonalizadas',
-    placeholder: 'Ex: 15/03 – Aniversário da mãe · 22/07 – Casamento · 10/12 – Formatura...',
-    maxLength: 200,
-    visivel: (c) => c.datasImportantes,
   },
 
   {
@@ -264,81 +251,13 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
   },
 
   {
-    id: 'materialGuarda',
-    grupo: 1,
-    titulo: 'Qual o material da guarda?',
-    descricao: 'A folha decorativa no início e fim do caderno — R$7,00',
-    tipo: 'selecao-grade',
-    campo: 'materialGuarda',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'branca',      label: 'Branca',      descricao: 'Clássica · Neutra · Elegante' },
-      { valor: 'colorida',    label: 'Colorida',    descricao: 'Cor sólida personalizada' },
-      { valor: 'marmorizada', label: 'Marmorizada', descricao: 'Efeito mármore · Sofisticado' },
-      { valor: 'kraft',       label: 'Kraft',       descricao: 'Rústica · Natural · Artesanal' },
-      { valor: 'estampada',   label: 'Estampada',   descricao: 'Com padrão estampado' },
-    ],
-  },
-
-  {
-    id: 'corGuarda',
-    grupo: 1,
-    titulo: 'Qual a cor da guarda?',
-    descricao: 'Escolha a cor sólida das folhas de guarda',
-    tipo: 'cor',
-    campo: 'corGuarda',
-    visivel: (c) => c.materialGuarda === 'colorida',
-    opcoes: [
-      { valor: '#FAF0E6', label: 'Off-White',    hex: '#FAF0E6' },
-      { valor: '#F5F0E0', label: 'Creme',        hex: '#F5F0E0' },
-      { valor: '#FFB6C1', label: 'Rosa claro',   hex: '#FFB6C1' },
-      { valor: '#FF69B4', label: 'Rosa pink',    hex: '#FF69B4' },
-      { valor: '#E6E6FA', label: 'Lavanda',      hex: '#E6E6FA' },
-      { valor: '#87CEEB', label: 'Azul claro',   hex: '#87CEEB' },
-      { valor: '#1B3A5C', label: 'Azul marinho', hex: '#1B3A5C' },
-      { valor: '#98FB98', label: 'Verde claro',  hex: '#98FB98' },
-      { valor: '#FFD700', label: 'Amarelo',      hex: '#FFD700' },
-      { valor: '#1A1A1A', label: 'Preto',        hex: '#1A1A1A' },
-    ],
-  },
-
-  {
-    id: 'padraoGuardaEstampado',
-    grupo: 1,
-    titulo: 'Qual o padrão da estampa da guarda?',
-    descricao: 'As cores combinadas com a capa ficarão a critério da DMO Papelaria',
-    tipo: 'selecao-grade',
-    campo: 'padraoGuardaEstampado',
-    avancaAutomatico: true,
-    visivel: (c) => c.materialGuarda === 'estampada',
-    opcoes: [
-      { valor: 'poas',     label: 'Poás (bolinhas)', descricao: 'Bolinhas delicadas' },
-      { valor: 'flores',   label: 'Flores',          descricao: 'Floral delicado' },
-      { valor: 'abstrata', label: 'Abstrata',        descricao: 'Arte livre e expressiva' },
-    ],
-  },
-
-  {
-    id: 'tipoCorteEspecial',
-    grupo: 1,
-    titulo: 'Quer corte especial nas páginas?',
-    descricao: 'Tipo de acabamento das bordas do papel',
-    tipo: 'selecao-grade',
-    campo: 'tipoCorteEspecial',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'nenhum',      label: 'Corte reto',  descricao: 'Bordas uniformes e precisas' },
-      { valor: 'deckle-edge', label: 'Deckle Edge', descricao: 'Bordas irregulares artesanais — especial · +R$5,00' },
-    ],
-  },
-
-  {
     id: 'tipoCantos',
     grupo: 1,
     titulo: 'Como ficam os cantos?',
     tipo: 'selecao-grade',
     campo: 'tipoCantos',
     avancaAutomatico: true,
+    visivel: (c) => c.tipoCantoneiras === 'nenhuma',
     opcoes: [
       { valor: 'arredondados', label: 'Arredondados', descricao: 'Cantos curvos e suaves · +R$5,00' },
       { valor: 'retos',        label: 'Retos',        descricao: 'Cantos em 90° — clássico' },
@@ -382,7 +301,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     opcoes: [
       { valor: 'couro',          label: 'Couro',          descricao: 'Natural · Durável · Envelhece bem' },
       { valor: 'sintetico',      label: 'Sintético',      descricao: 'Vegano · Resistente · Moderno' },
-      { valor: 'tecido',         label: 'Tecido',         descricao: 'Suave · Colorido · Delicado' },
       { valor: 'papel-especial', label: 'Papel especial', descricao: 'Elegante · Leve · Texturizado' },
       { valor: 'kraft',          label: 'Kraft',          descricao: 'Rústico · Natural · Artesanal' },
       { valor: 'linho',          label: 'Linho',          descricao: 'Chic · Texturizado · Refinado' },
@@ -556,17 +474,13 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
   },
 
   {
-    id: 'aplicacoesCapa',
+    id: 'pespontosAtivo',
     grupo: 2,
-    titulo: 'Quer aplicações extras na capa?',
-    descricao: 'Elementos decorativos adicionais — R$18,00 cada',
-    tipo: 'multipla-escolha',
-    campo: 'aplicacoesCapa',
-    opcoes: [
-      { valor: 'renda',     label: 'Renda',      descricao: 'Detalhe em renda delicada ao redor da capa — aspecto vintage' },
-      { valor: 'pespontos', label: 'Pespontos',  descricao: 'Costura delicada com linha ao redor da capa e contra capa' },
-      { valor: 'botoes',    label: 'Botões',     descricao: 'Botões decorativos' },
-    ],
+    titulo: 'Quer pespontos na capa?',
+    descricao: 'Costura decorativa ao redor da capa e contracapa — +R$18,00',
+    tipo: 'toggle',
+    campo: 'pespontosAtivo',
+    avancaAutomatico: true,
   },
 
   {
@@ -657,21 +571,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
   },
 
   {
-    id: 'tipoMarcador',
-    grupo: 2,
-    titulo: 'Qual o tipo de marcador?',
-    tipo: 'selecao-grade',
-    campo: 'tipoMarcador',
-    avancaAutomatico: true,
-    visivel: (c) => c.marcadorAtivo,
-    opcoes: [
-      { valor: 'fita-cetim',   label: 'Fita de cetim',   descricao: 'Suave e elegante' },
-      { valor: 'couro',        label: 'Couro',           descricao: 'Acrescenta espessura ao caderno' },
-      { valor: 'cordao-cetim', label: 'Cordão de cetim', descricao: 'Trançado e encantador' },
-    ],
-  },
-
-  {
     id: 'larguraMarcador',
     grupo: 2,
     titulo: 'Qual largura terá o marcador?',
@@ -696,6 +595,21 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     opcoes: [
       { valor: '1', label: 'Apenas um',      descricao: 'Um marcador' },
       { valor: '2', label: 'Dois marcadores', descricao: 'Segundo marcador · +R$8,00' },
+    ],
+  },
+
+  {
+    id: 'corMarcador',
+    grupo: 2,
+    titulo: 'Qual a cor do marcador?',
+    tipo: 'cor',
+    campo: 'corMarcador',
+    visivel: (c) => c.marcadorAtivo,
+    opcoes: [
+      { valor: '#FFFFFF', label: 'Branco',   hex: '#FFFFFF' },
+      { valor: '#1A1A1A', label: 'Preto',    hex: '#1A1A1A' },
+      { valor: '#D4B896', label: 'Bege',     hex: '#D4B896' },
+      { valor: '#C0392B', label: 'Vermelho', hex: '#C0392B' },
     ],
   },
 
@@ -728,26 +642,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     ],
   },
 
-  {
-    id: 'padraoEmbalagem',
-    grupo: 2,
-    titulo: 'Qual padrão para a embalagem?',
-    descricao: 'O saquinho e a caixa serão feitos com a mesma estampa escolhida',
-    tipo: 'selecao-lista',
-    campo: 'padraoEmbalagem',
-    avancaAutomatico: true,
-    opcoes: [
-      { valor: 'poas',            label: 'Poás (bolinhas)' },
-      { valor: 'floral-delicado', label: 'Floral delicado' },
-      { valor: 'floral-marcante', label: 'Floral marcante' },
-      { valor: 'listrado',        label: 'Listrado' },
-      { valor: 'xadrez',          label: 'Xadrez' },
-      { valor: 'folhagens',       label: 'Folhagens' },
-      { valor: 'animal-print',    label: 'Animal Print' },
-      { valor: 'abstrato',        label: 'Abstrato' },
-      { valor: 'algodao-cru',     label: 'Algodão cru' },
-    ],
-  },
 ]
 
 // ─── Utilitários ─────────────────────────────────────────────

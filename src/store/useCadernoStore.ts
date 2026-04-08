@@ -112,6 +112,9 @@ const configuracaoPadrao: ConfiguracaoCaderno = {
   // Papel especial
   papelEspecialId: '',
 
+  // Pespontos
+  pespontosAtivo: false,
+
   // Capa — Q28/29
   tipoEmbalagem: 'padrao',
   padraoEmbalagem: 'algodao-cru',

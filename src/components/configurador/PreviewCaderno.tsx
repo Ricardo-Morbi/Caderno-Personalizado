@@ -209,6 +209,15 @@ function AplicacoesCapa({ aplicacoes, cx, cy, largura, altura, raioCanto }: {
           <circle cx={cx+largura/2-8} cy={cy} r={3}/>
         </g>
       )}
+      {aplicacoes.includes('pespontos') && (
+        <rect
+          x={cx-largura/2+6} y={cy-altura/2+6}
+          width={largura-12} height={altura-12}
+          rx={raioCanto} fill="none"
+          stroke="rgba(255,255,255,0.65)" strokeWidth="1.2"
+          strokeDasharray="3 3"
+        />
+      )}
     </g>
   )
 }
@@ -1433,7 +1442,7 @@ export default function PreviewCaderno() {
     padraoPaginas, corFolhas, tipoPapel,
     materialGuarda, corGuarda, padraoGuarda, padraoGuardaEstampado,
     paginaDedicatoria, querPersonalizacaoCapa,
-    papelEspecialId,
+    papelEspecialId, pespontosAtivo,
   } = configuracao
 
   const prop = PROPORCAO_POR_FORMATO[formato] ?? PROPORCAO_POR_FORMATO['retrato']
@@ -1471,7 +1480,7 @@ export default function PreviewCaderno() {
     papelEspecialId: papelEspecialId ?? '',
     gravacaoCapa: querPersonalizacaoCapa ? gravacaoCapa : 'nenhuma',
     nomeGravado: querPersonalizacaoCapa ? nomeGravado : '',
-    posicaoGravacao, aplicacoesCapa: aplicacoesCapa ?? [],
+    posicaoGravacao, aplicacoesCapa: [...(aplicacoesCapa ?? []), ...(pespontosAtivo ? ['pespontos'] : [])],
     raioCanto, tipoEncadernacao, tipoLombada, corFio,
     elasticoAtivo: elasticoAtivo ?? false, corElastico, posicaoElastico,
     marcadorAtivo: marcadorAtivo ?? false, tipoMarcador: tipoMarcador ?? 'fita-cetim',

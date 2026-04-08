@@ -224,6 +224,9 @@ export interface ConfiguracaoCaderno {
   // Papel especial selecionado (condicional: materialCapa === 'papel-especial')
   papelEspecialId: string
 
+  // Pespontos (aplicação na capa)
+  pespontosAtivo: boolean
+
   // Q28 — Embalagem
   tipoEmbalagem: TipoEmbalagem
 
