@@ -349,6 +349,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     tipo: 'selecao-lista',
     campo: 'tipoEncadernacao',
     avancaAutomatico: true,
+    visivel: (c) => c.tipoLombada !== 'protegida',
     opcoes: [
       { valor: 'copta',            label: 'Copta',            descricao: 'Abertura 180° · Costura Aparente — muito resistente e durável' },
       { valor: 'long-stitch',      label: 'Long Stitch',      descricao: 'Abertura 180° · Costura longa aparente — visual artístico' },
@@ -364,7 +365,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     titulo: 'Qual a cor do fio de costura?',
     tipo: 'cor',
     campo: 'corFio',
-    visivel: (c) => ['copta', 'long-stitch', 'francesa-cruzada', 'belga'].includes(c.tipoEncadernacao),
+    visivel: (c) => c.tipoLombada !== 'protegida' && ['copta', 'long-stitch', 'francesa-cruzada', 'belga'].includes(c.tipoEncadernacao),
     opcoes: CORES_FIO_PADRAO.map((c) => ({ valor: c.hex, label: c.nome, hex: c.hex })),
   },
 
@@ -452,10 +453,8 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'bolsoInterno',
     opcoes: [
       { valor: 'bolsoInterno',       label: 'Bolso interno',           descricao: 'Fixado nas contra capas, para guardar papéis e cartões' },
-      { valor: 'envelopeAcoplado',   label: 'Envelope acoplado',       descricao: 'Fixado logo depois da capa ou no centro' },
       { valor: 'envelopeContracapa', label: 'Envelope na contra capa', descricao: 'Com aba de fechamento' },
-      { valor: 'portaCaneta',        label: 'Porta-caneta',            descricao: 'Suporte para guardar a caneta' },
-      { valor: 'abasOrelhas',        label: 'Abas / orelhas',          descricao: 'Dobra protetora nas bordas (incompatível com cantoneiras)' },
+      { valor: 'abasOrelhas',        label: 'Abas / orelhas',          descricao: 'Dobra protetora nas bordas' },
     ],
   },
 

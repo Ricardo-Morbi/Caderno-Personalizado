@@ -1671,14 +1671,6 @@ export default function PreviewCaderno() {
         Arraste para ver 360°
       </p>
 
-      {/* Botão Ver por fora / por dentro — override manual do auto-modo */}
-      <button
-        onClick={() => setModo(m => m === 'fechado' ? 'aberto' : 'fechado')}
-        className="text-xs font-sans tracking-widest uppercase border border-ivoire-400 hover:border-onix-400 text-onix-600 hover:text-onix-700 px-5 py-2 transition-all duration-150"
-      >
-        {modo === 'fechado' ? 'Ver por dentro' : 'Ver por fora'}
-      </button>
-
       {/* Tags de resumo */}
       <div className="flex flex-wrap gap-1.5 justify-center max-w-xs">
         <span className="text-xs bg-ivoire-300 text-onix-600 px-2 py-0.5">{materialCapa}</span>
