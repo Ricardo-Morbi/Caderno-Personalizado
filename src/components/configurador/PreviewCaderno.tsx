@@ -1010,15 +1010,20 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
 }
 
 // ─── Face: Verso (contracapa) ─────────────────────────────────
-function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao }: {
+function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId }: {
   W: number; H: number; corCapa: string; materialCapa: string; raioCanto: number
-  tipoTextura: string; tipoLaminacao: string
+  tipoTextura: string; tipoLaminacao: string; papelEspecialId?: string
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
   const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        {materialCapa === 'papel-especial' && papelEspecialId && (
+          <clipPath id="clip-papel-v">
+            <rect width={W} height={H} rx={raioCanto}/>
+          </clipPath>
+        )}
         {useGrain && (
           <filter id="grain-v" x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
             <feTurbulence type="fractalNoise" baseFrequency="0.76 0.70" numOctaves="4" seed="11" result="pebble"/>
@@ -1057,6 +1062,14 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
           <line x1="4" y1="0" x2="0" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
         </pattern>
       )}
+      {materialCapa === 'papel-especial' && papelEspecialId && (
+        <image
+          href={`/papeis-especiais/${papelEspecialId}.webp`}
+          x={0} y={0} width={W} height={H}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath="url(#clip-papel-v)"
+        />
+      )}
       <rect width={W} height={H} rx={raioCanto} fill="url(#luz-v)"/>
       <rect width={W} height={H} rx={raioCanto} fill="url(#htop-v)"/>
       {tipoLaminacao === 'brilho' && (
@@ -1075,11 +1088,11 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
 }
 
 // ─── Face: Lombada (spine) ────────────────────────────────────
-function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada, corFio }: {
+function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada, corFio, papelEspecialId }: {
   W: number; H: number; corCapa: string; materialCapa: string
-  tipoEncadernacao: string; tipoLombada: string; corFio: string
+  tipoEncadernacao: string; tipoLombada: string; corFio: string; papelEspecialId?: string
 }) {
-  const ehProtegida = tipoLombada === 'protegida'
+  const ehProtegida = tipoLombada === 'protegida' || tipoLombada === 'protegida-costura-aparente'
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -1090,6 +1103,11 @@ function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada,
           <stop offset="82%"  stopColor="white" stopOpacity="0.1"/>
           <stop offset="100%" stopColor="black" stopOpacity="0.18"/>
         </linearGradient>
+        {ehProtegida && materialCapa === 'papel-especial' && papelEspecialId && (
+          <clipPath id="clip-papel-sp">
+            <rect width={W} height={H}/>
+          </clipPath>
+        )}
         {materialCapa === 'linho' && (
           <pattern id="ls" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
             <line x1="0" y1="0" x2="4" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
@@ -1116,6 +1134,14 @@ function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada,
           <rect width={W} height={H} fill={corCapa}
             filter={(materialCapa === 'couro' || materialCapa === 'sintetico') ? 'url(#grain-sp)' : undefined}/>
           {materialCapa === 'linho' && <rect width={W} height={H} fill="url(#ls)"/>}
+          {materialCapa === 'papel-especial' && papelEspecialId && (
+            <image
+              href={`/papeis-especiais/${papelEspecialId}.webp`}
+              x={0} y={0} width={W} height={H}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#clip-papel-sp)"
+            />
+          )}
         </>
       ) : (
         <>
@@ -1311,14 +1337,14 @@ function Livro3D({ bW, bH, bD, props }: {
       <div style={{ ...face, width: W, height: H, left: 0, top: 0,
         transform: `rotateY(180deg) translateZ(${D/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}
-          tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao}/>
+          tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} papelEspecialId={papelEspecialId}/>
       </div>
 
       {/* LOMBADA (esquerda) */}
       <div style={{ ...face, width: D, height: H, left: (W-D)/2, top: 0,
         transform: `rotateY(-90deg) translateZ(${W/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceSpine W={D} H={H} corCapa={corCapa} materialCapa={materialCapa}
-          tipoEncadernacao={tipoEncadernacao} tipoLombada={tipoLombada} corFio={corFio}/>
+          tipoEncadernacao={tipoEncadernacao} tipoLombada={tipoLombada} corFio={corFio} papelEspecialId={papelEspecialId}/>
       </div>
 
       {/* CORTE / páginas (direita) */}
