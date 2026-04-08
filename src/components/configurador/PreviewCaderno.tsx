@@ -1,10 +1,36 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { LazyMotion, m as motion, AnimatePresence } from 'framer-motion'
 
 const loadFeatures = () => import('@/lib/motion-features').then(r => r.default)
 import { useCadernoStore } from '@/store/useCadernoStore'
+import { getPerguntasVisiveis } from '@/data/perguntas'
+
+// Mapa: qual página focar por pergunta do miolo
+const PAGINA_FOCO: Record<string, 'guarda' | 'miolo' | 'ambas'> = {
+  temaCaderno:             'miolo',
+  temaPersonalizado:       'miolo',
+  padraoPaginas:           'miolo',
+  'extras-afetivos':       'guarda',
+  frasePersonalizada:      'miolo',
+  datasPersonalizadas:     'miolo',
+  formato:                 'ambas',
+  tipoPapel:               'miolo',
+  graturaPapel:            'miolo',
+  tamanho:                 'ambas',
+  subtamanhoPersonalizado: 'ambas',
+  espessura:               'ambas',
+  folhasColoridas:         'miolo',
+  corFolhasColoridas:      'miolo',
+  materialGuarda:          'guarda',
+  corGuarda:               'guarda',
+  padraoGuardaEstampado:   'guarda',
+  tipoCorteEspecial:       'miolo',
+  tipoCantos:              'ambas',
+  pinturaBordasAtiva:      'miolo',
+  corPinturaBordas:        'miolo',
+}
 
 type Modo = 'fechado' | 'aberto'
 
@@ -213,7 +239,7 @@ function VistaAberto({
   padraoPaginas, tipoEncadernacao, corFio,
   marcadorAtivo, corMarcador, pinturaBordasAtiva, corPinturaBordas,
   materialGuarda, corGuarda, padraoGuarda, bolsoInterno,
-  tipoPapel, envelopeAcoplado, paginaDedicatoria,
+  tipoPapel, envelopeAcoplado, paginaDedicatoria, paginaFoco,
 }: {
   larguraCapa: number; alturaCapa: number; espessuraLombada: number; raioCanto: number
   corCapa: string; corInternaFolhas: string; corBordaPages: string
@@ -221,6 +247,7 @@ function VistaAberto({
   marcadorAtivo: boolean; corMarcador: string; pinturaBordasAtiva: boolean; corPinturaBordas: string
   materialGuarda: string; corGuarda: string; padraoGuarda: string; bolsoInterno: boolean
   tipoPapel: string; envelopeAcoplado: boolean; paginaDedicatoria: boolean
+  paginaFoco: 'guarda' | 'miolo' | 'ambas'
 }) {
   const margem = 24
   const lombadaVis = espessuraLombada * 0.7
@@ -455,6 +482,40 @@ function VistaAberto({
       {pinturaBordasAtiva && <rect x={xDir+1} y={yPag+1} width={pagLarg-2} height={pagAlt-2} rx={raioCanto} fill="none" stroke={corPinturaBordas} strokeWidth={1.5} opacity={0.5}/>}
       <rect x={xDir} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto} fill="url(#sombra-cd)"/>
       <rect x={xDir} y={yPag} width={pagLarg} height={pagAlt*0.35} rx={raioCanto} fill="url(#refl-p)"/>
+
+      {/* ── Highlight de foco: ilumina a página relevante à pergunta atual ── */}
+      {paginaFoco === 'guarda' && (
+        <>
+          {/* Dim na página direita */}
+          <rect x={xDir} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto}
+            fill="rgba(255,255,255,0.35)" style={{ pointerEvents: 'none' }}/>
+          {/* Ring dourado na página esquerda */}
+          <motion.rect
+            key={`foco-guarda`}
+            x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto}
+            fill="none" stroke="#C9A84C" strokeWidth={1.5}
+            initial={{ opacity: 0, strokeWidth: 3 }}
+            animate={{ opacity: 0.7, strokeWidth: 1.5 }}
+            transition={{ duration: 0.4 }}
+            style={{ pointerEvents: 'none' }}/>
+        </>
+      )}
+      {paginaFoco === 'miolo' && (
+        <>
+          {/* Dim na página esquerda */}
+          <rect x={xEsq} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto}
+            fill="rgba(255,255,255,0.35)" style={{ pointerEvents: 'none' }}/>
+          {/* Ring dourado na página direita */}
+          <motion.rect
+            key={`foco-miolo`}
+            x={xDir} y={yPag} width={pagLarg} height={pagAlt} rx={raioCanto}
+            fill="none" stroke="#C9A84C" strokeWidth={1.5}
+            initial={{ opacity: 0, strokeWidth: 3 }}
+            animate={{ opacity: 0.7, strokeWidth: 1.5 }}
+            transition={{ duration: 0.4 }}
+            style={{ pointerEvents: 'none' }}/>
+        </>
+      )}
     </motion.svg>
   )
 }
@@ -1281,17 +1342,32 @@ function Livro3D({ bW, bH, bD, props }: {
 
 // ─── Componente Principal ─────────────────────────────────────
 export default function PreviewCaderno() {
-  const { configuracao } = useCadernoStore()
+  const { configuracao, perguntaIndex } = useCadernoStore()
   const [modo, setModo] = useState<Modo>('fechado')
 
+  // Identifica pergunta atual para auto-modo e foco de página
+  const perguntasVisiveis = getPerguntasVisiveis(configuracao)
+  const perguntaAtualPreview = perguntasVisiveis[perguntaIndex]
+  const paginaFocoAtual: 'guarda' | 'miolo' | 'ambas' =
+    PAGINA_FOCO[perguntaAtualPreview?.id ?? ''] ?? 'ambas'
+
+  // Auto-modo: grupo 1 = aberto (miolo), grupo 2 = fechado (capa)
+  useEffect(() => {
+    setModo(perguntaAtualPreview?.grupo === 1 ? 'aberto' : 'fechado')
+  }, [perguntaAtualPreview?.grupo])
+
   // Refs para manipulação DOM direta — zero re-renders durante drag
-  const wrapRef    = useRef<HTMLDivElement>(null)
-  const bookRef    = useRef<HTMLDivElement>(null)
-  const hintRef    = useRef<HTMLParagraphElement>(null)
-  const rot        = useRef({ Y: 20, X: -10 })
-  const drag       = useRef({ on: false, lX: 0, lY: 0, velY: 0, velX: 0 })
-  const rafId      = useRef(0)
-  const rafPending = useRef(false)   // RAF scheduling — limita DOM writes a 60fps
+  const wrapRef      = useRef<HTMLDivElement>(null)
+  const bookRef      = useRef<HTMLDivElement>(null)
+  const wrapAbertoRef = useRef<HTMLDivElement>(null)  // container da vista aberta
+  const hintRef      = useRef<HTMLParagraphElement>(null)
+  const rot          = useRef({ Y: 20, X: -10 })
+  const rotAberto    = useRef({ Y: 0, X: 0 })        // rotação da vista aberta
+  const drag         = useRef({ on: false, lX: 0, lY: 0, velY: 0, velX: 0 })
+  const rafId        = useRef(0)
+  const rafPending   = useRef(false)
+  const modoRef      = useRef(modo)                   // modo sem closure stale nos handlers
+  useEffect(() => { modoRef.current = modo }, [modo])
 
   const {
     tamanho, formato, espessura,
@@ -1371,12 +1447,15 @@ export default function PreviewCaderno() {
     tipoPapel: tipoPapel ?? 'offset',
     envelopeAcoplado: envelopeAcoplado ?? false,
     paginaDedicatoria: paginaDedicatoria ?? false,
+    paginaFoco: paginaFocoAtual,
   }
 
   // Aplica rotação diretamente no DOM — sem passar pelo React
   function applyTransform() {
-    if (bookRef.current)
+    if (modoRef.current === 'fechado' && bookRef.current)
       bookRef.current.style.transform = `rotateX(${rot.current.X}deg) rotateY(${rot.current.Y}deg)`
+    if (modoRef.current === 'aberto' && wrapAbertoRef.current)
+      wrapAbertoRef.current.style.transform = `perspective(900px) rotateX(${rotAberto.current.X}deg) rotateY(${rotAberto.current.Y}deg)`
   }
 
   // Inércia pós-drag via rAF — decaimento exponencial
@@ -1384,17 +1463,22 @@ export default function PreviewCaderno() {
     drag.current.velY *= 0.93
     drag.current.velX *= 0.93
     if (Math.abs(drag.current.velY) < 0.06 && Math.abs(drag.current.velX) < 0.06) return
-    rot.current.Y += drag.current.velY
-    rot.current.X = Math.max(-35, Math.min(25, rot.current.X + drag.current.velX))
+    if (modoRef.current === 'fechado') {
+      rot.current.Y += drag.current.velY
+      rot.current.X = Math.max(-35, Math.min(25, rot.current.X + drag.current.velX))
+    } else {
+      rotAberto.current.Y = Math.max(-30, Math.min(30, rotAberto.current.Y + drag.current.velY * 0.35))
+      rotAberto.current.X = Math.max(-20, Math.min(20, rotAberto.current.X + drag.current.velX * 0.35))
+    }
     applyTransform()
     rafId.current = requestAnimationFrame(inertia)
   }
 
   function onPDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (modo !== 'fechado') return
     cancelAnimationFrame(rafId.current)
     drag.current = { on: true, lX: e.clientX, lY: e.clientY, velY: 0, velX: 0 }
-    if (wrapRef.current) wrapRef.current.style.cursor = 'grabbing'
+    const container = modoRef.current === 'fechado' ? wrapRef.current : wrapAbertoRef.current
+    if (container) container.style.cursor = 'grabbing'
     if (hintRef.current) {
       hintRef.current.style.opacity = '0'
       hintRef.current.style.pointerEvents = 'none'
@@ -1405,16 +1489,19 @@ export default function PreviewCaderno() {
 
   function onPMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!drag.current.on) return
-    // Delta-based: velocidade = deslocamento desde o último evento
     const dx = e.clientX - drag.current.lX
     const dy = e.clientY - drag.current.lY
     drag.current.velY = dx * 0.45
     drag.current.velX = -dy * 0.3
     drag.current.lX = e.clientX
     drag.current.lY = e.clientY
-    rot.current.Y += drag.current.velY
-    rot.current.X = Math.max(-35, Math.min(25, rot.current.X + drag.current.velX))
-    // RAF scheduling — garante exatamente 60fps, evita writes acima da taxa do monitor
+    if (modoRef.current === 'fechado') {
+      rot.current.Y += drag.current.velY
+      rot.current.X = Math.max(-35, Math.min(25, rot.current.X + drag.current.velX))
+    } else {
+      rotAberto.current.Y = Math.max(-30, Math.min(30, rotAberto.current.Y + drag.current.velY * 0.35))
+      rotAberto.current.X = Math.max(-20, Math.min(20, rotAberto.current.X + drag.current.velX * 0.35))
+    }
     if (!rafPending.current) {
       rafPending.current = true
       requestAnimationFrame(() => {
@@ -1427,8 +1514,8 @@ export default function PreviewCaderno() {
   function onPUp() {
     if (!drag.current.on) return
     drag.current.on = false
-    if (wrapRef.current) wrapRef.current.style.cursor = 'grab'
-    // Inicia inércia com a velocidade acumulada no último frame
+    const container = modoRef.current === 'fechado' ? wrapRef.current : wrapAbertoRef.current
+    if (container) container.style.cursor = 'grab'
     rafId.current = requestAnimationFrame(inertia)
   }
 
@@ -1480,9 +1567,26 @@ export default function PreviewCaderno() {
           ) : (
             <motion.div key="aberto"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ filter: 'drop-shadow(4px 8px 24px rgba(26,24,24,0.18))' }}>
-              <VistaAberto {...propsAberto}/>
+              transition={{ duration: 0.3 }}>
+              {/* Wrapper drag 360° para a vista aberta */}
+              <div
+                ref={wrapAbertoRef}
+                className="touch-none"
+                style={{
+                  cursor: 'grab',
+                  willChange: 'transform',
+                  transformStyle: 'preserve-3d',
+                  transform: `perspective(900px) rotateX(${rotAberto.current.X}deg) rotateY(${rotAberto.current.Y}deg)`,
+                  filter: 'drop-shadow(4px 8px 24px rgba(26,24,24,0.18))',
+                } as React.CSSProperties}
+                onPointerDown={onPDown}
+                onPointerMove={onPMove}
+                onPointerUp={onPUp}
+                onPointerLeave={onPUp}
+                onPointerCancel={onPUp}
+              >
+                <VistaAberto {...propsAberto}/>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1497,23 +1601,21 @@ export default function PreviewCaderno() {
         }}/>
       )}
 
-      {/* Dica de rotação — visibilidade controlada via ref, sem re-render */}
-      {modo === 'fechado' && (
-        <p ref={hintRef}
-          className="text-xs text-onix-500 tracking-widest flex items-center gap-2 transition-opacity duration-500">
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-            <path d="M1 5h14M10 1l4 4-4 4M6 1L2 5l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-          </svg>
-          Arraste para ver 360°
-        </p>
-      )}
+      {/* Dica de rotação — sempre visível, controlada via ref */}
+      <p ref={hintRef}
+        className="text-xs text-onix-500 tracking-widest flex items-center gap-2 transition-opacity duration-500">
+        <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+          <path d="M1 5h14M10 1l4 4-4 4M6 1L2 5l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+        </svg>
+        Arraste para ver 360°
+      </p>
 
-      {/* Botão Abrir / Fechar */}
+      {/* Botão Ver por fora / por dentro — override manual do auto-modo */}
       <button
         onClick={() => setModo(m => m === 'fechado' ? 'aberto' : 'fechado')}
         className="text-xs font-sans tracking-widest uppercase border border-ivoire-400 hover:border-onix-400 text-onix-600 hover:text-onix-700 px-5 py-2 transition-all duration-150"
       >
-        {modo === 'fechado' ? 'Abrir caderno' : 'Fechar caderno'}
+        {modo === 'fechado' ? 'Ver por dentro' : 'Ver por fora'}
       </button>
 
       {/* Tags de resumo */}
