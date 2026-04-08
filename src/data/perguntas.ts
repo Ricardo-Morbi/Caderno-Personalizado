@@ -104,10 +104,13 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     avancaAutomatico: true,
     visivel: (c) => c.materialCapa === 'papel-especial',
     opcoes: [
-      { valor: 'Papel-1',   label: 'Branco',      descricao: 'Relevo madeira · Off-white',    imagem: '/papeis-especiais/Papel-1.webp' },
-      { valor: 'Papel-3_1', label: 'Rosa Nude',   descricao: 'Relevo madeira · Rosa claro',   imagem: '/papeis-especiais/Papel-3_1.webp' },
-      { valor: 'Papel-2',   label: 'Verde Oliva', descricao: 'Relevo madeira · Verde militar', imagem: '/papeis-especiais/Papel-2.webp' },
-      { valor: 'Papel-4_1', label: 'Marrom',      descricao: 'Relevo madeira · Chocolate',    imagem: '/papeis-especiais/Papel-4_1.webp' },
+      { valor: 'Papel-1',   label: 'Branco',         descricao: 'Relevo madeira · Off-white',      imagem: '/papeis-especiais/Papel-1.webp' },
+      { valor: 'Papel-3_1', label: 'Rosa Nude',     descricao: 'Relevo madeira · Rosa claro',     imagem: '/papeis-especiais/Papel-3_1.webp' },
+      { valor: 'Papel-2',   label: 'Verde Oliva',   descricao: 'Relevo madeira · Verde militar',  imagem: '/papeis-especiais/Papel-2.webp' },
+      { valor: 'Papel-4_1', label: 'Marrom',        descricao: 'Relevo madeira · Chocolate',      imagem: '/papeis-especiais/Papel-4_1.webp' },
+      { valor: 'Papel-5',   label: 'Verde Esmeralda', descricao: 'Textura · Verde esmeralda',     imagem: '/papeis-especiais/Papel-5.webp' },
+      { valor: 'Papel-6',   label: 'Prata',         descricao: 'Textura metalizada · Prata',      imagem: '/papeis-especiais/Papel-6.webp' },
+      { valor: 'Papel-7',   label: 'Preto Madeira', descricao: 'Relevo madeira · Preto',          imagem: '/papeis-especiais/Papel-7.webp' },
     ],
   },
 
