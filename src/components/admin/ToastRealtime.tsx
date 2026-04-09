@@ -1,8 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { getSupabase } from '@/lib/supabase'
+import { useEffect, useRef, useState } from 'react'
 import type { Pedido } from '@/types/pedido'
+
+// ─── ToastRealtime via polling autenticado ──────────────────────────────────
+// Versão anterior usava Supabase Realtime com anon key (pública), o que expunha
+// dados de clientes a qualquer pessoa com a chave. O polling bate em /api/pedidos
+// que exige cookie de admin — seguro por design.
+// Intervalo: 30s (balanceia UX vs carga de API).
 
 interface Toast {
   id: string
@@ -13,34 +18,46 @@ interface Props {
   onNovoPedido: (pedido: Pedido) => void
 }
 
+const INTERVALO_MS = 30_000
+
 export default function ToastRealtime({ onNovoPedido }: Props) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const ultimoIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    const sb = getSupabase()
-    const canal = sb
-      .channel('pedidos-realtime')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'pedidos' },
-        (payload) => {
-          const pedido = payload.new as Pedido
-          const toast: Toast = { id: `${Date.now()}`, pedido }
+    async function checar() {
+      try {
+        const res = await fetch('/api/pedidos', { credentials: 'include' })
+        if (!res.ok) return
+        const pedidos: Pedido[] = await res.json()
+        if (!Array.isArray(pedidos) || pedidos.length === 0) return
 
+        const maisRecente = pedidos[0]
+
+        // Inicializa o cursor sem disparar toast na primeira carga
+        if (ultimoIdRef.current === null) {
+          ultimoIdRef.current = maisRecente.id
+          return
+        }
+
+        // Novo pedido detectado
+        if (maisRecente.id !== ultimoIdRef.current) {
+          ultimoIdRef.current = maisRecente.id
+          const toast: Toast = { id: `${Date.now()}`, pedido: maisRecente }
           setToasts(prev => [...prev, toast])
-          onNovoPedido(pedido)
-
-          // Remove após 6 segundos
+          onNovoPedido(maisRecente)
           setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== toast.id))
           }, 6000)
         }
-      )
-      .subscribe()
-
-    return () => {
-      sb.removeChannel(canal)
+      } catch {
+        // falha silenciosa — não quebra o painel
+      }
     }
+
+    checar()
+    const intervalo = setInterval(checar, INTERVALO_MS)
+    return () => clearInterval(intervalo)
   }, [onNovoPedido])
 
   if (toasts.length === 0) return null

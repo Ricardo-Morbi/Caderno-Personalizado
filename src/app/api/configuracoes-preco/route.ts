@@ -34,6 +34,6 @@ export async function PUT(request: NextRequest) {
     .from('configuracoes_preco')
     .upsert({ id: 'principal', dados, atualizado_em: new Date().toISOString() })
 
-  if (error) return NextResponse.json({ erro: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ erro: 'Erro ao salvar configurações' }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

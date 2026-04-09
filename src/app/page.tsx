@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { useCadernoStore } from '@/store/useCadernoStore'
 import type { ConfiguracaoCaderno } from '@/types/caderno'
 import { getPerguntasVisiveis, GRUPOS } from '@/data/perguntas'
+import Image from 'next/image'
 import PreviewCaderno from '@/components/configurador/PreviewCaderno'
 import PerguntaUnica from '@/components/configurador/PerguntaUnica'
 import { calcularPreco, TABELA_PADRAO, type TabelaPrecos } from '@/lib/calcularPreco'
@@ -22,7 +23,7 @@ const ICONES_GRUPO: Record<string, React.FC<{ tamanho?: number; className?: stri
 const MENSAGENS_SOBRANCELHA = [
   '✦  Entregas rápidas em todo o país',
   '✦  Garantia de 10 anos',
-  '✦  Feito à mão com amor artesanal',
+  '✦  Feito com intenção',
 ]
 
 
@@ -267,12 +268,14 @@ export default function PaginaConfigurador() {
         <div className="flex items-center justify-between px-5 py-4 max-w-screen-xl mx-auto">
 
           {/* Logo */}
-          <div>
-            <p className="text-xs tracking-widest text-onix-500 uppercase font-sans mb-0.5">Ateliê</p>
-            <h1 className="text-base font-serif text-onix-700 leading-tight tracking-tight">
-              Caderno Artesanal
-            </h1>
-          </div>
+          <Image
+            src="/logo-dmo.webp"
+            alt="DMO Papelaria"
+            width={120}
+            height={40}
+            className="mix-blend-multiply"
+            priority
+          />
 
           {/* Contador central */}
           <div className="text-center">

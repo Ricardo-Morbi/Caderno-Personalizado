@@ -35,6 +35,6 @@ export async function PATCH(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ erro: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ erro: 'Erro ao atualizar pedido' }, { status: 500 })
   return NextResponse.json(data)
 }

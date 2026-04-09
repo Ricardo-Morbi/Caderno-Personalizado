@@ -1270,44 +1270,54 @@ function FaceCorte({ W, H, corInternaFolhas, pinturaBordasAtiva, corPinturaBorda
 }
 
 // ─── Face: Topo e Base ────────────────────────────────────────
-function FaceTopo({ W, H, corCapa, corInternaFolhas, pinturaBordasAtiva, corPinturaBordas, spineRatio = 0.14 }: {
-  W: number; H: number; corCapa: string; corInternaFolhas: string
-  pinturaBordasAtiva: boolean; corPinturaBordas: string; spineRatio?: number
+function FaceTopo({ W, H, corInternaFolhas, pinturaBordasAtiva, corPinturaBordas }: {
+  W: number; H: number; corInternaFolhas: string
+  pinturaBordasAtiva: boolean; corPinturaBordas: string
 }) {
-  const sW = W * spineRatio
   const spacing = 0.55
-  const total = Math.floor((W - sW) / spacing)
+  const total = Math.floor(W / spacing)
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="luz-topo" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="luz-topo" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%"   stopColor="white" stopOpacity="0.30"/>
+          <stop offset="35%"  stopColor="white" stopOpacity="0.06"/>
           <stop offset="100%" stopColor="black" stopOpacity="0.10"/>
+        </linearGradient>
+        <linearGradient id="sombra-topo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="rgba(0,0,0,0)"    stopOpacity="0"/>
+          <stop offset="70%"  stopColor="rgba(0,0,0,0.06)" stopOpacity="1"/>
+          <stop offset="100%" stopColor="rgba(0,0,0,0.18)" stopOpacity="1"/>
         </linearGradient>
       </defs>
       {/* Fundo folhas */}
       <rect width={W} height={H} fill={corInternaFolhas}/>
 
-      {pinturaBordasAtiva ? (
-        /* Gilding — cobre todo o corte das páginas (exceto lombada) */
-        <rect x={sW} y={0} width={W - sW} height={H} fill={corPinturaBordas} opacity={1}/>
-      ) : (
-        /* Linhas verticais das páginas */
-        Array.from({ length: total }, (_, i) => {
-          const x = sW + i * spacing
-          const isDark = i % 2 === 0
-          return (
-            <line key={i}
-              x1={x} y1={0} x2={x} y2={H}
-              stroke={isDark ? 'rgba(130,110,90,0.80)' : 'rgba(210,195,180,0.30)'}
-              strokeWidth={isDark ? 0.55 : 0.28}
-            />
-          )
-        })
-      )}
+      {/* Linhas das páginas — cobertura total, igual ao FaceCorte */}
+      {!pinturaBordasAtiva && Array.from({ length: total }, (_, i) => {
+        const x = i * spacing
+        const isDark = i % 2 === 0
+        return (
+          <line key={i}
+            x1={x} y1={0} x2={x} y2={H}
+            stroke={isDark ? 'rgba(130,110,90,0.80)' : 'rgba(210,195,180,0.30)'}
+            strokeWidth={isDark ? 0.55 : 0.28}
+          />
+        )
+      })}
 
-      {/* Luz */}
-      <rect width={W} height={H} fill="url(#luz-topo)"/>
+      {/* Pintura de bordas — cobre 100% da face, uniforme */}
+      {pinturaBordasAtiva ? (
+        <>
+          <rect width={W} height={H} fill={corPinturaBordas} opacity={1}/>
+          <rect width={W} height={H} fill="url(#luz-topo)" opacity={1}/>
+        </>
+      ) : (
+        <>
+          <rect width={W} height={H} fill="url(#sombra-topo)"/>
+          <rect width={W} height={H} fill="url(#luz-topo)"/>
+        </>
+      )}
     </svg>
   )
 }
@@ -1385,14 +1395,14 @@ function Livro3D({ bW, bH, bD, props }: {
       {/* TOPO */}
       <div style={{ ...face, width: W, height: D, left: 0, top: (H-D)/2,
         transform: `rotateX(90deg) translateZ(${H/2}px)`, backfaceVisibility: 'hidden' }}>
-        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}
+        <FaceTopo W={W} H={D} corInternaFolhas={corInternaFolhas}
           pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}/>
       </div>
 
       {/* BASE */}
       <div style={{ ...face, width: W, height: D, left: 0, top: (H-D)/2,
         transform: `rotateX(-90deg) translateZ(${H/2}px)`, backfaceVisibility: 'hidden' }}>
-        <FaceTopo W={W} H={D} corCapa={corCapa} corInternaFolhas={corInternaFolhas}
+        <FaceTopo W={W} H={D} corInternaFolhas={corInternaFolhas}
           pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}/>
       </div>
     </div>
