@@ -78,12 +78,6 @@ export default function EtapaExtras() {
               icone: '💌',
             },
             {
-              campo: 'frasesAoLongo' as const,
-              label: 'Frases ao longo do caderno',
-              descricao: 'Citações inspiradoras espalhadas pelas páginas',
-              icone: '💬',
-            },
-            {
               campo: 'datasImportantes' as const,
               label: 'Datas importantes marcadas',
               descricao: 'Aniversários, comemorações e eventos no miolo',
@@ -119,15 +113,24 @@ export default function EtapaExtras() {
           🎉 Seu caderno está quase pronto!
         </h3>
         <ul className="text-xs text-terracota-500 space-y-1.5">
-          <li>✓ Tamanho: <strong>{configuracao.tamanho}</strong> · {configuracao.formato} · {configuracao.espessura}</li>
-          <li>✓ Capa: <strong>{configuracao.materialCapa}</strong> com {configuracao.gravacaoCapa !== 'nenhuma' ? configuracao.gravacaoCapa : 'sem gravação'}</li>
-          <li>✓ Encadernação: <strong>{configuracao.tipoEncadernacao}</strong> · fio cor {configuracao.corFio}</li>
-          <li>✓ Miolo: <strong>{configuracao.tipoPapel}</strong> {configuracao.graturaPapel} · {configuracao.padraoPaginas}</li>
-          {configuracao.elasticoAtivo && <li>✓ Elástico <strong>{configuracao.posicaoElastico}</strong></li>}
-          {configuracao.marcadorAtivo && <li>✓ Marcador: <strong>{configuracao.tipoMarcador}</strong></li>}
-          {configuracao.proposicaoCaderno !== 'escrita-livre' && (
-            <li>✓ Propósito: <strong>{configuracao.proposicaoCaderno}</strong></li>
-          )}
+          <li>✓ Tamanho: <strong>{configuracao.tamanho}</strong> · {configuracao.espessura}</li>
+          <li>✓ Capa: <strong>{{
+            'couro': 'Couro', 'sintetico': 'Sintético', 'tecido': 'Tecido',
+            'papel-especial': 'Papel especial', 'kraft': 'Kraft', 'linho': 'Linho',
+          }[configuracao.materialCapa] ?? configuracao.materialCapa}</strong>
+            {configuracao.gravacaoCapa && configuracao.gravacaoCapa !== 'nenhuma'
+              ? ` · ${configuracao.gravacaoCapa}` : ''}</li>
+          <li>✓ Encadernação: <strong>{{
+            'copta': 'Copta', 'francesa-cruzada': 'Francesa cruzada',
+            'long-stitch': 'Long stitch', 'belga': 'Belga', 'wire-o': 'Wire-O',
+          }[configuracao.tipoEncadernacao] ?? configuracao.tipoEncadernacao}</strong></li>
+          <li>✓ Miolo: <strong>{{
+            'offset': 'Offset', 'polen': 'Pólen', 'reciclado': 'Reciclado',
+          }[configuracao.tipoPapel] ?? configuracao.tipoPapel}</strong> {configuracao.graturaPapel} · {{
+            'liso': 'Liso', 'pautado': 'Pautado', 'pontilhado': 'Pontilhado', 'quadriculado': 'Quadriculado',
+          }[configuracao.padraoPaginas] ?? configuracao.padraoPaginas}</li>
+          {configuracao.elasticoAtivo && <li>✓ Elástico incluso</li>}
+          {configuracao.marcadorAtivo && <li>✓ Marcador incluso</li>}
         </ul>
         <button
           className="botao-primario w-full mt-4 text-sm"

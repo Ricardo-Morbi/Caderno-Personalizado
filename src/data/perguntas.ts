@@ -546,21 +546,8 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'paginaDedicatoria',
     opcoes: [
       { valor: 'paginaDedicatoria', label: 'Página de dedicatória', descricao: 'Espaço para mensagem especial no início' },
-      { valor: 'frasesAoLongo',     label: 'Frases ao longo',       descricao: 'Citações inspiradoras na frente de cada página' },
       { valor: 'essenciaNoParapel', label: 'Essência no papel',     descricao: 'Aroma sutil e especial nas páginas' },
     ],
-  },
-
-  {
-    id: 'frasePersonalizada',
-    grupo: 2,
-    titulo: 'Qual frase ou citação você deseja?',
-    descricao: 'Escreva aqui qual frase ou citação deseja ao longo das páginas',
-    tipo: 'texto',
-    campo: 'frasePersonalizada',
-    placeholder: 'Ex: A vida é bela · Viver plena e livremente · Carpe diem...',
-    maxLength: 120,
-    visivel: (c) => c.frasesAoLongo,
   },
 
   {
