@@ -5,6 +5,76 @@ import type { TabelaPrecos } from '@/lib/calcularPreco'
 import { TABELA_PADRAO, detalharPreco } from '@/lib/calcularPreco'
 import type { ConfiguracaoCaderno } from '@/types/caderno'
 
+// Calculadora: meta de faturamento → valor hora
+function CalculadoraValorHora({
+  valorAtual,
+  onAplicar,
+}: {
+  valorAtual: number
+  onAplicar: (v: number) => void
+}) {
+  const [meta, setMeta] = useState(3000)
+  const [horas, setHoras] = useState(120)
+  const valorCalculado = horas > 0 ? Math.round((meta / horas) * 100) / 100 : 0
+
+  return (
+    <div className="bg-ouro-50 border border-ouro-200 p-4 mb-6">
+      <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-3">
+        Calcular valor hora pela meta mensal
+      </p>
+      <div className="space-y-2 mb-3">
+        <div className="flex items-center justify-between gap-3">
+          <label className="text-xs text-onix-600 font-sans">Meta de faturamento mensal</label>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-onix-400 font-sans">R$</span>
+            <input
+              type="number"
+              min="0"
+              step="100"
+              value={meta}
+              onChange={e => setMeta(parseFloat(e.target.value) || 0)}
+              className="w-24 border border-ivoire-400 bg-white px-2 py-1 text-xs text-onix-700 text-right outline-none focus:border-onix-400 font-sans"
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <label className="text-xs text-onix-600 font-sans">Horas trabalhadas por mes</label>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min="1"
+              step="5"
+              value={horas}
+              onChange={e => setHoras(parseFloat(e.target.value) || 1)}
+              className="w-24 border border-ivoire-400 bg-white px-2 py-1 text-xs text-onix-700 text-right outline-none focus:border-onix-400 font-sans"
+            />
+            <span className="text-xs text-onix-400 font-sans">h</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-xs text-onix-500 font-sans">Valor hora sugerido: </span>
+          <span className="text-sm font-sans font-medium text-onix-700">
+            R$ {valorCalculado.toFixed(2).replace('.', ',')}
+          </span>
+          {valorAtual !== valorCalculado && (
+            <span className="text-[10px] text-onix-400 font-sans ml-2">
+              (atual: R$ {valorAtual.toFixed(2).replace('.', ',')})
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => onAplicar(valorCalculado)}
+          className="bg-onix-700 hover:bg-onix-800 text-ivoire-100 px-4 py-1.5 text-xs tracking-widest uppercase font-sans transition-colors"
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // Config de simulação (caderno médio padrão)
 const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   // Miolo
@@ -282,7 +352,13 @@ export default function PaginaMateriais() {
       {/* ── ABA: MAO DE OBRA ── */}
       {abaAtiva === 'maoObra' && (
         <div className="max-w-lg">
-          <Secao titulo="Valor da hora de trabalho">
+          {/* Calculadora de valor hora pela meta */}
+          <CalculadoraValorHora
+            valorAtual={tabela.valorHoraArtesa}
+            onAplicar={(v) => set('valorHoraArtesa', v)}
+          />
+
+          <Secao titulo="Valor hora (resultado ou ajuste manual)">
             <Campo label="Valor hora da artesa" campo="valorHoraArtesa" valor={tabela.valorHoraArtesa} onChange={set} />
           </Secao>
 
@@ -314,17 +390,10 @@ export default function PaginaMateriais() {
       {/* ── ABA: CUSTOS FIXOS ── */}
       {abaAtiva === 'fixos' && (
         <div className="max-w-lg">
-          <Secao titulo="Custos fixos mensais">
-            <Campo label="Total de custos fixos por mes" campo="custoFixoMensal" valor={tabela.custoFixoMensal} onChange={set} />
+          <Secao titulo="Custo fixo por caderno">
+            <Campo label="Custo fixo por caderno" campo="custoFixoUnitario" valor={tabela.custoFixoUnitario ?? 25} onChange={set} />
             <p className="text-[10px] text-onix-400 font-sans py-2">
-              Inclua: aluguel, energia, internet, materiais consumidos, etc.
-            </p>
-          </Secao>
-
-          <Secao titulo="Producao media">
-            <Campo label="Cadernos produzidos por mes" campo="producaoMediaMensal" valor={tabela.producaoMediaMensal} onChange={set} sufixo="un" step="1" />
-            <p className="text-[10px] text-onix-400 font-sans py-2">
-              Custo fixo por caderno: {R(tabela.custoFixoMensal / Math.max(tabela.producaoMediaMensal, 1))}
+              Valor a somar em cada caderno para cobrir aluguel, energia, internet, embalagens e demais custos fixos.
             </p>
           </Secao>
 
@@ -340,8 +409,8 @@ export default function PaginaMateriais() {
             <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-3">Formula completa</p>
             <div className="space-y-1 text-xs text-onix-600 font-sans">
               <p>Custo material + Mao de obra + Custo fixo unitario = Custo total</p>
-              <p>Preco final = Custo total × (1 + {tabela.margemLucro}%) × (1 + {tabela.margemInvestimento ?? 10}%)</p>
-              <p className="text-onix-400">= Custo total × {((1 + tabela.margemLucro / 100) * (1 + (tabela.margemInvestimento ?? 10) / 100)).toFixed(3)}</p>
+              <p>Preco final = Custo total × (1+{tabela.margemLucro}%) × (1+{tabela.margemInvestimento ?? 10}%)</p>
+              <p className="text-onix-400">= Custo total × {((1 + tabela.margemLucro / 100) * (1 + (tabela.margemInvestimento ?? 10) / 100)).toFixed(3)}×</p>
             </div>
           </div>
         </div>
@@ -369,7 +438,7 @@ export default function PaginaMateriais() {
               </div>
               <div className="flex justify-between items-center py-1.5">
                 <span className="text-xs text-onix-500 font-sans">
-                  Custo fixo ({R(tabela.custoFixoMensal)}/{tabela.producaoMediaMensal} un)
+                  Custo fixo por caderno
                 </span>
                 <span className="text-xs font-sans text-onix-700">{R(detalhe.custo_fixo)}</span>
               </div>

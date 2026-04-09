@@ -94,7 +94,7 @@ export default function PaginaCalculadora() {
       .then((d: TabelaPrecos) => {
         setTabela(d)
         setValorHora(d.valorHoraArtesa)
-        setCustoFixoUnitario(Math.round((d.custoFixoMensal / Math.max(d.producaoMediaMensal, 1)) * 100) / 100)
+        setCustoFixoUnitario(d.custoFixoUnitario ?? 25)
         setMargemLucro(d.margemLucro)
         setMargemInvestimento(d.margemInvestimento ?? 10)
         setCarregando(false)
@@ -180,14 +180,14 @@ export default function PaginaCalculadora() {
             <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-1">Valores padrão</p>
             <p className="text-xs text-onix-500 font-sans leading-relaxed">
               Hora: {R(tabela.valorHoraArtesa)} ·
-              Fixo/un: {R(tabela.custoFixoMensal / Math.max(tabela.producaoMediaMensal, 1))} ·
+              Fixo/un: {R(tabela.custoFixoUnitario ?? 25)} ·
               Lucro: {tabela.margemLucro}% ·
               Investimento: {tabela.margemInvestimento ?? 10}%
             </p>
             <button
               onClick={() => {
                 setValorHora(tabela.valorHoraArtesa)
-                setCustoFixoUnitario(Math.round((tabela.custoFixoMensal / Math.max(tabela.producaoMediaMensal, 1)) * 100) / 100)
+                setCustoFixoUnitario(tabela.custoFixoUnitario ?? 25)
                 setMargemLucro(tabela.margemLucro)
                 setMargemInvestimento(tabela.margemInvestimento ?? 10)
               }}

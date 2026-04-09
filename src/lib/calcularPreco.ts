@@ -180,8 +180,7 @@ export interface TabelaPrecos {
   tempoExtra_bordado: number
   tempoExtra_bolso: number
   tempoExtra_acabamento: number
-  custoFixoMensal: number
-  producaoMediaMensal: number
+  custoFixoUnitario: number
   margemLucro: number
   margemInvestimento: number
 }
@@ -202,7 +201,7 @@ export const TABELA_PADRAO: TabelaPrecos = {
   valorHoraArtesa: 35, tempo_fino: 0.75, tempo_medio: 1.0, tempo_grosso: 1.5,
   tempo_extraGrosso: 2.0, tempoExtra_gravacao: 0.25, tempoExtra_bordado: 0.75,
   tempoExtra_bolso: 0.2, tempoExtra_acabamento: 0.3,
-  custoFixoMensal: 500, producaoMediaMensal: 20, margemLucro: 50,
+  custoFixoUnitario: 25, margemLucro: 50,
   margemInvestimento: 10,
 }
 
@@ -355,7 +354,7 @@ export function detalharPreco(c: ConfiguracaoCaderno, t: TabelaPrecos) {
 
   const horas_trabalho = Math.round((tempoBase + tempoExtra) * 100) / 100
   const custo_mao_obra = Math.round(horas_trabalho * t.valorHoraArtesa * 100) / 100
-  const custo_fixo     = Math.round((t.custoFixoMensal / Math.max(t.producaoMediaMensal, 1)) * 100) / 100
+  const custo_fixo     = Math.round((t.custoFixoUnitario ?? 25) * 100) / 100
   const custo_total    = Math.round((custo_material + custo_mao_obra + custo_fixo) * 100) / 100
 
   const margemInv      = t.margemInvestimento ?? 10
