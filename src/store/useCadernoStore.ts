@@ -9,8 +9,6 @@ const configuracaoPadrao: ConfiguracaoCaderno = {
 
   // Miolo — Q2
   paginaDedicatoria: false,
-  frasesAoLongo: false,
-  frasePersonalizada: '',
   datasImportantes: false,
   datasPersonalizadas: '',
   essenciaNoParapel: false,

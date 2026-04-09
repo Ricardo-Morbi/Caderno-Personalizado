@@ -113,8 +113,6 @@ export interface ConfiguracaoCaderno {
 
   // Q2 — Toques afetivos
   paginaDedicatoria: boolean
-  frasesAoLongo: boolean
-  frasePersonalizada: string       // condicional: frasesAoLongo
   datasImportantes: boolean
   datasPersonalizadas: string      // condicional: datasImportantes
   essenciaNoParapel: boolean

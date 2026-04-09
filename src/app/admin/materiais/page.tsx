@@ -79,7 +79,7 @@ function CalculadoraValorHora({
 const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   // Miolo
   temaCaderno: 'sem-tema-1', temaPersonalizado: '', padraoPaginas: 'liso',
-  paginaDedicatoria: false, frasesAoLongo: false, frasePersonalizada: '',
+  paginaDedicatoria: false,
   datasImportantes: false, datasPersonalizadas: '', essenciaNoParapel: false,
   formato: 'retrato',
   tipoPapel: 'offset', graturaPapel: '90g',
@@ -109,7 +109,7 @@ const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   corFolhas: 'branca',
 }
 
-type Aba = 'materiais' | 'maoObra' | 'fixos' | 'simulador'
+type Aba = 'maoObra' | 'fixos' | 'simulador'
 
 function R(v: number) {
   return `R$ ${v.toFixed(2).replace('.', ',')}`
@@ -155,7 +155,7 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
 
 export default function PaginaMateriais() {
   const [tabela, setTabela] = useState<TabelaPrecos>(TABELA_PADRAO)
-  const [abaAtiva, setAbaAtiva] = useState<Aba>('materiais')
+  const [abaAtiva, setAbaAtiva] = useState<Aba>('maoObra')
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [carregando, setCarregando] = useState(true)
@@ -205,7 +205,6 @@ export default function PaginaMateriais() {
   }
 
   const ABAS: { id: Aba; label: string }[] = [
-    { id: 'materiais',  label: 'Materiais' },
     { id: 'maoObra',    label: 'Mao de Obra' },
     { id: 'fixos',      label: 'Custos Fixos' },
     { id: 'simulador',  label: 'Simulador' },
@@ -260,94 +259,6 @@ export default function PaginaMateriais() {
           </button>
         ))}
       </div>
-
-      {/* ── ABA: MATERIAIS ── */}
-      {abaAtiva === 'materiais' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <Secao titulo="Base (fio, cola, guarda branca, offset 90g)">
-              <Campo label="Material base do caderno" campo="materialBase" valor={tabela.materialBase} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Adicional por tamanho (mais papel e capa)">
-              <Campo label="A6 (padrao, sem adicional)" campo="tamanho_A6" valor={0} onChange={() => {}} />
-              <Campo label="A5" campo="tamanho_A5" valor={tabela.tamanho_A5} onChange={set} />
-              <Campo label="A4" campo="tamanho_A4" valor={tabela.tamanho_A4} onChange={set} />
-              <Campo label="Personalizado" campo="tamanho_personalizado" valor={tabela.tamanho_personalizado} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Adicional por espessura (mais folhas de miolo)">
-              <Campo label="Fino ~80 fls (padrao)" campo="esp_fino" valor={0} onChange={() => {}} />
-              <Campo label="Medio ~160 fls" campo="espessura_medio" valor={tabela.espessura_medio} onChange={set} />
-              <Campo label="Grosso ~240 fls" campo="espessura_grosso" valor={tabela.espessura_grosso} onChange={set} />
-              <Campo label="Extra-grosso ~320 fls" campo="espessura_extraGrosso" valor={tabela.espessura_extraGrosso} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Material da capa (custo do material)">
-              <Campo label="Kraft" campo="capa_kraft" valor={tabela.capa_kraft} onChange={set} />
-              <Campo label="Papel especial" campo="capa_papelEspecial" valor={tabela.capa_papelEspecial} onChange={set} />
-              <Campo label="Tecido" campo="capa_tecido" valor={tabela.capa_tecido} onChange={set} />
-              <Campo label="Linho" campo="capa_linho" valor={tabela.capa_linho} onChange={set} />
-              <Campo label="Sintetico" campo="capa_sintetico" valor={tabela.capa_sintetico} onChange={set} />
-              <Campo label="Couro" campo="capa_couro" valor={tabela.capa_couro} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Estampa / impressao na capa">
-              <Campo label="Sem estampa (padrao)" campo="est_none" valor={0} onChange={() => {}} />
-              <Campo label="Minimalista" campo="estampa_minimalista" valor={tabela.estampa_minimalista} onChange={set} />
-              <Campo label="Floral" campo="estampa_floral" valor={tabela.estampa_floral} onChange={set} />
-              <Campo label="Abstrata" campo="estampa_abstrata" valor={tabela.estampa_abstrata} onChange={set} />
-              <Campo label="Tematica" campo="estampa_tematica" valor={tabela.estampa_tematica} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Gravacao da capa (material + consumiveis)">
-              <Campo label="Sem gravacao (padrao)" campo="grav_none" valor={0} onChange={() => {}} />
-              <Campo label="Baixo relevo" campo="gravacao_baixoRelevo" valor={tabela.gravacao_baixoRelevo} onChange={set} />
-              <Campo label="Alto relevo" campo="gravacao_altoRelevo" valor={tabela.gravacao_altoRelevo} onChange={set} />
-              <Campo label="Bordado (fio + materiais)" campo="gravacao_bordado" valor={tabela.gravacao_bordado} onChange={set} />
-            </Secao>
-          </div>
-
-          <div>
-            <Secao titulo="Encadernacao (fio, agulha, cola, ferragem)">
-              <Campo label="Copta (padrao)" campo="enc_copta" valor={0} onChange={() => {}} />
-              <Campo label="Long stitch" campo="enc_longStitch" valor={tabela.enc_longStitch} onChange={set} />
-              <Campo label="Francesa cruzada" campo="enc_francesaCruzada" valor={tabela.enc_francesaCruzada} onChange={set} />
-              <Campo label="Wire-O" campo="enc_wireO" valor={tabela.enc_wireO} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Tipo de papel do miolo">
-              <Campo label="Offset (padrao)" campo="pap_off" valor={0} onChange={() => {}} />
-              <Campo label="Reciclado" campo="papel_reciclado" valor={tabela.papel_reciclado} onChange={set} />
-              <Campo label="Polen" campo="papel_polen" valor={tabela.papel_polen} onChange={set} />
-              <Campo label="Vegetal" campo="papel_vegetal" valor={tabela.papel_vegetal} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Adicional por gramatura">
-              <Campo label="90g (padrao)" campo="gram_90" valor={0} onChange={() => {}} />
-              <Campo label="120g" campo="gramatura_120g" valor={tabela.gramatura_120g} onChange={set} />
-              <Campo label="180g" campo="gramatura_180g" valor={tabela.gramatura_180g} onChange={set} />
-              <Campo label="240g" campo="gramatura_240g" valor={tabela.gramatura_240g} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Elementos funcionais (custo de cada item)">
-              <Campo label="Elastico" campo="elem_elastico" valor={tabela.elem_elastico} onChange={set} />
-              <Campo label="Marcador / fitilho" campo="elem_marcador" valor={tabela.elem_marcador} onChange={set} />
-              <Campo label="Bolso interno" campo="elem_bolso" valor={tabela.elem_bolso} onChange={set} />
-              <Campo label="Porta-caneta" campo="elem_portaCaneta" valor={tabela.elem_portaCaneta} onChange={set} />
-              <Campo label="Envelope acoplado" campo="elem_envelope" valor={tabela.elem_envelope} onChange={set} />
-              <Campo label="Abas / orelhas" campo="elem_abas" valor={tabela.elem_abas} onChange={set} />
-            </Secao>
-
-            <Secao titulo="Acabamentos (material + consumiveis)">
-              <Campo label="Pintura de bordas" campo="acab_pinturaBordas" valor={tabela.acab_pinturaBordas} onChange={set} />
-              <Campo label="Deckle edge (corte especial)" campo="acab_deckleEdge" valor={tabela.acab_deckleEdge} onChange={set} />
-              <Campo label="Laminacao (fosca ou brilho)" campo="acab_laminacao" valor={tabela.acab_laminacao} onChange={set} />
-              <Campo label="Guarda especial (nao-branca)" campo="acab_guardaEspecial" valor={tabela.acab_guardaEspecial} onChange={set} />
-            </Secao>
-          </div>
-        </div>
-      )}
 
       {/* ── ABA: MAO DE OBRA ── */}
       {abaAtiva === 'maoObra' && (

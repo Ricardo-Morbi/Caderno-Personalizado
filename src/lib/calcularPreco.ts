@@ -132,45 +132,6 @@ function subtipoCapaEspecial(corCapa: string): 'arbol' | 'star' | 'vtex' {
 // ============================================================
 
 export interface TabelaPrecos {
-  materialBase: number
-  tamanho_A5: number
-  tamanho_A4: number
-  tamanho_personalizado: number
-  espessura_medio: number
-  espessura_grosso: number
-  espessura_extraGrosso: number
-  capa_couro: number
-  capa_sintetico: number
-  capa_tecido: number
-  capa_papelEspecial: number
-  capa_kraft: number
-  capa_linho: number
-  estampa_floral: number
-  estampa_minimalista: number
-  estampa_abstrata: number
-  estampa_tematica: number
-  gravacao_baixoRelevo: number
-  gravacao_altoRelevo: number
-  gravacao_bordado: number
-  enc_francesaCruzada: number
-  enc_longStitch: number
-  enc_wireO: number
-  papel_polen: number
-  papel_reciclado: number
-  papel_vegetal: number
-  gramatura_120g: number
-  gramatura_180g: number
-  gramatura_240g: number
-  elem_elastico: number
-  elem_marcador: number
-  elem_bolso: number
-  elem_portaCaneta: number
-  elem_envelope: number
-  elem_abas: number
-  acab_pinturaBordas: number
-  acab_deckleEdge: number
-  acab_laminacao: number
-  acab_guardaEspecial: number
   valorHoraArtesa: number
   tempo_fino: number
   tempo_medio: number
@@ -186,22 +147,17 @@ export interface TabelaPrecos {
 }
 
 export const TABELA_PADRAO: TabelaPrecos = {
-  materialBase: 8, tamanho_A5: 2, tamanho_A4: 4, tamanho_personalizado: 8,
-  espessura_medio: 3, espessura_grosso: 6, espessura_extraGrosso: 10,
-  capa_couro: 50, capa_sintetico: 20, capa_tecido: 15, capa_papelEspecial: 10,
-  capa_kraft: 7, capa_linho: 18,
-  estampa_floral: 8, estampa_minimalista: 5, estampa_abstrata: 10, estampa_tematica: 15,
-  gravacao_baixoRelevo: 10, gravacao_altoRelevo: 15, gravacao_bordado: 20,
-  enc_francesaCruzada: 8, enc_longStitch: 6, enc_wireO: 12,
-  papel_polen: 5, papel_reciclado: 3, papel_vegetal: 8,
-  gramatura_120g: 4, gramatura_180g: 9, gramatura_240g: 15,
-  elem_elastico: 5, elem_marcador: 7, elem_bolso: 9, elem_portaCaneta: 4,
-  elem_envelope: 8, elem_abas: 5,
-  acab_pinturaBordas: 5, acab_deckleEdge: 10, acab_laminacao: 6, acab_guardaEspecial: 7,
-  valorHoraArtesa: 35, tempo_fino: 0.75, tempo_medio: 1.0, tempo_grosso: 1.5,
-  tempo_extraGrosso: 2.0, tempoExtra_gravacao: 0.25, tempoExtra_bordado: 0.75,
-  tempoExtra_bolso: 0.2, tempoExtra_acabamento: 0.3,
-  custoFixoUnitario: 25, margemLucro: 50,
+  valorHoraArtesa: 35,
+  tempo_fino: 0.75,
+  tempo_medio: 1,
+  tempo_grosso: 1.5,
+  tempo_extraGrosso: 2,
+  tempoExtra_gravacao: 0.25,
+  tempoExtra_bordado: 0.75,
+  tempoExtra_bolso: 0.2,
+  tempoExtra_acabamento: 0.3,
+  custoFixoUnitario: 25,
+  margemLucro: 50,
   margemInvestimento: 10,
 }
 
@@ -242,7 +198,6 @@ export function calcularPreco(c: ConfiguracaoCaderno, _t?: TabelaPrecos): number
 
   // Toques afetivos — R$15 cada (impressão + papel especial)
   if (c.paginaDedicatoria) custo += 15
-  if (c.frasesAoLongo) custo += 15
   if (c.datasImportantes) custo += 15
   if (c.essenciaNoParapel) custo += 15
 

@@ -142,8 +142,6 @@ export default function FichaTecnica({ c }: { c: ConfiguracaoCaderno }) {
       <div className="pt-3">
         <Secao titulo="Toques Afetivos" linhas={[
           { titulo: 'Página de dedicatória', valor: c.paginaDedicatoria ? 'Sim' : null },
-          { titulo: 'Frases ao longo',       valor: c.frasesAoLongo ? 'Sim' : null },
-          { titulo: 'Frase personalizada',   valor: c.frasesAoLongo ? (c.frasePersonalizada || null) : null },
           { titulo: 'Essência no papel',     valor: c.essenciaNoParapel ? 'Sim' : null },
         ]} />
       </div>
