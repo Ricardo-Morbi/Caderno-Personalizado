@@ -12,6 +12,7 @@ import {
   IconeLivroAberto, IconePapel,
   IconeSeta, IconeSetaEsq, IconeCheck,
 } from '@/components/ui/Icons'
+import FichaTecnica from '@/components/admin/FichaTecnica'
 
 // ─── Mapa de ícones SVG por grupo ─────────────────────────────
 const ICONES_GRUPO: Record<string, React.FC<{ tamanho?: number; className?: string }>> = {
@@ -74,16 +75,19 @@ function TotalPedido({ valor }: { valor: number }) {
   )
 }
 
-// ─── Modal de solicitação ──────────────────────────────────────
+// ─── Modal de solicitação — 2 etapas ──────────────────────────
 function ModalSolicitar({
   total,
   configuracao,
+  tabelaPrecos,
   aoFechar,
 }: {
   total: number
   configuracao: ConfiguracaoCaderno
+  tabelaPrecos: TabelaPrecos
   aoFechar: () => void
 }) {
+  const [etapa, setEtapa] = useState<'conferencia' | 'dados'>('conferencia')
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -121,64 +125,97 @@ function ModalSolicitar({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-onix-800/60 backdrop-blur-sm px-4 pb-8 lg:pb-0"
+      className="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-onix-800/60 backdrop-blur-sm px-4 pb-4 lg:pb-0"
       onClick={aoFechar}
     >
       <div
-        className="bg-white w-full max-w-sm p-8 border border-ivoire-400"
+        className="bg-white w-full max-w-sm border border-ivoire-400 max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-8 h-px bg-ouro-400 mb-6" />
-        <h3 className="text-lg font-serif text-onix-700 mb-2">Quase lá!</h3>
-        <p className="text-sm text-onix-400 leading-relaxed mb-1">
-          Seu caderno foi configurado. O valor estimado é:
-        </p>
-        <p className="text-2xl font-serif text-onix-700 mb-6">
-          R$ {total.toFixed(2).replace('.', ',')}
-        </p>
+        {etapa === 'conferencia' ? (
+          <>
+            {/* Cabeçalho */}
+            <div className="px-6 pt-6 pb-4 border-b border-ivoire-300 flex-shrink-0">
+              <div className="w-8 h-px bg-ouro-400 mb-4" />
+              <h3 className="text-lg font-serif text-onix-700 mb-1">Confira seu caderno</h3>
+              <p className="text-xs text-onix-400 font-sans">Verifique todos os detalhes antes de enviar o pedido.</p>
+            </div>
+            {/* Ficha técnica scrollável */}
+            <div className="overflow-y-auto flex-1 px-6 py-4">
+              <FichaTecnica c={configuracao} t={tabelaPrecos} />
+            </div>
+            {/* Botões */}
+            <div className="px-6 pb-6 pt-4 border-t border-ivoire-300 flex-shrink-0 space-y-2">
+              <button
+                onClick={() => setEtapa('dados')}
+                className="w-full bg-onix-700 hover:bg-onix-800 text-ivoire-100 py-3 text-xs tracking-widest uppercase font-sans transition-colors duration-200"
+              >
+                Confirmar e pedir
+              </button>
+              <button
+                type="button"
+                onClick={aoFechar}
+                className="w-full text-xs text-onix-400 hover:text-onix-600 py-1 font-sans transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="p-8">
+            <div className="w-8 h-px bg-ouro-400 mb-6" />
+            <h3 className="text-lg font-serif text-onix-700 mb-2">Quase lá!</h3>
+            <p className="text-sm text-onix-400 leading-relaxed mb-1">
+              Valor estimado:
+            </p>
+            <p className="text-2xl font-serif text-onix-700 mb-6">
+              R$ {total.toFixed(2).replace('.', ',')}
+            </p>
 
-        <form onSubmit={handleEnviar}>
-          <label className="block text-xs text-onix-500 tracking-widest uppercase font-sans mb-1.5">
-            Seu nome
-          </label>
-          <input
-            type="text"
-            value={nome}
-            onChange={e => setNome(e.target.value)}
-            className="w-full border border-ivoire-400 bg-ivoire-50 px-4 py-2.5 text-sm text-onix-700 outline-none focus:border-onix-400 transition-colors mb-4"
-            placeholder="Maria Silva"
-            required
-          />
+            <form onSubmit={handleEnviar}>
+              <label className="block text-xs text-onix-500 tracking-widest uppercase font-sans mb-1.5">
+                Seu nome
+              </label>
+              <input
+                type="text"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                className="w-full border border-ivoire-400 bg-ivoire-50 px-4 py-2.5 text-sm text-onix-700 outline-none focus:border-onix-400 transition-colors mb-4"
+                placeholder="Maria Silva"
+                required
+              />
 
-          <label className="block text-xs text-onix-500 tracking-widest uppercase font-sans mb-1.5">
-            WhatsApp
-          </label>
-          <input
-            type="tel"
-            value={whatsapp}
-            onChange={e => setWhatsapp(e.target.value)}
-            className="w-full border border-ivoire-400 bg-ivoire-50 px-4 py-2.5 text-sm text-onix-700 outline-none focus:border-onix-400 transition-colors mb-6"
-            placeholder="(11) 99999-9999"
-            required
-          />
+              <label className="block text-xs text-onix-500 tracking-widest uppercase font-sans mb-1.5">
+                WhatsApp
+              </label>
+              <input
+                type="tel"
+                value={whatsapp}
+                onChange={e => setWhatsapp(e.target.value)}
+                className="w-full border border-ivoire-400 bg-ivoire-50 px-4 py-2.5 text-sm text-onix-700 outline-none focus:border-onix-400 transition-colors mb-6"
+                placeholder="(11) 99999-9999"
+                required
+              />
 
-          {erro && <p className="text-xs text-red-600 mb-4">{erro}</p>}
+              {erro && <p className="text-xs text-red-600 mb-4">{erro}</p>}
 
-          <button
-            type="submit"
-            disabled={enviando}
-            className="w-full bg-onix-700 hover:bg-onix-800 disabled:opacity-50 text-ivoire-100 py-3 text-xs tracking-widest uppercase font-sans transition-colors duration-200 mb-3"
-          >
-            {enviando ? 'Enviando...' : 'Finalizar pelo WhatsApp'}
-          </button>
-          <button
-            type="button"
-            onClick={aoFechar}
-            className="w-full text-xs text-onix-400 hover:text-onix-600 py-1 font-sans transition-colors"
-          >
-            Cancelar
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={enviando}
+                className="w-full bg-onix-700 hover:bg-onix-800 disabled:opacity-50 text-ivoire-100 py-3 text-xs tracking-widest uppercase font-sans transition-colors duration-200 mb-3"
+              >
+                {enviando ? 'Enviando...' : 'Finalizar pelo WhatsApp'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEtapa('conferencia')}
+                className="w-full text-xs text-onix-400 hover:text-onix-600 py-1 font-sans transition-colors"
+              >
+                ← Rever detalhes
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -257,7 +294,7 @@ export default function PaginaConfigurador() {
 
       {/* Modal de solicitação */}
       {modalAberto && (
-        <ModalSolicitar total={totalValor} configuracao={configuracao} aoFechar={fecharModal} />
+        <ModalSolicitar total={totalValor} configuracao={configuracao} tabelaPrecos={tabelaPrecos} aoFechar={fecharModal} />
       )}
 
       {/* ── SOBRANCELHA ── */}

@@ -118,21 +118,33 @@ function GravacaoCapa({ texto, tipo, posicao, cx, cy, largura, altura, corCapa, 
     )
   }
 
-  if (tipo === 'alto-relevo') {
-    const corTexto = ehEscuro ? 'rgba(255,255,255,0.92)' : 'rgba(20,10,5,0.82)'
-    const corBase  = ehEscuro ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.35)'
-    const corHL    = ehEscuro ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.7)'
+  if (tipo === 'baixo-relevo-foil') {
+    // Hot stamping dourado — gradiente metálico simulado com camadas
+    const foilId = `foil-${Math.abs(textCX | 0)}`
     return (
       <g>
-        {linhas.map((l, i) => <text key={`d${i}`} x={textCX+1.2} y={yInicio+i*lineHeight+1.8}
+        <defs>
+          <linearGradient id={foilId} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#FFF0A0" stopOpacity="1" />
+            <stop offset="30%"  stopColor="#D4AF37" stopOpacity="1" />
+            <stop offset="55%"  stopColor="#F5DFA0" stopOpacity="1" />
+            <stop offset="80%"  stopColor="#A0860A" stopOpacity="1" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        {/* Sombra embassada */}
+        {linhas.map((l, i) => <text key={`s${i}`} x={textCX+0.6} y={yInicio+i*lineHeight+0.8}
           textAnchor={anchor} dominantBaseline="middle" fontSize={fontSize}
-          fontFamily={fontFamily} letterSpacing="0.12em" fill={corBase}>{l}</text>)}
-        {linhas.map((l, i) => <text key={`h${i}`} x={textCX-0.4} y={yInicio+i*lineHeight-0.6}
-          textAnchor={anchor} dominantBaseline="middle" fontSize={fontSize}
-          fontFamily={fontFamily} letterSpacing="0.12em" fill={corHL}>{l}</text>)}
+          fontFamily={fontFamily} letterSpacing="0.12em" fill="rgba(80,50,0,0.5)">{l}</text>)}
+        {/* Texto com gradiente dourado */}
         {linhas.map((l, i) => <text key={i} x={textCX} y={yInicio+i*lineHeight}
           textAnchor={anchor} dominantBaseline="middle" fontSize={fontSize}
-          fontFamily={fontFamily} letterSpacing="0.12em" fill={corTexto}>{l}</text>)}
+          fontFamily={fontFamily} letterSpacing="0.12em" fill={`url(#${foilId})`}>{l}</text>)}
+        {/* Reflexo branco fino no topo */}
+        {linhas.map((l, i) => <text key={`r${i}`} x={textCX} y={yInicio+i*lineHeight-0.3}
+          textAnchor={anchor} dominantBaseline="middle" fontSize={fontSize * 0.35}
+          fontFamily={fontFamily} letterSpacing="0.12em"
+          fill="rgba(255,255,255,0.55)">{l}</text>)}
       </g>
     )
   }
@@ -249,6 +261,7 @@ function VistaAberto({
   marcadorAtivo, corMarcador, pinturaBordasAtiva, corPinturaBordas,
   materialGuarda, corGuarda, padraoGuarda, bolsoInterno,
   tipoPapel, envelopeAcoplado, paginaDedicatoria, paginaFoco,
+  folhasColoridas, corFolhasColoridas,
 }: {
   larguraCapa: number; alturaCapa: number; espessuraLombada: number; raioCanto: number
   corCapa: string; corInternaFolhas: string; corBordaPages: string
@@ -257,6 +270,7 @@ function VistaAberto({
   materialGuarda: string; corGuarda: string; padraoGuarda: string; bolsoInterno: boolean
   tipoPapel: string; envelopeAcoplado: boolean; paginaDedicatoria: boolean
   paginaFoco: 'guarda' | 'miolo' | 'ambas'
+  folhasColoridas?: boolean; corFolhasColoridas?: string
 }) {
   const margem = 24
   const lombadaVis = espessuraLombada * 0.7
@@ -449,6 +463,21 @@ function VistaAberto({
             fill="none" stroke="rgba(195,208,215,0.28)" strokeWidth="0.5"/>
         </g>
       )}
+      {/* Folhas coloridas intercaladas — tiras na borda direita da página */}
+      {folhasColoridas && corFolhasColoridas && (() => {
+        const numTiras = 7
+        const tiraH = pagAlt / (numTiras * 2 + 1)
+        return (
+          <g>
+            {Array.from({ length: numTiras }, (_, i) => (
+              <rect key={i}
+                x={xDir + pagLarg - 3} y={yPag + tiraH * (i * 2 + 1)}
+                width={4} height={tiraH * 0.85}
+                rx={0.5} fill={corFolhasColoridas} opacity={0.75}/>
+            ))}
+          </g>
+        )
+      })()}
       {/* Bolso interno — aba no canto inferior direito da página direita */}
       {bolsoInterno && (
         <g>
@@ -689,7 +718,7 @@ function Costura({ tipoEncadernacao, corFio, W, H }: {
 function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   gravacaoCapa, nomeGravado, posicaoGravacao, aplicacoesCapa,
   raioCanto, elasticoAtivo, corElastico, posicaoElastico,
-  marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
+  marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador, quantidadeMarcadores,
   portaCaneta,
   pinturaBordasAtiva, corPinturaBordas,
   corBordado, tipoTipografia,
@@ -699,7 +728,7 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   W: number; H: number; corCapa: string; materialCapa: string; estampaCapa: string
   gravacaoCapa: string; nomeGravado: string; posicaoGravacao: string; aplicacoesCapa: string[]
   raioCanto: number; elasticoAtivo: boolean; corElastico: string; posicaoElastico: string
-  marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string
+  marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string; quantidadeMarcadores?: number
   portaCaneta: boolean
   pinturaBordasAtiva: boolean; corPinturaBordas: string
   corBordado: string; tipoTipografia: string
@@ -886,51 +915,58 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
           fill={corElastico}/>
       )}
 
-      {/* Marcador — ponta sai abaixo da capa, forma varia pelo tipo */}
-      {marcadorAtivo && (
-        <g>
-          {/* Sombra da ponta */}
-          <polygon
-            points={`${rX + rW + 0.8},${H} ${rX + rW * 2 + 0.8},${H} ${rX + rW * 1.5 + 0.8},${H + tipH}`}
-            fill="rgba(0,0,0,0.18)"/>
-          {/* fitilho: V-cut triangular */}
-          {(tipoMarcador === 'fita-cetim' || tipoMarcador === 'fitilho' || !tipoMarcador) && (
-            <>
-              <polygon points={`${rX},${H} ${rX + rW},${H} ${rX + rW/2},${H + tipH}`} fill={corMarcador}/>
-              <polygon points={`${rX + rW*0.18},${H} ${rX + rW*0.42},${H} ${rX + rW/2},${H + tipH*0.35}`}
-                fill="rgba(255,255,255,0.28)"/>
-            </>
-          )}
-          {/* couro: trapézio com bordas — mais largo e quadrado */}
-          {tipoMarcador === 'couro' && (
-            <>
-              <polygon points={`${rX},${H} ${rX + rW},${H} ${rX + rW*0.85},${H + tipH} ${rX + rW*0.15},${H + tipH}`}
-                fill={corMarcador}/>
-              <polygon points={`${rX + rW*0.15},${H} ${rX + rW*0.38},${H} ${rX + rW*0.32},${H + tipH*0.4} ${rX + rW*0.18},${H + tipH*0.4}`}
-                fill="rgba(255,255,255,0.22)"/>
-              {/* Costura decorativa nas bordas do couro */}
-              <line x1={rX + rW*0.12} y1={H + 2} x2={rX + rW*0.22} y2={H + tipH - 2}
-                stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
-              <line x1={rX + rW*0.78} y1={H + 2} x2={rX + rW*0.88} y2={H + tipH - 2}
-                stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
-            </>
-          )}
-          {/* cordão: círculo/oval representando o cabo do cordão */}
-          {(tipoMarcador === 'cordao-cetim' || tipoMarcador === 'cordao') && (
-            <>
-              <line x1={rX + rW/2} y1={H} x2={rX + rW/2} y2={H + tipH - 4}
-                stroke={corMarcador} strokeWidth={rW * 0.55} strokeLinecap="round"/>
-              <ellipse cx={rX + rW/2} cy={H + tipH - 3} rx={rW * 0.45} ry={rW * 0.45}
-                fill={corMarcador}/>
-              <ellipse cx={rX + rW/2 - rW*0.12} cy={H + tipH - 4} rx={rW*0.14} ry={rW*0.14}
-                fill="rgba(255,255,255,0.35)"/>
-            </>
-          )}
-          {/* Slot de saída */}
-          <rect x={rX - 1.5} y={H - 2} width={rW + 3} height={3}
-            fill="rgba(0,0,0,0.35)" rx={0.5}/>
-        </g>
-      )}
+      {/* Marcador — ponta sai abaixo da capa, chanfrado (corte diagonal) */}
+      {marcadorAtivo && (() => {
+        const qtd = quantidadeMarcadores ?? 1
+        const gap = rW + 4
+        const offsets = qtd >= 2 ? [0, gap] : [0]
+        return (
+          <g>
+            {offsets.map((off, idx) => {
+              const x0 = rX + off
+              return (
+                <g key={idx}>
+                  {/* Sombra */}
+                  <polygon points={`${x0+0.8},${H} ${x0+rW+0.8},${H} ${x0+rW+0.8},${H+tipH*0.55+0.8} ${x0+0.8},${H+tipH+0.8}`}
+                    fill="rgba(0,0,0,0.15)"/>
+                  {/* fita-cetim: chanfrado — corte diagonal (lado direito mais curto) */}
+                  {(tipoMarcador === 'fita-cetim' || tipoMarcador === 'fitilho' || !tipoMarcador) && (
+                    <>
+                      <polygon points={`${x0},${H} ${x0+rW},${H} ${x0+rW},${H+tipH*0.55} ${x0},${H+tipH}`} fill={corMarcador}/>
+                      <polygon points={`${x0+rW*0.15},${H} ${x0+rW*0.5},${H} ${x0+rW*0.5},${H+tipH*0.28} ${x0+rW*0.15},${H+tipH*0.45}`}
+                        fill="rgba(255,255,255,0.28)"/>
+                    </>
+                  )}
+                  {/* couro: trapézio com chanfrado */}
+                  {tipoMarcador === 'couro' && (
+                    <>
+                      <polygon points={`${x0},${H} ${x0+rW},${H} ${x0+rW*0.9},${H+tipH*0.5} ${x0+rW*0.1},${H+tipH}`} fill={corMarcador}/>
+                      <polygon points={`${x0+rW*0.15},${H} ${x0+rW*0.38},${H} ${x0+rW*0.35},${H+tipH*0.35} ${x0+rW*0.13},${H+tipH*0.45}`}
+                        fill="rgba(255,255,255,0.22)"/>
+                      <line x1={x0+rW*0.12} y1={H+2} x2={x0+rW*0.11} y2={H+tipH-2}
+                        stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
+                      <line x1={x0+rW*0.82} y1={H+2} x2={x0+rW*0.88} y2={H+tipH*0.45}
+                        stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="1.5 1.5"/>
+                    </>
+                  )}
+                  {/* cordão */}
+                  {(tipoMarcador === 'cordao-cetim' || tipoMarcador === 'cordao') && (
+                    <>
+                      <line x1={x0+rW/2} y1={H} x2={x0+rW/2} y2={H+tipH-4}
+                        stroke={corMarcador} strokeWidth={rW*0.55} strokeLinecap="round"/>
+                      <ellipse cx={x0+rW/2} cy={H+tipH-3} rx={rW*0.45} ry={rW*0.45} fill={corMarcador}/>
+                      <ellipse cx={x0+rW/2-rW*0.12} cy={H+tipH-4} rx={rW*0.14} ry={rW*0.14}
+                        fill="rgba(255,255,255,0.35)"/>
+                    </>
+                  )}
+                  {/* Slot de saída */}
+                  <rect x={x0-1.5} y={H-2} width={rW+3} height={3} fill="rgba(0,0,0,0.35)" rx={0.5}/>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })()}
 
       {/* Porta-caneta — tira vertical na borda direita da capa */}
       {portaCaneta && (
@@ -1026,10 +1062,11 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
 }
 
 // ─── Face: Verso (contracapa) ─────────────────────────────────
-function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, linhoId, tipoCantoneiras, aplicacoesCapa }: {
+function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, linhoId, tipoCantoneiras, aplicacoesCapa, elasticoAtivo, corElastico, posicaoElastico, bolsoInterno, envelopeContracapa }: {
   W: number; H: number; corCapa: string; materialCapa: string; raioCanto: number
   tipoTextura: string; tipoLaminacao: string; papelEspecialId?: string; linhoId?: string; tipoCantoneiras?: string
-  aplicacoesCapa?: string[]
+  aplicacoesCapa?: string[]; elasticoAtivo?: boolean; corElastico?: string; posicaoElastico?: string
+  bolsoInterno?: boolean; envelopeContracapa?: boolean
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
   const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
@@ -1126,6 +1163,45 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
       {aplicacoesCapa && aplicacoesCapa.length > 0 && (
         <AplicacoesCapa aplicacoes={aplicacoesCapa} cx={W/2} cy={H/2}
           largura={W} altura={H} raioCanto={raioCanto}/>
+      )}
+      {/* Elástico — posição espelhada em relação à frente */}
+      {elasticoAtivo && (
+        <rect
+          x={posicaoElastico === 'vertical' ? W*0.26 : 0}
+          y={posicaoElastico === 'vertical' ? 0 : H*0.26}
+          width={posicaoElastico === 'vertical' ? W*0.04 : W}
+          height={posicaoElastico === 'vertical' ? H : H*0.04}
+          fill={corElastico} opacity="0.85" rx="1"
+        />
+      )}
+      {/* Bolso interno — indicador visual na contracapa */}
+      {bolsoInterno && !envelopeContracapa && (
+        <g opacity="0.72">
+          <rect x={W*0.08} y={H*0.68} width={W*0.84} height={H*0.26}
+            rx={raioCanto*0.5} fill="rgba(200,185,165,0.35)" stroke="rgba(150,130,110,0.45)" strokeWidth="0.8"/>
+          <rect x={W*0.08} y={H*0.68} width={W*0.84} height={3}
+            rx={raioCanto*0.5} fill="rgba(150,130,110,0.2)"/>
+          <line x1={W*0.08} y1={H*0.68} x2={W*0.92} y2={H*0.68}
+            stroke="rgba(150,130,110,0.5)" strokeWidth="0.7" strokeDasharray="2 2"/>
+          <text x={W*0.5} y={H*0.82} textAnchor="middle" dominantBaseline="middle"
+            fontSize="5.5" fill="rgba(130,110,90,0.6)" fontFamily="Georgia, serif" letterSpacing="0.08em">
+            bolso
+          </text>
+        </g>
+      )}
+      {/* Envelope contracapa — indicador visual */}
+      {envelopeContracapa && (
+        <g opacity="0.75">
+          <rect x={W*0.06} y={H*0.60} width={W*0.88} height={H*0.34}
+            rx={raioCanto*0.5} fill="rgba(232,224,208,0.55)"
+            stroke="rgba(150,128,105,0.50)" strokeWidth="0.8"/>
+          <path d={`M ${W*0.06},${H*0.60} L ${W*0.5},${H*0.725} L ${W*0.94},${H*0.60} Z`}
+            fill="rgba(218,208,190,0.60)" stroke="rgba(150,128,105,0.38)" strokeWidth="0.6"/>
+          <text x={W*0.5} y={H*0.82} textAnchor="middle" dominantBaseline="middle"
+            fontSize="5.5" fill="rgba(130,110,90,0.6)" fontFamily="Georgia, serif" letterSpacing="0.10em">
+            envelope
+          </text>
+        </g>
       )}
       {/* Highlight aresta direita */}
       <line x1={W-2} y1={raioCanto} x2={W-2} y2={H-raioCanto}
@@ -1357,21 +1433,22 @@ function Livro3D({ bW, bH, bD, props }: {
     gravacaoCapa: string; nomeGravado: string; posicaoGravacao: string; aplicacoesCapa: string[]
     raioCanto: number; tipoEncadernacao: string; tipoLombada: string; corFio: string
     elasticoAtivo: boolean; corElastico: string; posicaoElastico: string
-    marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string
+    marcadorAtivo: boolean; tipoMarcador: string; corMarcador: string; larguraMarcador: string; quantidadeMarcadores?: number
     portaCaneta: boolean
     pinturaBordasAtiva: boolean; corPinturaBordas: string
     tipoCorteEspecial: string
     corInternaFolhas: string; corBordado: string; tipoTipografia: string
     tipoTextura: string; tipoLaminacao: string; abasOrelhas: boolean; tipoCantoneiras: string
-    papelEspecialId?: string; linhoId?: string
+    papelEspecialId?: string; linhoId?: string; bolsoInterno?: boolean; envelopeContracapa?: boolean
   }
 }) {
   const { corCapa, materialCapa, estampaCapa, gravacaoCapa, nomeGravado, posicaoGravacao,
     aplicacoesCapa, raioCanto, tipoEncadernacao, tipoLombada, corFio,
-    elasticoAtivo, corElastico, posicaoElastico, marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
+    elasticoAtivo, corElastico, posicaoElastico, marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador, quantidadeMarcadores,
     portaCaneta, pinturaBordasAtiva, corPinturaBordas, tipoCorteEspecial,
     corInternaFolhas, corBordado, tipoTipografia,
-    tipoTextura, tipoLaminacao, abasOrelhas, tipoCantoneiras, papelEspecialId, linhoId } = props
+    tipoTextura, tipoLaminacao, abasOrelhas, tipoCantoneiras, papelEspecialId, linhoId,
+    bolsoInterno, envelopeContracapa } = props
 
   const face: React.CSSProperties = { position: 'absolute', overflow: 'hidden' }
   const faceOpen: React.CSSProperties = { position: 'absolute', overflow: 'visible' }
@@ -1389,6 +1466,7 @@ function Livro3D({ bW, bH, bD, props }: {
           raioCanto={raioCanto} elasticoAtivo={elasticoAtivo} corElastico={corElastico}
           posicaoElastico={posicaoElastico} marcadorAtivo={marcadorAtivo}
           tipoMarcador={tipoMarcador} corMarcador={corMarcador} larguraMarcador={larguraMarcador}
+          quantidadeMarcadores={quantidadeMarcadores}
           portaCaneta={portaCaneta}
           pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}
           corBordado={corBordado} tipoTipografia={tipoTipografia}
@@ -1401,7 +1479,9 @@ function Livro3D({ bW, bH, bD, props }: {
         transform: `rotateY(180deg) translateZ(${D/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}
           tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} papelEspecialId={papelEspecialId}
-          linhoId={linhoId} tipoCantoneiras={tipoCantoneiras} aplicacoesCapa={aplicacoesCapa}/>
+          linhoId={linhoId} tipoCantoneiras={tipoCantoneiras} aplicacoesCapa={aplicacoesCapa}
+          elasticoAtivo={elasticoAtivo} corElastico={corElastico} posicaoElastico={posicaoElastico}
+          bolsoInterno={bolsoInterno} envelopeContracapa={envelopeContracapa}/>
       </div>
 
       {/* LOMBADA (esquerda) */}
@@ -1448,10 +1528,17 @@ export default function PreviewCaderno() {
   const paginaFocoAtual: 'guarda' | 'miolo' | 'ambas' =
     PAGINA_FOCO[perguntaAtualPreview?.id ?? ''] ?? 'ambas'
 
-  // Auto-modo: grupo 1 = fechado (aparência/capa), grupo 2 = aberto (miolo)
+  // Auto-modo: abre/fecha conforme pergunta ativa
+  // - grupo 2 (miolo) → aberto
+  // - extras-elementos (bolso/envelope) → aberto (ver layout nas páginas)
+  // - pinturaBordasAtiva / corPinturaBordas → fechado (ver bordas laterais no 3D)
   useEffect(() => {
-    setModo(perguntaAtualPreview?.grupo === 2 ? 'aberto' : 'fechado')
-  }, [perguntaAtualPreview?.grupo])
+    const id = perguntaAtualPreview?.id ?? ''
+    const grupo = perguntaAtualPreview?.grupo ?? 1
+    const deveFechar = id === 'pinturaBordasAtiva' || id === 'corPinturaBordas'
+    const deveAbrir  = grupo === 2 || id === 'extras-elementos'
+    setModo(deveFechar ? 'fechado' : deveAbrir ? 'aberto' : 'fechado')
+  }, [perguntaAtualPreview?.id, perguntaAtualPreview?.grupo])
 
   // Refs para manipulação DOM direta — zero re-renders durante drag
   const wrapRef      = useRef<HTMLDivElement>(null)
@@ -1473,14 +1560,15 @@ export default function PreviewCaderno() {
     tipoTipografia, corBordado,
     tipoEncadernacao, tipoLombada, corFio,
     elasticoAtivo, corElastico, posicaoElastico,
-    marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
-    bolsoInterno, portaCaneta, envelopeAcoplado, abasOrelhas,
+    marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador, quantidadeMarcadores,
+    bolsoInterno, portaCaneta, envelopeAcoplado, envelopeContracapa, abasOrelhas,
     tipoCantos, tipoCantoneiras, pinturaBordasAtiva, corPinturaBordas,
     tipoCorteEspecial, tipoLaminacao, tipoTextura,
     padraoPaginas, corFolhas, tipoPapel,
     materialGuarda, corGuarda, padraoGuarda, padraoGuardaEstampado,
     paginaDedicatoria, querPersonalizacaoCapa,
     papelEspecialId, linhoId, pespontosAtivo,
+    folhasColoridas, corFolhasColoridas,
   } = configuracao
 
   const prop = PROPORCAO_POR_FORMATO[formato] ?? PROPORCAO_POR_FORMATO['retrato']
@@ -1524,6 +1612,7 @@ export default function PreviewCaderno() {
     elasticoAtivo: elasticoAtivo ?? false, corElastico, posicaoElastico,
     marcadorAtivo: marcadorAtivo ?? false, tipoMarcador: tipoMarcador ?? 'fita-cetim',
     corMarcador, larguraMarcador: larguraMarcador ?? 'medio',
+    quantidadeMarcadores: quantidadeMarcadores ?? 1,
     portaCaneta: portaCaneta ?? false,
     pinturaBordasAtiva: pinturaBordasAtiva ?? false, corPinturaBordas,
     tipoCorteEspecial: tipoCorteEspecial ?? 'nenhum',
@@ -1532,6 +1621,8 @@ export default function PreviewCaderno() {
     tipoLaminacao: tipoLaminacao ?? 'nenhuma',
     abasOrelhas: abasOrelhas ?? false,
     tipoCantoneiras: tipoCantoneiras ?? 'sem-cantoneiras',
+    bolsoInterno: bolsoInterno ?? false,
+    envelopeContracapa: envelopeContracapa ?? false,
   }
 
   const propsAberto = {
@@ -1548,6 +1639,8 @@ export default function PreviewCaderno() {
     envelopeAcoplado: envelopeAcoplado ?? false,
     paginaDedicatoria: paginaDedicatoria ?? false,
     paginaFoco: paginaFocoAtual,
+    folhasColoridas: folhasColoridas ?? false,
+    corFolhasColoridas: corFolhasColoridas ?? '#A8C5A0',
   }
 
   // Aplica rotação diretamente no DOM — sem passar pelo React
