@@ -1026,9 +1026,10 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
 }
 
 // ─── Face: Verso (contracapa) ─────────────────────────────────
-function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, linhoId, tipoCantoneiras }: {
+function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, linhoId, tipoCantoneiras, aplicacoesCapa }: {
   W: number; H: number; corCapa: string; materialCapa: string; raioCanto: number
   tipoTextura: string; tipoLaminacao: string; papelEspecialId?: string; linhoId?: string; tipoCantoneiras?: string
+  aplicacoesCapa?: string[]
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
   const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
@@ -1121,6 +1122,11 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
           </g>
         )
       })()}
+      {/* Aplicações (pespontos etc) */}
+      {aplicacoesCapa && aplicacoesCapa.length > 0 && (
+        <AplicacoesCapa aplicacoes={aplicacoesCapa} cx={W/2} cy={H/2}
+          largura={W} altura={H} raioCanto={raioCanto}/>
+      )}
       {/* Highlight aresta direita */}
       <line x1={W-2} y1={raioCanto} x2={W-2} y2={H-raioCanto}
         stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
@@ -1395,7 +1401,7 @@ function Livro3D({ bW, bH, bD, props }: {
         transform: `rotateY(180deg) translateZ(${D/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}
           tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} papelEspecialId={papelEspecialId}
-          linhoId={linhoId} tipoCantoneiras={tipoCantoneiras}/>
+          linhoId={linhoId} tipoCantoneiras={tipoCantoneiras} aplicacoesCapa={aplicacoesCapa}/>
       </div>
 
       {/* LOMBADA (esquerda) */}
