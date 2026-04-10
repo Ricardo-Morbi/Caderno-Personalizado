@@ -109,7 +109,7 @@ const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   tipoCorteEspecial: 'nenhum', tipoCantos: 'retos',
   pinturaBordasAtiva: false, corPinturaBordas: '#D4AF37',
   // Capa
-  materialCapa: 'couro', corCapa: '#6B4226', corCapaTecido: '',
+  materialCapa: 'couro', corCapa: '#6B4226',
   querPersonalizacaoCapa: false, nomeGravado: '', gravacaoCapa: 'nenhuma',
   tipoBordado: 'cor-unica', corBordado: '#F5DFA0',
   tipoTipografia: 'serif', posicaoGravacao: 'centro', estampaCapa: 'nenhuma',
@@ -122,6 +122,7 @@ const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   bolsoInterno: false, envelopeAcoplado: false, envelopeContracapa: false, portaCaneta: false, abasOrelhas: false,
   tipoEmbalagem: 'padrao', padraoEmbalagem: 'algodao-cru',
   papelEspecialId: '',
+  linhoId: '',
   pespontosAtivo: false,
   // Legado
   impressoesInternas: false, divisoriasInternas: false,

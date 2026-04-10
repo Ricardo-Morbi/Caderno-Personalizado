@@ -113,13 +113,35 @@ export default function PreviewCadernoMini({ configuracao: c, tamanho = 120 }: P
           fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5"
           strokeDasharray="2 3"/>
       )}
-      {c.materialCapa === 'tecido' && (
-        <g opacity="0.15">
-          {Array.from({length: 6}, (_,i) => (
-            <line key={i} x1={xCapa} y1={yCapa + i * (altCapa/5)} x2={xCapa+largCapa} y2={yCapa + i * (altCapa/5)}
-              stroke="black" strokeWidth="0.4"/>
-          ))}
-        </g>
+      {c.materialCapa === 'linho' && c.linhoId && (
+        <>
+          <defs>
+            <clipPath id="clip-linho-mini">
+              <rect x={xCapa} y={yCapa} width={largCapa} height={altCapa} rx={raioCanto}/>
+            </clipPath>
+          </defs>
+          <image
+            href={`/linhos/${c.linhoId}.webp`}
+            x={xCapa} y={yCapa} width={largCapa} height={altCapa}
+            preserveAspectRatio="xMidYMid slice"
+            clipPath="url(#clip-linho-mini)"
+          />
+        </>
+      )}
+      {c.materialCapa === 'papel-especial' && c.papelEspecialId && (
+        <>
+          <defs>
+            <clipPath id="clip-papel-mini">
+              <rect x={xCapa} y={yCapa} width={largCapa} height={altCapa} rx={raioCanto}/>
+            </clipPath>
+          </defs>
+          <image
+            href={`/papeis-especiais/${c.papelEspecialId}.webp`}
+            x={xCapa} y={yCapa} width={largCapa} height={altCapa}
+            preserveAspectRatio="xMidYMid slice"
+            clipPath="url(#clip-papel-mini)"
+          />
+        </>
       )}
 
       {/* Aplicações: metais */}

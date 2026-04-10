@@ -56,7 +56,6 @@ const configuracaoPadrao: ConfiguracaoCaderno = {
 
   // Capa — Q15
   corCapa: '#6B4226',
-  corCapaTecido: '',
 
   // Capa — Q16
   querPersonalizacaoCapa: false,
@@ -109,6 +108,9 @@ const configuracaoPadrao: ConfiguracaoCaderno = {
 
   // Papel especial
   papelEspecialId: '',
+
+  // Linho
+  linhoId: '',
 
   // Pespontos
   pespontosAtivo: false,

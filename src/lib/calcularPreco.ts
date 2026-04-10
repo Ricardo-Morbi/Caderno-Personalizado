@@ -70,11 +70,6 @@ const CAPA_SINTETICO: Record<TamanhoMiolo, number> = {
   A6: 10, A5: 20, A4: 30, especial: 22,
 }
 
-// Tecido/tricoline (R$21,49/m, ~1,4m de largura)
-const CAPA_TECIDO: Record<TamanhoMiolo, number> = {
-  A6: 6, A5: 12, A4: 18, especial: 14,
-}
-
 // Árbol (R$19,65/folha ~66×96cm)
 const CAPA_PAPEL_ARBOL: Record<TamanhoMiolo, number> = {
   A6: 1.50, A5: 3.15, A4: 5.75, especial: 4.15,
@@ -228,8 +223,6 @@ export function calcularPreco(c: ConfiguracaoCaderno, _t?: TabelaPrecos): number
     custo += CAPA_COURO[tam]
   } else if (c.materialCapa === 'sintetico') {
     custo += CAPA_SINTETICO[tam]
-  } else if (c.materialCapa === 'tecido') {
-    custo += CAPA_TECIDO[tam]
   } else if (c.materialCapa === 'papel-especial') {
     const sub = subtipoCapaEspecial(c.corCapa)
     if (sub === 'arbol') custo += CAPA_PAPEL_ARBOL[tam]
@@ -240,6 +233,9 @@ export function calcularPreco(c: ConfiguracaoCaderno, _t?: TabelaPrecos): number
   } else if (c.materialCapa === 'linho') {
     custo += CAPA_LINHO[tam]
   }
+
+  // Pespontos — R$8 (linha encerada + consumíveis)
+  if (c.pespontosAtivo) custo += 8
 
   // Personalização (qualquer tipo) — R$25 (consumíveis de gravação/bordado)
   if (c.querPersonalizacaoCapa && c.nomeGravado.trim().length > 0) {
@@ -331,11 +327,13 @@ export function itemizarPreco(c: ConfiguracaoCaderno): ItemPreco[] {
   // Capa — base
   itens.push({ titulo: 'Base de papelão (capa)', custo: BASE_CAPA[tam] })
 
+  // Pespontos
+  if (c.pespontosAtivo) itens.push({ titulo: 'Pespontos', custo: 8 })
+
   // Capa — material
   let custoCapaMat = 0
   if (c.materialCapa === 'couro')          custoCapaMat = CAPA_COURO[tam]
   else if (c.materialCapa === 'sintetico') custoCapaMat = CAPA_SINTETICO[tam]
-  else if (c.materialCapa === 'tecido')    custoCapaMat = CAPA_TECIDO[tam]
   else if (c.materialCapa === 'papel-especial') {
     const sub = subtipoCapaEspecial(c.corCapa)
     custoCapaMat = sub === 'arbol' ? CAPA_PAPEL_ARBOL[tam] : sub === 'vtex' ? CAPA_PAPEL_VTEX[tam] : CAPA_PAPEL_STAR[tam]
@@ -400,7 +398,7 @@ export function detalharPreco(c: ConfiguracaoCaderno, t: TabelaPrecos) {
   const temGravacao = c.gravacaoCapa && ['baixo-relevo', 'alto-relevo'].includes(c.gravacaoCapa)
   const temBordado  = c.gravacaoCapa === 'bordado'
   const temBolso    = c.bolsoInterno || c.envelopeAcoplado || c.envelopeContracapa
-  const temAcab     = c.pinturaBordasAtiva || c.tipoCorteEspecial === 'deckle-edge'
+  const temAcab     = c.pinturaBordasAtiva || c.tipoCorteEspecial === 'deckle-edge' || c.pespontosAtivo
 
   if (temGravacao) tempoExtra += t.tempoExtra_gravacao
   if (temBordado)  tempoExtra += t.tempoExtra_bordado

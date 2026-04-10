@@ -26,7 +26,6 @@ const opcoesTipografia: { valor: TipoTipografia; label: string; descricao: strin
 const opcoesMaterial: { valor: MaterialCapa; label: string; descricao: string }[] = [
   { valor: 'couro', label: 'Couro', descricao: 'Natural, durável' },
   { valor: 'sintetico', label: 'Sintético', descricao: 'Vegano, resistente' },
-  { valor: 'tecido', label: 'Tecido', descricao: 'Suave, colorido' },
   { valor: 'papel-especial', label: 'Papel Especial', descricao: 'Elegante, leve' },
   { valor: 'kraft', label: 'Kraft', descricao: 'Rústico, natural' },
   { valor: 'linho', label: 'Linho', descricao: 'Texturizado, chic' },

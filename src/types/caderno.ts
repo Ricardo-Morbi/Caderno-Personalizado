@@ -9,7 +9,6 @@ export type EspessuraCaderno = 'fino' | 'medio' | 'grosso'
 export type MaterialCapa =
   | 'couro'
   | 'sintetico'
-  | 'tecido'
   | 'papel-especial'
   | 'kraft'
   | 'linho'
@@ -162,7 +161,6 @@ export interface ConfiguracaoCaderno {
 
   // Q15 — Cor da capa
   corCapa: string
-  corCapaTecido: string            // condicional: tecido — campo de texto
 
   // Q16 — Querer personalização (toggle Sim/Não)
   querPersonalizacaoCapa: boolean
@@ -221,6 +219,9 @@ export interface ConfiguracaoCaderno {
 
   // Papel especial selecionado (condicional: materialCapa === 'papel-especial')
   papelEspecialId: string
+
+  // Linho selecionado (condicional: materialCapa === 'linho')
+  linhoId: string
 
   // Pespontos (aplicação na capa)
   pespontosAtivo: boolean

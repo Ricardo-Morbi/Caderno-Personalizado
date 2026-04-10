@@ -63,6 +63,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     opcoes: [
       { valor: 'couro',          label: 'Couro',          descricao: 'Natural · Durável · Envelhece bem' },
       { valor: 'sintetico',      label: 'Sintético',      descricao: 'Vegano · Resistente · Moderno' },
+
       { valor: 'papel-especial', label: 'Papel especial', descricao: 'Elegante · Leve · Texturizado' },
       { valor: 'kraft',          label: 'Kraft',          descricao: 'Rústico · Natural · Artesanal' },
       { valor: 'linho',          label: 'Linho',          descricao: 'Chic · Texturizado · Refinado' },
@@ -114,34 +115,23 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     ],
   },
 
-  // Cor da capa — tecido: campo de texto para cor principal
+  // Linho — escolha da textura com foto real
   {
-    id: 'corCapaTecido',
+    id: 'corCapa-linho',
     grupo: 1,
-    titulo: 'Qual a cor principal do revestimento em tecido?',
-    descricao: 'Escreva a seguir qual a cor principal do tecido do seu caderno/livro',
-    tipo: 'texto',
-    campo: 'corCapaTecido',
-    placeholder: 'Ex: azul marinho, rosa chá, estampado floral...',
-    maxLength: 60,
-    visivel: (c) => c.materialCapa === 'tecido',
-  },
-
-  // Padrão do tecido
-  {
-    id: 'padrao-tecido',
-    grupo: 1,
-    titulo: 'Qual o padrão do tecido?',
+    titulo: 'Qual linho você quer na capa?',
+    descricao: 'Tecido natural com textura refinada — escolha a cor',
     tipo: 'selecao-grade',
-    campo: 'estampaCapa',
+    campo: 'linhoId',
     avancaAutomatico: true,
-    visivel: (c) => c.materialCapa === 'tecido',
+    visivel: (c) => c.materialCapa === 'linho',
     opcoes: [
-      { valor: 'nenhuma',     label: 'Liso (cor única)',     descricao: 'Sem estampa' },
-      { valor: 'floral',      label: 'Flores',               descricao: 'Estampa floral' },
-      { valor: 'minimalista', label: 'Grid (mini xadrez)',    descricao: 'Grade discreta' },
-      { valor: 'abstrata',    label: 'Geométrico/Borboletas', descricao: 'Padrão geométrico' },
-      { valor: 'tematica',    label: 'Poás (bolinhas)',       descricao: 'Bolinhas delicadas' },
+      { valor: 'Linho-1', label: 'Linho 1', imagem: '/linhos/Linho-1.webp' },
+      { valor: 'Linho-2', label: 'Linho 2', imagem: '/linhos/Linho-2.webp' },
+      { valor: 'Linho-3', label: 'Linho 3', imagem: '/linhos/Linho-3.webp' },
+      { valor: 'Linho-4', label: 'Linho 4', imagem: '/linhos/Linho-4.webp' },
+      { valor: 'Linho-5', label: 'Linho 5', imagem: '/linhos/Linho-5.webp' },
+      { valor: 'Linho-6', label: 'Linho 6', imagem: '/linhos/Linho-6.webp' },
     ],
   },
 
@@ -213,7 +203,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'querPersonalizacaoCapa',
     grupo: 1,
     titulo: 'Deseja personalizar a capa com nome, iniciais ou frase?',
-    descricao: 'Gravação, bordado ou baixo/alto relevo — +R$25,00',
+    descricao: 'Gravação, bordado ou baixo/alto relevo',
     tipo: 'toggle',
     campo: 'querPersonalizacaoCapa',
     avancaAutomatico: true,
@@ -240,9 +230,9 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     avancaAutomatico: true,
     visivel: (c) => c.querPersonalizacaoCapa && c.nomeGravado.trim().length > 0,
     opcoes: [
-      { valor: 'baixo-relevo', label: 'Baixo relevo', descricao: 'Sutil e elegante — afundado na capa · +R$25,00' },
-      { valor: 'alto-relevo',  label: 'Alto relevo',  descricao: 'Marcante — elevado na capa · +R$25,00' },
-      { valor: 'bordado',      label: 'Bordado',      descricao: 'Feito à mão com fio — o mais artesanal · +R$25,00' },
+      { valor: 'baixo-relevo', label: 'Baixo relevo', descricao: 'Sutil e elegante — afundado na capa' },
+      { valor: 'alto-relevo',  label: 'Alto relevo',  descricao: 'Marcante — elevado na capa' },
+      { valor: 'bordado',      label: 'Bordado',      descricao: 'Feito à mão com fio — o mais artesanal' },
     ],
   },
 
@@ -313,9 +303,9 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     avancaAutomatico: true,
     opcoes: [
       { valor: 'nenhuma',          label: 'Sem cantoneiras',     descricao: 'Capa sem adicional' },
-      { valor: 'papel',            label: 'Em papel',            descricao: '+R$5,00' },
-      { valor: 'metal-simples',    label: 'Em metal simples',    descricao: '+R$9,00' },
-      { valor: 'metal-trabalhado', label: 'Em metal trabalhado', descricao: '+R$12,00' },
+      { valor: 'papel',            label: 'Em papel',            descricao: 'Proteção discreta nas pontas' },
+      { valor: 'metal-simples',    label: 'Em metal simples',    descricao: 'Metal liso e resistente' },
+      { valor: 'metal-trabalhado', label: 'Em metal trabalhado', descricao: 'Metal com acabamento trabalhado' },
     ],
   },
 
@@ -323,7 +313,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'pespontosAtivo',
     grupo: 1,
     titulo: 'Quer pespontos na capa?',
-    descricao: 'Costura decorativa ao redor da capa e contracapa — +R$18,00',
+    descricao: 'Costura decorativa ao redor da capa e contracapa',
     tipo: 'toggle',
     campo: 'pespontosAtivo',
     avancaAutomatico: true,
@@ -348,7 +338,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'tipoEncadernacao',
     grupo: 1,
     titulo: 'Qual tipo de costura?',
-    descricao: 'Define como as páginas são presas — +R$6,00 (Wire-O: +R$9,00)',
+    descricao: 'Define como as páginas são presas',
     tipo: 'selecao-lista',
     campo: 'tipoEncadernacao',
     avancaAutomatico: true,
@@ -378,7 +368,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'elasticoAtivo',
     grupo: 1,
     titulo: 'Quer elástico de fechamento?',
-    descricao: 'Mantém o caderno fechado e protegido — +R$6,00',
+    descricao: 'Mantém o caderno fechado e protegido',
     tipo: 'toggle',
     campo: 'elasticoAtivo',
     avancaAutomatico: true,
@@ -398,7 +388,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'marcadorAtivo',
     grupo: 1,
     titulo: 'Quer marcador de páginas?',
-    descricao: 'Fita de cetim, couro ou cordão saindo do caderno — +R$8,00',
+    descricao: 'Fita de cetim saindo do caderno',
     tipo: 'toggle',
     campo: 'marcadorAtivo',
     avancaAutomatico: true,
@@ -428,7 +418,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     visivel: (c) => c.marcadorAtivo,
     opcoes: [
       { valor: '1', label: 'Apenas um',       descricao: 'Um marcador' },
-      { valor: '2', label: 'Dois marcadores',  descricao: 'Segundo marcador · +R$8,00' },
+      { valor: '2', label: 'Dois marcadores',  descricao: 'Para múltiplos marcadores de página' },
     ],
   },
 
@@ -451,7 +441,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'extras-elementos',
     grupo: 1,
     titulo: 'Outros elementos funcionais?',
-    descricao: 'Itens extras para seu caderno/livro — R$7,00 cada',
+    descricao: 'Itens extras para seu caderno/livro',
     tipo: 'multipla-escolha',
     campo: 'bolsoInterno',
     opcoes: [
@@ -541,7 +531,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'extras-afetivos',
     grupo: 2,
     titulo: 'Deseja que seu caderno/livro traga toques afetivos?',
-    descricao: 'Elementos especiais que tornam o caderno único — R$15,00 cada',
+    descricao: 'Elementos especiais que tornam o caderno único',
     tipo: 'multipla-escolha',
     campo: 'paginaDedicatoria',
     opcoes: [
@@ -590,7 +580,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     avancaAutomatico: true,
     visivel: (c) => c.tipoCantoneiras === 'nenhuma',
     opcoes: [
-      { valor: 'arredondados', label: 'Arredondados', descricao: 'Cantos curvos e suaves · +R$5,00' },
+      { valor: 'arredondados', label: 'Arredondados', descricao: 'Cantos curvos e suaves' },
       { valor: 'retos',        label: 'Retos',        descricao: 'Cantos em 90° — clássico' },
     ],
   },
@@ -599,7 +589,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     id: 'folhasColoridas',
     grupo: 2,
     titulo: 'Deseja folhas coloridas intercaladas?',
-    descricao: 'De 5 a 10 folhas coloridas — R$0,50 por folha',
+    descricao: 'De 5 a 10 folhas coloridas intercaladas',
     tipo: 'toggle',
     campo: 'folhasColoridas',
     avancaAutomatico: true,
@@ -638,8 +628,8 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'tipoEmbalagem',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'padrao',   label: 'Embalagem padrão',        descricao: 'Saquinho em tecido de algodão · +R$25,00' },
-      { valor: 'presente', label: 'Embalagem para presente', descricao: 'Saquinho + caixa personalizada · +R$65,00' },
+      { valor: 'padrao',   label: 'Embalagem padrão',        descricao: 'Saquinho em tecido de algodão cru' },
+      { valor: 'presente', label: 'Embalagem para presente', descricao: 'Saquinho + caixa personalizada' },
     ],
   },
 

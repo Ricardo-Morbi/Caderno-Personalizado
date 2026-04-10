@@ -694,7 +694,7 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   pinturaBordasAtiva, corPinturaBordas,
   corBordado, tipoTipografia,
   tipoTextura, tipoLaminacao, abasOrelhas, tipoCantoneiras,
-  papelEspecialId,
+  papelEspecialId, linhoId,
 }: {
   W: number; H: number; corCapa: string; materialCapa: string; estampaCapa: string
   gravacaoCapa: string; nomeGravado: string; posicaoGravacao: string; aplicacoesCapa: string[]
@@ -704,7 +704,7 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
   pinturaBordasAtiva: boolean; corPinturaBordas: string
   corBordado: string; tipoTipografia: string
   tipoTextura: string; tipoLaminacao: string; abasOrelhas: boolean; tipoCantoneiras: string
-  papelEspecialId?: string
+  papelEspecialId?: string; linhoId?: string
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
   // granulada força grain em qualquer material; lisa remove grain até do couro
@@ -728,12 +728,6 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
             <line x1="4" y1="0" x2="0" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
           </pattern>
         )}
-        {materialCapa === 'tecido' && (
-          <pattern id="tf" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
-            <rect width="3" height="3" fill={`${corCapa}25`}/>
-            <rect x="3" y="3" width="3" height="3" fill={`${corCapa}25`}/>
-          </pattern>
-        )}
         {materialCapa === 'kraft' && (
           <pattern id="kf" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
             <circle cx="4" cy="4" r="0.9" fill={`${corCapa}35`}/>
@@ -755,6 +749,12 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
         {/* Papel especial — clipPath para imagem real */}
         {materialCapa === 'papel-especial' && papelEspecialId && (
           <clipPath id="clip-papel-fr">
+            <rect width={W} height={H} rx={raioCanto}/>
+          </clipPath>
+        )}
+        {/* Linho — clipPath para imagem real */}
+        {materialCapa === 'linho' && linhoId && (
+          <clipPath id="clip-linho-fr">
             <rect width={W} height={H} rx={raioCanto}/>
           </clipPath>
         )}
@@ -790,8 +790,7 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
         filter={useGrain ? 'url(#grain-fr)' : undefined}/>
 
       {/* Material overlay */}
-      {materialCapa === 'linho'  && <rect width={W} height={H} rx={raioCanto} fill="url(#lf)"/>}
-      {materialCapa === 'tecido' && <rect width={W} height={H} rx={raioCanto} fill="url(#tf)"/>}
+      {materialCapa === 'linho' && !linhoId && <rect width={W} height={H} rx={raioCanto} fill="url(#lf)"/>}
       {materialCapa === 'kraft'  && <rect width={W} height={H} rx={raioCanto} fill="url(#kf)"/>}
       {/* Papel especial — imagem real da textura */}
       {materialCapa === 'papel-especial' && papelEspecialId && (
@@ -800,6 +799,15 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
           x={0} y={0} width={W} height={H}
           preserveAspectRatio="xMidYMid slice"
           clipPath="url(#clip-papel-fr)"
+        />
+      )}
+      {/* Linho — imagem real da textura */}
+      {materialCapa === 'linho' && linhoId && (
+        <image
+          href={`/linhos/${linhoId}.webp`}
+          x={0} y={0} width={W} height={H}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath="url(#clip-linho-fr)"
         />
       )}
 
@@ -1018,9 +1026,9 @@ function FaceFrente({ W, H, corCapa, materialCapa, estampaCapa,
 }
 
 // ─── Face: Verso (contracapa) ─────────────────────────────────
-function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, tipoCantoneiras }: {
+function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLaminacao, papelEspecialId, linhoId, tipoCantoneiras }: {
   W: number; H: number; corCapa: string; materialCapa: string; raioCanto: number
-  tipoTextura: string; tipoLaminacao: string; papelEspecialId?: string; tipoCantoneiras?: string
+  tipoTextura: string; tipoLaminacao: string; papelEspecialId?: string; linhoId?: string; tipoCantoneiras?: string
 }) {
   const ehCouro = materialCapa === 'couro' || materialCapa === 'sintetico'
   const useGrain = tipoTextura === 'granulada' || (tipoTextura !== 'lisa' && ehCouro)
@@ -1029,6 +1037,11 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
       <defs>
         {materialCapa === 'papel-especial' && papelEspecialId && (
           <clipPath id="clip-papel-v">
+            <rect width={W} height={H} rx={raioCanto}/>
+          </clipPath>
+        )}
+        {materialCapa === 'linho' && linhoId && (
+          <clipPath id="clip-linho-v">
             <rect width={W} height={H} rx={raioCanto}/>
           </clipPath>
         )}
@@ -1064,18 +1077,20 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
       </defs>
       <rect width={W} height={H} rx={raioCanto} fill={corCapa}
         filter={useGrain ? 'url(#grain-v)' : undefined}/>
-      {materialCapa === 'linho' && (
-        <pattern id="lv" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="4" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
-          <line x1="4" y1="0" x2="0" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
-        </pattern>
-      )}
       {materialCapa === 'papel-especial' && papelEspecialId && (
         <image
           href={`/papeis-especiais/${papelEspecialId}.webp`}
           x={0} y={0} width={W} height={H}
           preserveAspectRatio="xMidYMid slice"
           clipPath="url(#clip-papel-v)"
+        />
+      )}
+      {materialCapa === 'linho' && linhoId && (
+        <image
+          href={`/linhos/${linhoId}.webp`}
+          x={0} y={0} width={W} height={H}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath="url(#clip-linho-v)"
         />
       )}
       <rect width={W} height={H} rx={raioCanto} fill="url(#luz-v)"/>
@@ -1116,9 +1131,9 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
 }
 
 // ─── Face: Lombada (spine) ────────────────────────────────────
-function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada, corFio, papelEspecialId }: {
+function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada, corFio, papelEspecialId, linhoId }: {
   W: number; H: number; corCapa: string; materialCapa: string
-  tipoEncadernacao: string; tipoLombada: string; corFio: string; papelEspecialId?: string
+  tipoEncadernacao: string; tipoLombada: string; corFio: string; papelEspecialId?: string; linhoId?: string
 }) {
   const ehProtegida = tipoLombada === 'protegida' || tipoLombada === 'protegida-costura-aparente'
   return (
@@ -1136,11 +1151,10 @@ function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada,
             <rect width={W} height={H}/>
           </clipPath>
         )}
-        {materialCapa === 'linho' && (
-          <pattern id="ls" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-            <line x1="0" y1="0" x2="4" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
-            <line x1="4" y1="0" x2="0" y2="4" stroke={`${corCapa}55`} strokeWidth="0.6"/>
-          </pattern>
+        {ehProtegida && materialCapa === 'linho' && linhoId && (
+          <clipPath id="clip-linho-sp">
+            <rect width={W} height={H}/>
+          </clipPath>
         )}
         {(materialCapa === 'couro' || materialCapa === 'sintetico') && (
           <filter id="grain-sp" x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
@@ -1161,13 +1175,20 @@ function FaceSpine({ W, H, corCapa, materialCapa, tipoEncadernacao, tipoLombada,
         <>
           <rect width={W} height={H} fill={corCapa}
             filter={(materialCapa === 'couro' || materialCapa === 'sintetico') ? 'url(#grain-sp)' : undefined}/>
-          {materialCapa === 'linho' && <rect width={W} height={H} fill="url(#ls)"/>}
           {materialCapa === 'papel-especial' && papelEspecialId && (
             <image
               href={`/papeis-especiais/${papelEspecialId}.webp`}
               x={0} y={0} width={W} height={H}
               preserveAspectRatio="xMidYMid slice"
               clipPath="url(#clip-papel-sp)"
+            />
+          )}
+          {materialCapa === 'linho' && linhoId && (
+            <image
+              href={`/linhos/${linhoId}.webp`}
+              x={0} y={0} width={W} height={H}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#clip-linho-sp)"
             />
           )}
         </>
@@ -1336,7 +1357,7 @@ function Livro3D({ bW, bH, bD, props }: {
     tipoCorteEspecial: string
     corInternaFolhas: string; corBordado: string; tipoTipografia: string
     tipoTextura: string; tipoLaminacao: string; abasOrelhas: boolean; tipoCantoneiras: string
-    papelEspecialId?: string
+    papelEspecialId?: string; linhoId?: string
   }
 }) {
   const { corCapa, materialCapa, estampaCapa, gravacaoCapa, nomeGravado, posicaoGravacao,
@@ -1344,7 +1365,7 @@ function Livro3D({ bW, bH, bD, props }: {
     elasticoAtivo, corElastico, posicaoElastico, marcadorAtivo, tipoMarcador, corMarcador, larguraMarcador,
     portaCaneta, pinturaBordasAtiva, corPinturaBordas, tipoCorteEspecial,
     corInternaFolhas, corBordado, tipoTipografia,
-    tipoTextura, tipoLaminacao, abasOrelhas, tipoCantoneiras, papelEspecialId } = props
+    tipoTextura, tipoLaminacao, abasOrelhas, tipoCantoneiras, papelEspecialId, linhoId } = props
 
   const face: React.CSSProperties = { position: 'absolute', overflow: 'hidden' }
   const faceOpen: React.CSSProperties = { position: 'absolute', overflow: 'visible' }
@@ -1366,7 +1387,7 @@ function Livro3D({ bW, bH, bD, props }: {
           pinturaBordasAtiva={pinturaBordasAtiva} corPinturaBordas={corPinturaBordas}
           corBordado={corBordado} tipoTipografia={tipoTipografia}
           tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} abasOrelhas={abasOrelhas}
-          tipoCantoneiras={tipoCantoneiras} papelEspecialId={papelEspecialId}/>
+          tipoCantoneiras={tipoCantoneiras} papelEspecialId={papelEspecialId} linhoId={linhoId}/>
       </div>
 
       {/* VERSO */}
@@ -1374,14 +1395,15 @@ function Livro3D({ bW, bH, bD, props }: {
         transform: `rotateY(180deg) translateZ(${D/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceVerso W={W} H={H} corCapa={corCapa} materialCapa={materialCapa} raioCanto={raioCanto}
           tipoTextura={tipoTextura} tipoLaminacao={tipoLaminacao} papelEspecialId={papelEspecialId}
-          tipoCantoneiras={tipoCantoneiras}/>
+          linhoId={linhoId} tipoCantoneiras={tipoCantoneiras}/>
       </div>
 
       {/* LOMBADA (esquerda) */}
       <div style={{ ...face, width: D, height: H, left: (W-D)/2, top: 0,
         transform: `rotateY(-90deg) translateZ(${W/2}px)`, backfaceVisibility: 'hidden' }}>
         <FaceSpine W={D} H={H} corCapa={corCapa} materialCapa={materialCapa}
-          tipoEncadernacao={tipoEncadernacao} tipoLombada={tipoLombada} corFio={corFio} papelEspecialId={papelEspecialId}/>
+          tipoEncadernacao={tipoEncadernacao} tipoLombada={tipoLombada} corFio={corFio}
+          papelEspecialId={papelEspecialId} linhoId={linhoId}/>
       </div>
 
       {/* CORTE / páginas (direita) */}
@@ -1452,7 +1474,7 @@ export default function PreviewCaderno() {
     padraoPaginas, corFolhas, tipoPapel,
     materialGuarda, corGuarda, padraoGuarda, padraoGuardaEstampado,
     paginaDedicatoria, querPersonalizacaoCapa,
-    papelEspecialId, pespontosAtivo,
+    papelEspecialId, linhoId, pespontosAtivo,
   } = configuracao
 
   const prop = PROPORCAO_POR_FORMATO[formato] ?? PROPORCAO_POR_FORMATO['retrato']
@@ -1488,6 +1510,7 @@ export default function PreviewCaderno() {
   const livroProps = {
     corCapa, materialCapa, estampaCapa,
     papelEspecialId: papelEspecialId ?? '',
+    linhoId: linhoId ?? '',
     gravacaoCapa: querPersonalizacaoCapa ? gravacaoCapa : 'nenhuma',
     nomeGravado: querPersonalizacaoCapa ? nomeGravado : '',
     posicaoGravacao, aplicacoesCapa: [...(aplicacoesCapa ?? []), ...(pespontosAtivo ? ['pespontos'] : [])],

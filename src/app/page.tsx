@@ -7,7 +7,7 @@ import { getPerguntasVisiveis, GRUPOS } from '@/data/perguntas'
 import Image from 'next/image'
 import PreviewCaderno from '@/components/configurador/PreviewCaderno'
 import PerguntaUnica from '@/components/configurador/PerguntaUnica'
-import { calcularPreco, TABELA_PADRAO, type TabelaPrecos } from '@/lib/calcularPreco'
+import { detalharPreco, TABELA_PADRAO, type TabelaPrecos } from '@/lib/calcularPreco'
 import {
   IconeLivroAberto, IconePapel,
   IconeSeta, IconeSetaEsq, IconeCheck,
@@ -244,7 +244,7 @@ export default function PaginaConfigurador() {
     }
   }
 
-  const totalValor = perguntaIndex === 0 ? 0 : calcularPreco(configuracao, tabelaPrecos)
+  const totalValor = perguntaIndex === 0 ? 0 : detalharPreco(configuracao, tabelaPrecos).preco_final
 
   // Perguntas opcionais — não bloqueiam o avanço
   const tiposOpcionais = ['multipla-escolha', 'texto']

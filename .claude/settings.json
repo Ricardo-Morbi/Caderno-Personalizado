@@ -28,7 +28,15 @@
       "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/favicon.png\" \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/favicon.png\")",
       "Bash(cp \"C:/Users/Ricardo/Downloads/logo DMO PAPELARIA/1.png\" \"c:/Users/Ricardo/Documents/VSCODE/caderno-artesanal-configurador/public/logo.png\")",
       "Bash(find c:UsersRicardoDocumentsVSCODEcaderno-artesanal-configuradorsrccomponentsconfiguradoretapas -type f -name *.tsx -o -name *.ts)",
-      "Read(//c/Users/Ricardo/Desktop/CAPAS/Pápeis Especiais/Papeis Otimizados/**)"
+      "Read(//c/Users/Ricardo/Desktop/CAPAS/Pápeis Especiais/Papeis Otimizados/**)",
+      "Bash(gh run:*)",
+      "Read(//c/Users/Ricardo/Desktop/CAPAS/Linho/LINHO OTIMAZADO/**)",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 1.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-1.webp\")",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 2.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-2.webp\")",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 3.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-3.webp\")",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 4.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-4.webp\")",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 5.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-5.webp\")",
+      "Bash(cp \"C:\\\\Users\\\\Ricardo\\\\Desktop\\\\CAPAS\\\\Linho\\\\LINHO OTIMAZADO\\\\Linho 6.webp\" \"c:\\\\Users\\\\Ricardo\\\\Documents\\\\VSCODE\\\\caderno-artesanal-configurador\\\\public\\\\linhos\\\\Linho-6.webp\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\Ricardo\\.claude\\skills\\meta-ads-tracking\\references",
@@ -37,7 +45,8 @@
       "C:\\Users\\Ricardo\\Documents\\VSCODE\\funnel-hacking",
       "C:\\Users\\Ricardo\\Documents\\VSCODE",
       "C:\\Users\\Ricardo\\Downloads\\logo DMO PAPELARIA",
-      "C:\\Users\\Ricardo\\Desktop\\CAPAS\\Pápeis Especiais\\Papeis Otimizados"
+      "C:\\Users\\Ricardo\\Desktop\\CAPAS\\Pápeis Especiais\\Papeis Otimizados",
+      "C:\\Users\\Ricardo\\Downloads\\Logos\\Logo Dani"
     ]
   }
 }

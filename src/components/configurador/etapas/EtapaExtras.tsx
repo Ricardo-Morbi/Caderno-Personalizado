@@ -115,7 +115,7 @@ export default function EtapaExtras() {
         <ul className="text-xs text-terracota-500 space-y-1.5">
           <li>✓ Tamanho: <strong>{configuracao.tamanho}</strong> · {configuracao.espessura}</li>
           <li>✓ Capa: <strong>{{
-            'couro': 'Couro', 'sintetico': 'Sintético', 'tecido': 'Tecido',
+            'couro': 'Couro', 'sintetico': 'Sintético',
             'papel-especial': 'Papel especial', 'kraft': 'Kraft', 'linho': 'Linho',
           }[configuracao.materialCapa] ?? configuracao.materialCapa}</strong>
             {configuracao.gravacaoCapa && configuracao.gravacaoCapa !== 'nenhuma'

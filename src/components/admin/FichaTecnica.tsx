@@ -6,7 +6,7 @@ const LABELS: Record<string, Record<string, string>> = {
   tamanho:          { A6:'A6', A5:'A5', A4:'A4', personalizado:'Personalizado' },
   formato:          { retrato:'Retrato', paisagem:'Paisagem', quadrado:'Quadrado' },
   espessura:        { fino:'Fino (~40 fls)', medio:'Médio (~80 fls)', grosso:'Grosso (~120 fls)' },
-  materialCapa:     { couro:'Couro', sintetico:'Sintético', tecido:'Tecido', 'papel-especial':'Papel especial', kraft:'Kraft', linho:'Linho' },
+  materialCapa:     { couro:'Couro', sintetico:'Sintético', 'papel-especial':'Papel especial', kraft:'Kraft', linho:'Linho' },
   estampaCapa:      { nenhuma:'Sem estampa', floral:'Floral', minimalista:'Minimalista', abstrata:'Abstrata', tematica:'Temática' },
   gravacaoCapa:     { nenhuma:'Sem gravação', 'baixo-relevo':'Baixo relevo', 'alto-relevo':'Alto relevo', bordado:'Bordado' },
   posicaoGravacao:  { centro:'Centro', 'terco-superior':'Terço superior', 'terco-inferior':'Terço inferior', 'canto-inf-direito':'Canto inf. direito' },
@@ -87,8 +87,9 @@ export default function FichaTecnica({ c, t }: { c: ConfiguracaoCaderno; t?: Tab
         <Secao titulo="Capa" linhas={[
           { titulo: 'Material',        valor: label('materialCapa', c.materialCapa) },
           { titulo: 'Papel especial',  valor: c.materialCapa === 'papel-especial' ? (c.papelEspecialId || null) : null },
+          { titulo: 'Linho',           valor: c.materialCapa === 'linho' ? (c.linhoId || null) : null },
           { titulo: 'Cor',             valor: c.corCapa ? <Cor hex={c.corCapa} /> : null },
-          { titulo: 'Cor tecido',      valor: c.materialCapa === 'tecido' ? (c.corCapaTecido || null) : null },
+
           { titulo: 'Estampa',         valor: c.estampaCapa && c.estampaCapa !== 'nenhuma' ? label('estampaCapa', c.estampaCapa) : null },
           { titulo: 'Pespontos',       valor: c.pespontosAtivo ? 'Sim' : null },
           { titulo: 'Cantoneiras',     valor: c.tipoCantoneiras !== 'nenhuma' ? label('tipoCantoneiras', c.tipoCantoneiras) : null },
