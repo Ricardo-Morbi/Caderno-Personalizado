@@ -281,7 +281,9 @@ export default function PaginaConfigurador() {
     }
   }
 
-  const totalValor = detalharPreco(configuracao, tabelaPrecos).preco_final
+  const totalValor = perguntasRespondidas.length > 0
+    ? detalharPreco(configuracao, tabelaPrecos).preco_final
+    : 0
 
   // Perguntas opcionais — não bloqueiam o avanço
   const tiposOpcionais = ['multipla-escolha', 'texto']
