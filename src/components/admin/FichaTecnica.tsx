@@ -8,7 +8,7 @@ const LABELS: Record<string, Record<string, string>> = {
   espessura:        { fino:'Fino (~40 fls)', medio:'Médio (~80 fls)', grosso:'Grosso (~120 fls)' },
   materialCapa:     { couro:'Couro', sintetico:'Sintético', 'papel-especial':'Papel especial', kraft:'Kraft', linho:'Linho' },
   estampaCapa:      { nenhuma:'Sem estampa', floral:'Floral', minimalista:'Minimalista', abstrata:'Abstrata', tematica:'Temática' },
-  gravacaoCapa:     { nenhuma:'Sem gravação', 'baixo-relevo':'Baixo relevo', 'alto-relevo':'Alto relevo', bordado:'Bordado' },
+  gravacaoCapa:     { nenhuma:'Sem gravação', 'baixo-relevo':'Baixo relevo', 'baixo-relevo-foil':'Baixo relevo c/ foil', bordado:'Bordado' },
   posicaoGravacao:  { centro:'Centro', 'terco-superior':'Terço superior', 'terco-inferior':'Terço inferior', 'canto-inf-direito':'Canto inf. direito' },
   tipoBordado:      { 'cor-unica':'Cor única', colorido:'Colorido' },
   tipoCantoneiras:  { nenhuma:'Sem cantoneiras', papel:'Papel', 'metal-simples':'Metal simples', 'metal-trabalhado':'Metal trabalhado' },

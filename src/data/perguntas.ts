@@ -26,6 +26,7 @@ export interface OpcaoPergunta {
   hex?: string          // para opções de cor
   altura?: number       // para a espessura visual
   imagem?: string       // para opções com foto (ex: papéis especiais)
+  opcaoVisivel?: (config: ConfiguracaoCaderno) => boolean  // filtro dinâmico de visibilidade
 }
 
 export interface Pergunta {
@@ -178,7 +179,6 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     opcoes: [
       { valor: 'retrato',  label: 'Retrato',  descricao: 'Vertical — o mais comum' },
       { valor: 'paisagem', label: 'Paisagem', descricao: 'Horizontal — ideal para sketches' },
-      { valor: 'quadrado', label: 'Quadrado', descricao: 'Igual na largura e na altura' },
     ],
   },
 
@@ -230,9 +230,9 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     avancaAutomatico: true,
     visivel: (c) => c.querPersonalizacaoCapa && c.nomeGravado.trim().length > 0,
     opcoes: [
-      { valor: 'baixo-relevo', label: 'Baixo relevo', descricao: 'Sutil e elegante — afundado na capa' },
-      { valor: 'alto-relevo',  label: 'Alto relevo',  descricao: 'Marcante — elevado na capa' },
-      { valor: 'bordado',      label: 'Bordado',      descricao: 'Feito à mão com fio — o mais artesanal' },
+      { valor: 'baixo-relevo',      label: 'Baixo relevo',             descricao: 'Sutil e elegante — afundado na capa' },
+      { valor: 'baixo-relevo-foil', label: 'Baixo relevo com foil',    descricao: 'Hot stamping dourado — luxo e brilho metálico' },
+      { valor: 'bordado',           label: 'Bordado',                  descricao: 'Feito à mão com fio — o mais artesanal' },
     ],
   },
 
@@ -487,15 +487,14 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'temaCaderno',
     avancaAutomatico: true,
     opcoes: [
-      { valor: 'sem-tema-1',  label: 'Sem tema — Folhas lisas',                     descricao: 'Sem impressão alguma · Folhas em branco' },
+      { valor: 'sem-tema-1',  label: 'Sem tema — Folhas lisas',                      descricao: 'Sem impressão alguma · Folhas em branco' },
       { valor: 'sem-tema-2',  label: 'Sem tema — Com pauta/pontilhado/quadriculado', descricao: 'Impressão P&B · Escolha o padrão a seguir' },
-      { valor: 'versatil',    label: 'Caderno Versátil',                             descricao: 'Tema personalizado a sua escolha · Especifique a seguir' },
-      { valor: 'maternidade', label: 'Maternidade',                                  descricao: 'Para mamães e bebês · Impressão padrão DMO' },
-      { valor: 'casamento',   label: 'Casamento',                                    descricao: 'Diário da noiva · Impressão padrão DMO' },
-      { valor: 'viagens',     label: 'Viagens',                                      descricao: 'Para registrar aventuras · Impressão padrão DMO' },
-      { valor: 'gratidao',    label: 'Gratidão',                                     descricao: 'Diário de gratidão · Impressão padrão DMO' },
-      { valor: 'estudos',     label: 'Estudos / Trabalho',                           descricao: 'Otimizado para aprender e trabalhar' },
-      { valor: 'planner',     label: 'Planner',                                      descricao: 'Organização pessoal e profissional' },
+      { valor: 'maternidade', label: 'Maternidade',  descricao: 'Para mamães e bebês · Impressão padrão DMO',          opcaoVisivel: (c) => c.espessura === 'medio' },
+      { valor: 'casamento',   label: 'Casamento',    descricao: 'Diário da noiva · Impressão padrão DMO',              opcaoVisivel: (c) => c.espessura === 'medio' },
+      { valor: 'viagens',     label: 'Viagens',      descricao: 'Para registrar aventuras · Impressão padrão DMO',     opcaoVisivel: (c) => c.espessura === 'medio' },
+      { valor: 'gratidao',    label: 'Gratidão',     descricao: 'Diário de gratidão · Impressão padrão DMO',           opcaoVisivel: (c) => c.espessura === 'medio' },
+      { valor: 'estudos',     label: 'Estudos / Trabalho', descricao: 'Otimizado para aprender e trabalhar',           opcaoVisivel: (c) => c.espessura === 'medio' },
+      { valor: 'planner',     label: 'Planner',      descricao: 'Organização pessoal e profissional',                  opcaoVisivel: (c) => c.espessura === 'medio' },
     ],
   },
 
@@ -508,7 +507,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     campo: 'temaPersonalizado',
     placeholder: 'Ex: girassóis, pássaros, oceano, cosmos...',
     maxLength: 80,
-    visivel: (c) => c.temaCaderno === 'versatil',
+    visivel: () => false,  // versatil removido — campo mantido para não quebrar o store
   },
 
   {
@@ -519,7 +518,7 @@ export const TODAS_PERGUNTAS: Pergunta[] = [
     tipo: 'selecao-grade',
     campo: 'padraoPaginas',
     avancaAutomatico: true,
-    visivel: (c) => ['sem-tema-2', 'estudos', 'versatil'].includes(c.temaCaderno),
+    visivel: (c) => ['sem-tema-2', 'estudos'].includes(c.temaCaderno),
     opcoes: [
       { valor: 'pautado',      label: 'Pautado',      descricao: 'Linhas horizontais — escrita organizada' },
       { valor: 'pontilhado',   label: 'Pontilhado',   descricao: 'Grid discreto — versátil e moderno' },

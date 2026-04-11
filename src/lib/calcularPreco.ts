@@ -144,6 +144,7 @@ export interface TabelaPrecos {
   tempo_extraGrosso: number
   tempoExtra_gravacao: number
   tempoExtra_bordado: number
+  tempoExtra_pespontos: number
   tempoExtra_bolso: number
   tempoExtra_acabamento: number
   // Custos fixos e margens
@@ -168,9 +169,10 @@ export const TABELA_PADRAO: TabelaPrecos = {
   tempo_grosso: 1.5,
   tempo_extraGrosso: 2,
   tempoExtra_gravacao: 0.25,
-  tempoExtra_bordado: 0.75,
-  tempoExtra_bolso: 0.2,
-  tempoExtra_acabamento: 0.3,
+  tempoExtra_bordado: 0.5,    // 30min
+  tempoExtra_pespontos: 0.33, // 20min
+  tempoExtra_bolso: 0.17,     // 10min
+  tempoExtra_acabamento: 0.58, // 35min (pintura de bordas)
   custoFixoUnitario: 25,
   margemLucro: 50,
   margemInvestimento: 10,
@@ -305,6 +307,8 @@ export function calcularPreco(c: ConfiguracaoCaderno, t?: TabelaPrecos): number 
   // Personalização (gravação / bordado)
   if (c.querPersonalizacaoCapa && c.nomeGravado.trim().length > 0) {
     custo += mat.gravacao
+    // Foil (hot stamping) — folha dourada metalizada, custo extra
+    if (c.gravacaoCapa === 'baixo-relevo-foil') custo += 12
     // Bordado colorido usa fio adicional (meada DMC extra)
     if (c.gravacaoCapa === 'bordado' && c.tipoBordado === 'colorido') {
       custo += mat.bordadoColoridoExtra
@@ -457,15 +461,16 @@ export function detalharPreco(c: ConfiguracaoCaderno, t: TabelaPrecos) {
   )
 
   let tempoExtra = 0
-  const temGravacao = c.gravacaoCapa && ['baixo-relevo', 'alto-relevo'].includes(c.gravacaoCapa)
+  const temGravacao = c.gravacaoCapa && ['baixo-relevo', 'baixo-relevo-foil'].includes(c.gravacaoCapa)
   const temBordado  = c.gravacaoCapa === 'bordado'
   const temBolso    = c.bolsoInterno || c.envelopeContracapa
-  const temAcab     = c.pinturaBordasAtiva || c.pespontosAtivo
+  const temAcab     = c.pinturaBordasAtiva
 
-  if (temGravacao) tempoExtra += t.tempoExtra_gravacao
-  if (temBordado)  tempoExtra += t.tempoExtra_bordado
-  if (temBolso)    tempoExtra += t.tempoExtra_bolso
-  if (temAcab)     tempoExtra += t.tempoExtra_acabamento
+  if (temGravacao)       tempoExtra += t.tempoExtra_gravacao
+  if (temBordado)        tempoExtra += t.tempoExtra_bordado
+  if (c.pespontosAtivo)  tempoExtra += t.tempoExtra_pespontos
+  if (temBolso)          tempoExtra += t.tempoExtra_bolso
+  if (temAcab)           tempoExtra += t.tempoExtra_acabamento
 
   const horas_trabalho = Math.round((tempoBase + tempoExtra) * 100) / 100
   const custo_mao_obra = Math.round(horas_trabalho * t.valorHoraArtesa * 100) / 100

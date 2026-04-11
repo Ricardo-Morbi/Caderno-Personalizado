@@ -23,7 +23,7 @@ export type EstampaCapa =
 export type GravacaoCapa =
   | 'nenhuma'
   | 'baixo-relevo'
-  | 'alto-relevo'
+  | 'baixo-relevo-foil'
   | 'bordado'
 
 export type TipoTipografia = 'serif' | 'sans-serif' | 'script' | 'monoespaco'

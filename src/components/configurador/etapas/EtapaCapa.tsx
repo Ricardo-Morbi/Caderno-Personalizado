@@ -41,9 +41,9 @@ const opcoesEstampa: { valor: EstampaCapa; label: string }[] = [
 
 const opcoesGravacao: { valor: GravacaoCapa; label: string; descricao: string }[] = [
   { valor: 'nenhuma', label: 'Sem gravação', descricao: 'Capa lisa' },
-  { valor: 'baixo-relevo', label: 'Baixo relevo', descricao: 'Sutil, elegante' },
-  { valor: 'alto-relevo', label: 'Alto relevo', descricao: 'Marcante' },
-  { valor: 'bordado', label: 'Bordado', descricao: 'Artesanal' },
+  { valor: 'baixo-relevo',      label: 'Baixo relevo',          descricao: 'Sutil, elegante' },
+  { valor: 'baixo-relevo-foil', label: 'Baixo relevo com foil', descricao: 'Hot stamping dourado' },
+  { valor: 'bordado',           label: 'Bordado',               descricao: 'Artesanal' },
 ]
 
 const opcoesAplicacao: { valor: AplicacaoCapa; label: string; icone: string }[] = [

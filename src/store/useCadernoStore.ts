@@ -166,9 +166,13 @@ export const useCadernoStore = create<CadernoStore>((set) => ({
     })),
 
   atualizarOpcao: (campo, valor) =>
-    set((state) => ({
-      configuracao: { ...state.configuracao, [campo]: valor },
-    })),
+    set((state) => {
+      const nova = { ...state.configuracao, [campo]: valor }
+      // Bolso e envelope são mutuamente exclusivos
+      if (campo === 'bolsoInterno'       && valor === true) nova.envelopeContracapa = false
+      if (campo === 'envelopeContracapa' && valor === true) nova.bolsoInterno = false
+      return { configuracao: nova }
+    }),
 
   marcarRespondida: (id) =>
     set((state) => ({

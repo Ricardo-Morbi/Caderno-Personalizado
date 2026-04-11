@@ -5,7 +5,7 @@ import type { TabelaPrecos } from '@/lib/calcularPreco'
 import { TABELA_PADRAO, MAT_DEFAULTS, detalharPreco } from '@/lib/calcularPreco'
 import type { ConfiguracaoCaderno } from '@/types/caderno'
 
-// Calculadora: meta de faturamento → valor hora
+// ─── Calculadora: meta de faturamento → valor hora ──────────
 function CalculadoraValorHora({
   valorAtual,
   onAplicar,
@@ -20,7 +20,7 @@ function CalculadoraValorHora({
   const valorCalculado = horasMensais > 0 ? Math.round((meta / horasMensais) * 100) / 100 : 0
 
   return (
-    <div className="bg-ouro-50 border border-ouro-200 p-4 mb-6">
+    <div className="bg-ouro-50 border border-ouro-200 p-4 mb-4">
       <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-3">
         Calcular valor hora pela meta mensal
       </p>
@@ -85,7 +85,7 @@ function CalculadoraValorHora({
   )
 }
 
-// Config de simulação (caderno médio padrão)
+// ─── Config de simulação ─────────────────────────────────────
 const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   temaCaderno: 'sem-tema-1', temaPersonalizado: '', padraoPaginas: 'liso',
   paginaDedicatoria: false,
@@ -117,23 +117,22 @@ const CONFIG_SIMULACAO: ConfiguracaoCaderno = {
   corFolhas: 'branca',
 }
 
-type Aba = 'maoObra' | 'fixos' | 'materiais' | 'simulador'
-
 function R(v: number) {
   return `R$ ${v.toFixed(2).replace('.', ',')}`
 }
 
+// ─── Campo de número editável ────────────────────────────────
 function Campo({ label, campo, valor, onChange, sufixo = 'R$', step = '0.01', descricao }: {
   label: string; campo: string; valor: number
   onChange: (campo: string, v: number) => void
   sufixo?: string; step?: string; descricao?: string
 }) {
   return (
-    <div className="py-2 border-b border-ivoire-200 last:border-0">
+    <div className="py-2.5 border-b border-ivoire-200 last:border-0">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex-1">
-          <label className="text-xs text-onix-600 font-sans">{label}</label>
-          {descricao && <p className="text-[10px] text-onix-400 font-sans mt-0.5">{descricao}</p>}
+        <div className="flex-1 min-w-0">
+          <label className="text-xs text-onix-600 font-sans leading-snug">{label}</label>
+          {descricao && <p className="text-[10px] text-onix-400 font-sans mt-0.5 leading-snug">{descricao}</p>}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {sufixo === 'R$' && <span className="text-xs text-onix-400 font-sans">R$</span>}
@@ -149,10 +148,11 @@ function Campo({ label, campo, valor, onChange, sufixo = 'R$', step = '0.01', de
   )
 }
 
+// ─── Seção interna ───────────────────────────────────────────
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div className="mb-6">
-      <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-2">{titulo}</p>
+    <div className="mb-5">
+      <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-1.5">{titulo}</p>
       <div className="bg-white border border-ivoire-300 px-4 py-1">
         {children}
       </div>
@@ -160,7 +160,7 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
   )
 }
 
-// Tabela de preview de custo por tamanho (read-only)
+// ─── Tabela preview de custo por tamanho ─────────────────────
 function TabelaTamanhos({ titulo, valores }: {
   titulo: string
   valores: { A6: number; A5: number; A4: number }
@@ -180,7 +180,6 @@ function TabelaTamanhos({ titulo, valores }: {
   )
 }
 
-// Calcula os custos derivados para preview no admin
 function calcPreviewMat(tabela: TabelaPrecos) {
   const painelCouro = tabela.mat_couro_painel ?? MAT_DEFAULTS.couro_painel
   const metroSint   = tabela.mat_sintetico_metro ?? MAT_DEFAULTS.sintetico_metro
@@ -196,18 +195,50 @@ function calcPreviewMat(tabela: TabelaPrecos) {
   }
 }
 
+// ─── Bloco accordion ─────────────────────────────────────────
+function Bloco({ titulo, aberto, onToggle, children }: {
+  titulo: string
+  aberto: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="border border-ivoire-300 mb-3">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-ivoire-50 transition-colors text-left"
+      >
+        <span className="text-sm font-serif text-onix-700">{titulo}</span>
+        <span className={`text-onix-400 font-sans text-lg leading-none transition-transform duration-200 ${aberto ? 'rotate-45' : ''}`}>
+          +
+        </span>
+      </button>
+      {aberto && (
+        <div className="px-5 py-4 bg-ivoire-50 border-t border-ivoire-200">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── PÁGINA PRINCIPAL ────────────────────────────────────────
 export default function PaginaMateriais() {
   const [tabela, setTabela] = useState<TabelaPrecos>(TABELA_PADRAO)
-  const [abaAtiva, setAbaAtiva] = useState<Aba>('maoObra')
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [carregando, setCarregando] = useState(true)
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({
+    maoObra: true,
+    fixos: false,
+    materiais: false,
+    simulador: false,
+  })
 
   useEffect(() => {
     fetch('/api/configuracoes-preco')
       .then(r => r.json())
       .then(d => {
-        // Garante que campos novos de material tenham os defaults se não existirem no banco
         setTabela({ ...TABELA_PADRAO, ...d })
         setCarregando(false)
       })
@@ -216,6 +247,10 @@ export default function PaginaMateriais() {
 
   function set(campo: string, valor: number) {
     setTabela(prev => ({ ...prev, [campo]: valor }))
+  }
+
+  function toggle(id: string) {
+    setAbertos(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
   async function salvar() {
@@ -252,18 +287,12 @@ export default function PaginaMateriais() {
     return <div className="text-sm text-onix-400 py-20 text-center">Carregando configuracoes...</div>
   }
 
-  const ABAS: { id: Aba; label: string }[] = [
-    { id: 'maoObra',   label: 'Mao de Obra' },
-    { id: 'fixos',     label: 'Custos Fixos' },
-    { id: 'materiais', label: 'Materiais' },
-    { id: 'simulador', label: 'Simulador' },
-  ]
-
   return (
     <div>
-      <div className="mb-5">
+      {/* Cabeçalho */}
+      <div className="mb-6">
         <div className="w-6 h-px bg-ouro-400 mb-3" />
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-serif text-onix-700">Materiais e Precificacao</h2>
           <div className="flex items-center gap-3">
             <button
@@ -292,25 +321,8 @@ export default function PaginaMateriais() {
         )}
       </div>
 
-      {/* Abas */}
-      <div className="flex gap-1 mb-6 border-b border-ivoire-300">
-        {ABAS.map(a => (
-          <button
-            key={a.id}
-            onClick={() => setAbaAtiva(a.id)}
-            className={`px-5 py-2.5 text-xs tracking-widest uppercase font-sans transition-colors -mb-px border-b-2 ${
-              abaAtiva === a.id
-                ? 'border-onix-700 text-onix-700'
-                : 'border-transparent text-onix-400 hover:text-onix-600'
-            }`}
-          >
-            {a.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── ABA: MAO DE OBRA ── */}
-      {abaAtiva === 'maoObra' && (
+      {/* ── BLOCO: MAO DE OBRA ── */}
+      <Bloco titulo="Mao de Obra" aberto={abertos.maoObra} onToggle={() => toggle('maoObra')}>
         <div className="max-w-lg">
           <CalculadoraValorHora
             valorAtual={tabela.valorHoraArtesa}
@@ -322,32 +334,33 @@ export default function PaginaMateriais() {
           </Secao>
 
           <Secao titulo="Tempo base por espessura (horas para fazer o caderno)">
-            <Campo label="Fino (~80 folhas)" campo="tempo_fino" valor={tabela.tempo_fino} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Medio (~160 folhas)" campo="tempo_medio" valor={tabela.tempo_medio} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Grosso (~240 folhas)" campo="tempo_grosso" valor={tabela.tempo_grosso} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Extra-grosso (~320 folhas)" campo="tempo_extraGrosso" valor={tabela.tempo_extraGrosso} onChange={set} sufixo="h" step="0.25" />
+            <Campo label="Fino (40 folhas)"        campo="tempo_fino"        valor={tabela.tempo_fino}        onChange={set} sufixo="h" step="0.25" />
+            <Campo label="Medio (80 folhas)"        campo="tempo_medio"       valor={tabela.tempo_medio}       onChange={set} sufixo="h" step="0.25" />
+            <Campo label="Grosso (120 folhas)"       campo="tempo_grosso"      valor={tabela.tempo_grosso}      onChange={set} sufixo="h" step="0.25" />
+            <Campo label="Extra-grosso (160 folhas)" campo="tempo_extraGrosso" valor={tabela.tempo_extraGrosso} onChange={set} sufixo="h" step="0.25" />
           </Secao>
 
           <Secao titulo="Tempo extra por tipo de trabalho (horas adicionais)">
-            <Campo label="Gravacao (baixo ou alto relevo)" campo="tempoExtra_gravacao" valor={tabela.tempoExtra_gravacao} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Bordado" campo="tempoExtra_bordado" valor={tabela.tempoExtra_bordado} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Bolso interno ou envelope" campo="tempoExtra_bolso" valor={tabela.tempoExtra_bolso} onChange={set} sufixo="h" step="0.25" />
-            <Campo label="Pintura bordas ou pespontos" campo="tempoExtra_acabamento" valor={tabela.tempoExtra_acabamento} onChange={set} sufixo="h" step="0.25" />
+            <Campo label="Gravacao (baixo ou alto relevo)" campo="tempoExtra_gravacao"  valor={tabela.tempoExtra_gravacao}           onChange={set} sufixo="h" step="0.08" />
+            <Campo label="Bordado"                         campo="tempoExtra_bordado"   valor={tabela.tempoExtra_bordado}            onChange={set} sufixo="h" step="0.08" />
+            <Campo label="Pespontos decorativos"           campo="tempoExtra_pespontos" valor={tabela.tempoExtra_pespontos ?? 0.33}  onChange={set} sufixo="h" step="0.08" />
+            <Campo label="Bolso interno ou envelope"       campo="tempoExtra_bolso"     valor={tabela.tempoExtra_bolso}             onChange={set} sufixo="h" step="0.08" />
+            <Campo label="Pintura de bordas"               campo="tempoExtra_acabamento" valor={tabela.tempoExtra_acabamento}       onChange={set} sufixo="h" step="0.08" />
           </Secao>
 
-          <div className="bg-ivoire-100 border border-ivoire-300 p-4 mt-4">
-            <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-3">Como funciona o calculo de mao de obra</p>
+          <div className="bg-ivoire-100 border border-ivoire-300 p-4 mt-2">
+            <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-2">Como funciona</p>
             <p className="text-xs text-onix-600 font-sans leading-relaxed">
-              <strong>Horas totais</strong> = tempo base do tamanho + adicionais por trabalho<br />
+              <strong>Horas totais</strong> = tempo base + adicionais por trabalho<br />
               <strong>Custo mao de obra</strong> = horas totais × valor hora<br /><br />
-              Exemplo: caderno medio ({tabela.tempo_medio}h) com bordado (+{tabela.tempoExtra_bordado}h) = {tabela.tempo_medio + tabela.tempoExtra_bordado}h × {R(tabela.valorHoraArtesa)} = {R((tabela.tempo_medio + tabela.tempoExtra_bordado) * tabela.valorHoraArtesa)}
+              Exemplo: medio ({tabela.tempo_medio}h) com bordado (+{tabela.tempoExtra_bordado}h) = {tabela.tempo_medio + tabela.tempoExtra_bordado}h × {R(tabela.valorHoraArtesa)} = {R((tabela.tempo_medio + tabela.tempoExtra_bordado) * tabela.valorHoraArtesa)}
             </p>
           </div>
         </div>
-      )}
+      </Bloco>
 
-      {/* ── ABA: CUSTOS FIXOS ── */}
-      {abaAtiva === 'fixos' && (
+      {/* ── BLOCO: CUSTOS FIXOS ── */}
+      <Bloco titulo="Custos Fixos e Margens" aberto={abertos.fixos} onToggle={() => toggle('fixos')}>
         <div className="max-w-lg">
           <Secao titulo="Custo fixo por caderno">
             <Campo label="Custo fixo por caderno" campo="custoFixoUnitario" valor={tabela.custoFixoUnitario ?? 25} onChange={set} />
@@ -357,34 +370,33 @@ export default function PaginaMateriais() {
           </Secao>
 
           <Secao titulo="Margens">
-            <Campo label="Margem de lucro" campo="margemLucro" valor={tabela.margemLucro} onChange={set} sufixo="%" step="1" />
+            <Campo label="Margem de lucro"        campo="margemLucro"       valor={tabela.margemLucro}             onChange={set} sufixo="%" step="1" />
             <Campo label="Margem de investimento" campo="margemInvestimento" valor={tabela.margemInvestimento ?? 10} onChange={set} sufixo="%" step="1" />
             <p className="text-[10px] text-onix-400 font-sans py-2">
               Margem de lucro = retorno sobre o trabalho. Margem de investimento = reserva para materiais, equipamentos e crescimento.
             </p>
           </Secao>
 
-          <div className="bg-ivoire-100 border border-ivoire-300 p-4 mt-4">
-            <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-3">Formula completa</p>
+          <div className="bg-ivoire-100 border border-ivoire-300 p-4 mt-2">
+            <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-2">Formula completa</p>
             <div className="space-y-1 text-xs text-onix-600 font-sans">
-              <p>Custo material + Mao de obra + Custo fixo unitario = Custo total</p>
+              <p>Custo material + Mao de obra + Custo fixo = Custo total</p>
               <p>Preco final = Custo total × (1+{tabela.margemLucro}%) × (1+{tabela.margemInvestimento ?? 10}%)</p>
               <p className="text-onix-400">= Custo total × {((1 + tabela.margemLucro / 100) * (1 + (tabela.margemInvestimento ?? 10) / 100)).toFixed(3)}×</p>
             </div>
           </div>
         </div>
-      )}
+      </Bloco>
 
-      {/* ── ABA: MATERIAIS ── */}
-      {abaAtiva === 'materiais' && (
+      {/* ── BLOCO: MATERIAIS ── */}
+      <Bloco titulo="Custos de Material (Fornecedores)" aberto={abertos.materiais} onToggle={() => toggle('materiais')}>
         <div className="max-w-2xl">
-          <div className="bg-ouro-50 border border-ouro-200 px-4 py-3 mb-6">
+          <div className="bg-ouro-50 border border-ouro-200 px-4 py-3 mb-5">
             <p className="text-xs text-onix-600 font-sans leading-relaxed">
-              Insira o <strong>preco de compra do fornecedor</strong>. O sistema calcula automaticamente o custo por tamanho de caderno (A6, A5, A4) com base na area de cada capa e fator de perda de corte.
+              Insira o <strong>preco de compra do fornecedor</strong>. O sistema calcula automaticamente o custo por tamanho (A6, A5, A4) com base na area da capa e fator de perda de corte.
             </p>
           </div>
 
-          {/* Revestimentos da Capa */}
           <Secao titulo="Revestimentos da Capa">
             <Campo
               label="Couro — preco do painel 25×36cm (Galeria Mats)"
@@ -394,12 +406,12 @@ export default function PaginaMateriais() {
               descricao="Painel Classe B (Blaze, Stoned, Wax Relax). 1 painel p/ A6, 2 paineis p/ A5 e A4."
             />
             <div className="bg-ivoire-50 px-3 py-2 mb-2">
-              <p className="text-[10px] text-onix-400 font-sans mb-1">Custo de material calculado por tamanho:</p>
+              <p className="text-[10px] text-onix-400 font-sans mb-1">Custo calculado por tamanho:</p>
               <TabelaTamanhos titulo="Couro" valores={preview.couro} />
             </div>
 
             <Campo
-              label="Sintetico (courino) — preco por metro, 1,40m de largura (Escritex)"
+              label="Sintetico (courino) — preco por metro, 1,40m larg (Escritex)"
               campo="mat_sintetico_metro"
               valor={tabela.mat_sintetico_metro ?? MAT_DEFAULTS.sintetico_metro}
               onChange={set}
@@ -410,7 +422,7 @@ export default function PaginaMateriais() {
             </div>
 
             <Campo
-              label="Linho — preco por ½ metro, 1,33m de largura (Pitamello)"
+              label="Linho — preco por ½ metro, 1,33m larg (Pitamello)"
               campo="mat_linho_meio_metro"
               valor={tabela.mat_linho_meio_metro ?? MAT_DEFAULTS.linho_meio_metro}
               onChange={set}
@@ -421,7 +433,6 @@ export default function PaginaMateriais() {
             </div>
           </Secao>
 
-          {/* Personalização */}
           <Secao titulo="Personalizacao e Acabamentos">
             <Campo
               label="Gravacao / bordado — consumiveis base"
@@ -439,7 +450,6 @@ export default function PaginaMateriais() {
             />
           </Secao>
 
-          {/* Ferragens */}
           <Secao titulo="Ferragens e Encadernacao">
             <Campo
               label="Wire-O — ferragem anel duplo metalico"
@@ -448,7 +458,7 @@ export default function PaginaMateriais() {
               onChange={set}
               descricao="Custo por ferragem Wire-O. Varia por tamanho — use valor medio."
             />
-            <div className="py-2 border-b border-ivoire-200">
+            <div className="py-2.5 border-b border-ivoire-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-onix-600 font-sans">Cantoneiras metal simples (×4)</p>
@@ -457,7 +467,7 @@ export default function PaginaMateriais() {
                 <span className="text-xs text-onix-500 font-sans font-medium">{R(MAT_DEFAULTS.cantoneira_metal_simples)}</span>
               </div>
             </div>
-            <div className="py-2">
+            <div className="py-2.5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-onix-600 font-sans">Cantoneiras metal trabalhado (×4)</p>
@@ -468,7 +478,6 @@ export default function PaginaMateriais() {
             </div>
           </Secao>
 
-          {/* Embalagem */}
           <Secao titulo="Embalagem">
             <Campo
               label="Embalagem padrao — saquinho algodao cru"
@@ -485,21 +494,13 @@ export default function PaginaMateriais() {
               descricao="Saquinho de algodao + caixa premium + papel de seda."
             />
           </Secao>
-
-          <div className="bg-ivoire-100 border border-ivoire-300 p-4">
-            <p className="text-[10px] tracking-widest uppercase font-sans text-onix-400 mb-2">Como os precos sao aplicados</p>
-            <p className="text-xs text-onix-600 font-sans leading-relaxed">
-              Os valores acima sao <strong>custos de material bruto</strong>. O preco final ao cliente inclui tambem: mao de obra + custos fixos + margens (configurados nas outras abas).<br /><br />
-              Atualizar quando receber nova nota fiscal do fornecedor.
-            </p>
-          </div>
         </div>
-      )}
+      </Bloco>
 
-      {/* ── ABA: SIMULADOR ── */}
-      {abaAtiva === 'simulador' && (
+      {/* ── BLOCO: SIMULADOR ── */}
+      <Bloco titulo="Simulador de Preco" aberto={abertos.simulador} onToggle={() => toggle('simulador')}>
         <div className="max-w-md">
-          <div className="bg-white border border-ivoire-400 divide-y divide-ivoire-200 mb-6">
+          <div className="bg-white border border-ivoire-400 divide-y divide-ivoire-200 mb-4">
             <div className="px-5 py-3 bg-onix-800">
               <p className="text-xs tracking-widest uppercase font-sans text-ivoire-300">Simulacao — caderno padrao</p>
               <p className="text-[10px] text-ivoire-400 font-sans mt-0.5">A5 medio couro marcador copta offset 90g</p>
@@ -543,15 +544,14 @@ export default function PaginaMateriais() {
 
           <div className="bg-ouro-50 border border-ouro-200 px-4 py-3">
             <p className="text-xs text-onix-600 font-sans leading-relaxed">
-              <strong>Lembre-se:</strong> altere os valores nas outras abas e clique em{' '}
-              <strong>Salvar tudo</strong> para que o site publico use os novos precos imediatamente.
+              <strong>Lembre-se:</strong> altere os valores acima e clique em <strong>Salvar tudo</strong> para que o site publico use os novos precos imediatamente.
             </p>
           </div>
         </div>
-      )}
+      </Bloco>
 
-      {/* Botao salvar fixo no bottom */}
-      <div className="mt-8 pt-4 border-t border-ivoire-300 flex items-center justify-between">
+      {/* Rodapé — salvar */}
+      <div className="mt-6 pt-4 border-t border-ivoire-300 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-onix-400 font-sans">
           Os valores salvos sao usados em tempo real no site publico.
         </p>

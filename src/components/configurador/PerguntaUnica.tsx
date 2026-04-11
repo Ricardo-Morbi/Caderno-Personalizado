@@ -22,10 +22,11 @@ function SelecaoGrade({ pergunta, aoSelecionar }: {
 }) {
   const { configuracao } = useCadernoStore()
   const valorAtual = String(configuracao[pergunta.campo] ?? '')
+  const opcoesFiltradas = pergunta.opcoes?.filter((o) => !o.opcaoVisivel || o.opcaoVisivel(configuracao)) ?? []
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {pergunta.opcoes?.map((opcao) => {
+      {opcoesFiltradas.map((opcao) => {
         const selecionado = valorAtual === opcao.valor
         // Card com imagem de textura real
         if (opcao.imagem) {
@@ -105,10 +106,11 @@ function SelecaoLista({ pergunta, aoSelecionar }: {
 }) {
   const { configuracao } = useCadernoStore()
   const valorAtual = String(configuracao[pergunta.campo] ?? '')
+  const opcoesFiltradas = pergunta.opcoes?.filter((o) => !o.opcaoVisivel || o.opcaoVisivel(configuracao)) ?? []
 
   return (
     <div className="flex flex-col gap-1.5">
-      {pergunta.opcoes?.map((opcao) => {
+      {opcoesFiltradas.map((opcao) => {
         const selecionado = valorAtual === opcao.valor
         return (
           <button
@@ -221,35 +223,37 @@ function Toggle({ pergunta, aoSelecionar }: {
 
   return (
     <div className="flex gap-2">
+      {/* SIM — sempre em destaque (borda dourada), mais proeminente quando selecionado */}
       <button
         onClick={() => aoSelecionar(true)}
         className={`
           flex-1 py-6 border text-center transition-all duration-200 active:scale-95
           ${valorAtual
-            ? 'border-onix-600 bg-white shadow-luxo'
-            : 'border-ivoire-400 bg-ivoire-100 hover:border-onix-200'
+            ? 'border-ouro-500 bg-white shadow-luxo ring-1 ring-ouro-300'
+            : 'border-ouro-300 bg-white hover:border-ouro-400'
           }
         `}
       >
         <span className="block mb-2">
-          <IconeCheck tamanho={20} className={`mx-auto ${valorAtual ? 'text-ouro-400' : 'text-onix-400'}`} />
+          <IconeCheck tamanho={20} className={`mx-auto ${valorAtual ? 'text-ouro-500' : 'text-ouro-300'}`} />
         </span>
-        <span className={`block text-sm font-serif ${valorAtual ? 'text-onix-700' : 'text-onix-500'}`}>
+        <span className={`block text-sm font-serif ${valorAtual ? 'text-onix-700' : 'text-onix-600'}`}>
           Sim, quero
         </span>
       </button>
+      {/* NÃO — sempre discreto */}
       <button
         onClick={() => aoSelecionar(false)}
         className={`
           flex-1 py-6 border text-center transition-all duration-200 active:scale-95
           ${!valorAtual
-            ? 'border-onix-600 bg-white shadow-luxo'
-            : 'border-ivoire-400 bg-ivoire-100 hover:border-onix-200'
+            ? 'border-onix-300 bg-ivoire-50'
+            : 'border-ivoire-300 bg-ivoire-50 hover:border-ivoire-400'
           }
         `}
       >
-        <span className={`block text-xl mb-2 font-sans ${!valorAtual ? 'text-onix-500' : 'text-onix-400'}`}>—</span>
-        <span className={`block text-sm font-serif ${!valorAtual ? 'text-onix-700' : 'text-onix-500'}`}>
+        <span className={`block text-xl mb-2 font-sans ${!valorAtual ? 'text-onix-400' : 'text-onix-300'}`}>—</span>
+        <span className={`block text-sm font-serif ${!valorAtual ? 'text-onix-500' : 'text-onix-400'}`}>
           Não, obrigado
         </span>
       </button>
