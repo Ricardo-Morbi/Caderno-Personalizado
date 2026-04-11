@@ -1553,13 +1553,39 @@ function Livro3D({ bW, bH, bD, props }: {
 }
 
 // ─── Componente Principal ─────────────────────────────────────
+// Configuração neutra — exibida enquanto o usuário ainda não fez nenhuma seleção
+const CONFIG_NEUTRA_OVERRIDES = {
+  corCapa:            '#B8B0A2',  // cinza-bege neutro — sem cor específica
+  materialCapa:       'sintetico' as const, // textura mais simples, sem padrão marcante
+  gravacaoCapa:       'nenhuma'  as const,
+  nomeGravado:        '',
+  querPersonalizacaoCapa: false,
+  aplicacoesCapa:     [] as never[],
+  pespontosAtivo:     false,
+  elasticoAtivo:      false,
+  marcadorAtivo:      false,
+  portaCaneta:        false,
+  bolsoInterno:       false,
+  envelopeAcoplado:   false,
+  envelopeContracapa: false,
+  abasOrelhas:        false,
+  tipoCantoneiras:    'nenhuma' as const,
+  pinturaBordasAtiva: false,
+  tipoCorteEspecial:  'nenhum'  as const,
+}
+
 export default function PreviewCaderno() {
-  const { configuracao, perguntaIndex } = useCadernoStore()
+  const { configuracao: configuracaoStore, perguntaIndex, perguntasRespondidas } = useCadernoStore()
+
+  // Enquanto nenhuma pergunta foi respondida, mostra preview neutro (sem opções pré-ativas)
+  const configuracao = perguntasRespondidas.length === 0
+    ? { ...configuracaoStore, ...CONFIG_NEUTRA_OVERRIDES }
+    : configuracaoStore
   const [modo, setModo] = useState<Modo>('fechado')
   const [spread, setSpread] = useState(0) // 0=guarda+1ª pg | 1=miolo | 2=última pg+guarda
 
-  // Identifica pergunta atual para auto-modo e foco de página
-  const perguntasVisiveis = getPerguntasVisiveis(configuracao)
+  // Identifica pergunta atual para auto-modo e foco de página (usa config real, não a neutra)
+  const perguntasVisiveis = getPerguntasVisiveis(configuracaoStore)
   const perguntaAtualPreview = perguntasVisiveis[perguntaIndex]
   const paginaFocoAtual: 'guarda' | 'miolo' | 'ambas' =
     PAGINA_FOCO[perguntaAtualPreview?.id ?? ''] ?? 'ambas'
