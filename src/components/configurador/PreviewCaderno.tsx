@@ -1190,16 +1190,28 @@ function FaceVerso({ W, H, corCapa, materialCapa, raioCanto, tipoTextura, tipoLa
         <AplicacoesCapa aplicacoes={aplicacoesCapa} cx={W/2} cy={H/2}
           largura={W} altura={H} raioCanto={raioCanto}/>
       )}
-      {/* Elástico — posição espelhada em relação à frente */}
-      {elasticoAtivo && (
-        <rect
-          x={posicaoElastico === 'vertical' ? W*0.26 : 0}
-          y={posicaoElastico === 'vertical' ? 0 : H*0.26}
-          width={posicaoElastico === 'vertical' ? W*0.04 : W}
-          height={posicaoElastico === 'vertical' ? H : H*0.04}
-          fill={corElastico} opacity="0.85" rx="1"
-        />
-      )}
+      {/* Elástico — só os stubs de ancoragem no topo e base (não atravessa o verso) */}
+      {elasticoAtivo && corElastico && (() => {
+        const ex = posicaoElastico === 'vertical' ? W*0.3 - 1.25 : 0
+        const ey = posicaoElastico === 'vertical' ? 0           : H*0.35 - 1.25
+        const ew = posicaoElastico === 'vertical' ? 2.5         : W
+        const eh = posicaoElastico === 'vertical' ? 2.5         : 2.5
+        const stubH = 10  // altura do stub de ancoragem
+        return (
+          <g opacity={0.85}>
+            {/* Stub superior/esquerdo */}
+            {posicaoElastico === 'vertical'
+              ? <rect x={ex} y={0}        width={ew} height={stubH} fill={corElastico} rx="1"/>
+              : <rect x={0}  y={ey}       width={stubH} height={eh} fill={corElastico} rx="1"/>
+            }
+            {/* Stub inferior/direito */}
+            {posicaoElastico === 'vertical'
+              ? <rect x={ex} y={H-stubH}  width={ew} height={stubH} fill={corElastico} rx="1"/>
+              : <rect x={W-stubH} y={ey}  width={stubH} height={eh} fill={corElastico} rx="1"/>
+            }
+          </g>
+        )
+      })()}
       {/* Bolso interno — indicador visual na contracapa */}
       {bolsoInterno && !envelopeContracapa && (
         <g opacity="0.72">
