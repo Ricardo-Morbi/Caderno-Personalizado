@@ -20,14 +20,15 @@ function SelecaoGrade({ pergunta, aoSelecionar }: {
   pergunta: Pergunta
   aoSelecionar: (valor: string) => void
 }) {
-  const { configuracao } = useCadernoStore()
+  const { configuracao, perguntasRespondidas } = useCadernoStore()
   const valorAtual = String(configuracao[pergunta.campo] ?? '')
+  const foiRespondida = perguntasRespondidas.includes(pergunta.id)
   const opcoesFiltradas = pergunta.opcoes?.filter((o) => !o.opcaoVisivel || o.opcaoVisivel(configuracao)) ?? []
 
   return (
     <div className="grid grid-cols-2 gap-2">
       {opcoesFiltradas.map((opcao) => {
-        const selecionado = valorAtual === opcao.valor
+        const selecionado = foiRespondida && valorAtual === opcao.valor
         // Card com imagem de textura real
         if (opcao.imagem) {
           return (
@@ -104,14 +105,15 @@ function SelecaoLista({ pergunta, aoSelecionar }: {
   pergunta: Pergunta
   aoSelecionar: (valor: string) => void
 }) {
-  const { configuracao } = useCadernoStore()
+  const { configuracao, perguntasRespondidas } = useCadernoStore()
   const valorAtual = String(configuracao[pergunta.campo] ?? '')
+  const foiRespondida = perguntasRespondidas.includes(pergunta.id)
   const opcoesFiltradas = pergunta.opcoes?.filter((o) => !o.opcaoVisivel || o.opcaoVisivel(configuracao)) ?? []
 
   return (
     <div className="flex flex-col gap-1.5">
       {opcoesFiltradas.map((opcao) => {
-        const selecionado = valorAtual === opcao.valor
+        const selecionado = foiRespondida && valorAtual === opcao.valor
         return (
           <button
             key={opcao.valor}
@@ -156,8 +158,9 @@ function SeletorCor({ pergunta, aoSelecionar }: {
   pergunta: Pergunta
   aoSelecionar: (valor: string) => void
 }) {
-  const { configuracao, atualizarOpcao, marcarRespondida } = useCadernoStore()
+  const { configuracao, atualizarOpcao, marcarRespondida, perguntasRespondidas } = useCadernoStore()
   const valorAtual = String(configuracao[pergunta.campo] ?? '')
+  const foiRespondida = perguntasRespondidas.includes(pergunta.id)
 
   return (
     <div className="flex flex-col gap-4">
@@ -170,7 +173,7 @@ function SeletorCor({ pergunta, aoSelecionar }: {
             onClick={() => aoSelecionar(opcao.valor)}
             className={`
               w-10 h-10 rounded-full transition-all duration-200 active:scale-90
-              ${valorAtual === opcao.valor
+              ${foiRespondida && valorAtual === opcao.valor
                 ? 'scale-110 ring-2 ring-onix-500 ring-offset-2'
                 : 'hover:scale-105 ring-1 ring-ivoire-400'
               }
